@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./Page/dashboards";
-import MainLayout from "./composant/MainLayout";
+import MainLayout from "./layout/Mainlayout";
 import Client from "./Page/gestion-client";
 import Reservation from "./Page/Reservation";
 import Terrain from "./Page/Terrain";
