@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './Calendrier.css';
+import '../cal/Calendrier.css';
 
 // Composant Toast pour les retours utilisateur
 const CalLuxeToast = ({ message, type, onClose }) => {
