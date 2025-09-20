@@ -1,0 +1,279 @@
+/* Variables CSS pour une maintenance facile */
+:root {
+    --football-grass: #dcf5dc;
+    --football-grass-light: #4caf50;
+    --football-blue: #034b0f;
+    --white: #ffffff;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-500: #6b7280;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Reset et styles de base */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Layout principal */
+  .main-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color:green;
+  }
+  
+  /* Sidebar */
+  .sidebar {
+    width: 16rem; /* 64px en rem */
+    background: linear-gradient(to bottom,green, rgb(117, 205, 117));
+    flex-shrink: 0;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+  }
+  
+  .sidebar-content {
+    padding: 1rem;
+    flex: 1;
+  }
+  
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+  }
+  
+  .logo-circle {
+    height: 2.5rem;
+    width: 2.5rem;
+    background-color: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .logo-text {
+    color: var(--football-grass);
+    font-weight: bold;
+    font-size: 1.25rem;
+  }
+  
+  .app-name {
+    color: var(--white);
+    font-weight: bold;
+    font-size: 1.25rem;
+  }
+  
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    color: var(--white);
+    text-decoration: none;
+  }
+  
+  .sidebar-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .sidebar-item-active {
+    background-color: var(--white);
+    color: var(--football-blue);
+    font-weight: 500;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .sidebar-footer {
+    padding: 1rem 1rem 1.5rem;
+    margin-top: auto;
+  }
+  
+  .pro-version-banner {
+    padding: 0.75rem 1rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    color: var(--white);
+  }
+  
+  .pro-version-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .pro-version-description {
+    font-size: 0.75rem;
+    opacity: 0.75;
+    margin-top: 0.25rem;
+  }
+  
+  /* Contenu principal */
+  .main-content {
+    flex: 1;
+    background: linear-gradient(135deg, var(--gray-50), var(--gray-100));
+    min-width: 0; /* Permet au contenu de se réduire correctement */
+  }
+  
+  .main-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    background-color: var(--white);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .header-content {
+    max-width: 80rem; /* max-w-7xl equivalent */
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .welcome-text {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--football-grass);
+  }
+  
+  .date-display {
+    font-size: 0.875rem;
+    color: var(--gray-500);
+  }
+  
+  .content-container {
+    padding: 2rem;
+    max-width: 80rem; /* max-w-7xl equivalent */
+    margin: 0 auto;
+  }
+  
+  /* Media Queries pour la responsivité */
+  
+  /* Tablettes */
+  @media (max-width: 1024px) {
+    .main-layout {
+      flex-direction: column;
+    }
+    
+    .sidebar {
+      width: 100%;
+      position: sticky;
+      top: 0;
+      height: auto;
+    }
+    
+    .sidebar-content {
+      padding: 0.75rem;
+    }
+    
+    .sidebar-nav {
+      flex-direction: row;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+    
+    .sidebar-item {
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    
+    .sidebar-footer {
+      display: none;
+    }
+    
+    .content-container {
+      padding: 1.5rem;
+    }
+  }
+  
+  /* Smartphones */
+  @media (max-width: 768px) {
+    .sidebar-header {
+      margin-bottom: 1rem;
+    }
+    
+    .header-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    
+    .content-container {
+      padding: 1rem;
+    }
+    
+    .sidebar-nav {
+      gap: 0.5rem;
+    }
+    
+    .sidebar-item span {
+      display: none; /* Cache le texte des éléments de menu sur mobile */
+    }
+    
+    .sidebar-item {
+      justify-content: center;
+      padding: 0.75rem;
+    }
+  }
+  
+  /* Très petits écrans */
+  @media (max-width: 480px) {
+    .main-header {
+      padding: 1rem;
+    }
+    
+    .content-container {
+      padding: 0.75rem;
+    }
+    
+    .sidebar-item {
+      padding: 0.5rem;
+    }
+  }
+  
+  /* Améliorations d'accessibilité */
+  @media (prefers-reduced-motion: reduce) {
+    .sidebar-item {
+      transition: none;
+    }
+  }
+  
+  /* Mode somme (optionnel) */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --gray-50: #1f2937;
+      --gray-100: #111827;
+      --gray-500: #9ca3af;
+    }
+    
+    .main-header {
+      background-color: #374151;
+      border-bottom-color: #4b5563;
+    }
+    
+    .welcome-text {
+      color: #4ade80; /* Vert plus clair pour le mode somme */
+    }
+  }

@@ -1,0 +1,715 @@
+/* App.css - Refonte Ultra Luxueuse */
+:root {
+    --primary-dark: #114806;
+    --primary-light: #1a1a1a;
+    --gold: #d4af37;
+    --gold-light: #f1e5b9;
+    --gold-gradient: linear-gradient(135deg, #d4af37 0%, #f1e5b9 100%);
+    --platinum: #e5e4e2;
+    --ivory: #fffff0;
+    --champagne: #f7e7ce;
+    --text-dark: #2c2c2c;
+    --text-light: #ffffff;
+    --success: #28a745;
+    --error: #dc3545;
+    --warning: #ffc107;
+    --border-radius: 12px;
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.2);
+    --border-gold: 1px solid rgba(212, 175, 55, 0.3);
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+    background: linear-gradient(135deg, #f7f7f7 0%, #f1e5b9 100%);
+    color: var(--text-dark);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  
+  .app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Header Luxueux */
+  .app-header {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, #2c2c2c 100%);
+    color: var(--text-light);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 3px solid var(--gold);
+  }
+  
+  .app-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--gold-gradient);
+    opacity: 0.6;
+  }
+  
+  .app-header h1 {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    position: relative;
+    display: inline-block;
+  }
+  
+  .app-header h1::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: var(--gold);
+    border-radius: 2px;
+  }
+  
+  .app-header p {
+    font-size: 1.3rem;
+    opacity: 0.9;
+    font-style: italic;
+    margin-top: 1rem;
+    color: var(--gold-light);
+  }
+  
+  .app-main {
+    flex: 1;
+    padding: 3rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  /* Contrôles Élégants */
+  .controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    border: var(--border-gold);
+  }
+  
+  .date-range-selector {
+    background: rgba(255, 255, 255, 0.7);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    border: var(--border-gold);
+    flex-grow: 1;
+  }
+  
+  .date-range-selector h3 {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: var(--primary-dark);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .date-range-selector h3::before {
+    content: '📅';
+    font-size: 1.2rem;
+  }
+  
+  .date-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
+  
+  .date-inputs input {
+    padding: 0.8rem 1rem;
+    border: var(--border-gold);
+    border-radius: var(--border-radius);
+    font-family: inherit;
+    background: rgba(255, 255, 255, 0.7);
+    transition: var(--transition);
+    min-width: 150px;
+  }
+  
+  .date-inputs input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--gold-light);
+    border-color: var(--gold);
+  }
+  
+  .date-inputs span {
+    margin: 0 0.5rem;
+    color: var(--text-dark);
+    font-weight: 500;
+  }
+  
+  /* Boutons de Luxe */
+  .btn {
+    padding: 0.9rem 1.8rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: var(--transition);
+  }
+  
+  .btn:hover::before {
+    left: 100%;
+  }
+  
+  .btn-primary {
+    background: var(--gold-gradient);
+    color: var(--primary-dark);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .btn-secondary {
+    background: var(--primary-dark);
+    color: var(--text-light);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .btn-secondary:hover {
+    background: #333;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .btn-outline {
+    background: transparent;
+    border: 2px solid var(--primary-dark);
+    color: var(--primary-dark);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .btn-outline:hover {
+    background: var(--primary-dark);
+    color: var(--text-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .btn-view {
+    background: linear-gradient(135deg, #4a6fa5 0%, #6b8cbe 100%);
+    color: white;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .btn-view:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .btn-edit {
+    background: linear-gradient(135deg, #ffc107 0%, #ffdb70 100%);
+    color: var(--primary-dark);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .btn-edit:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .btn-delete {
+    background: linear-gradient(135deg, var(--error) 0%, #e35d6a 100%);
+    color: white;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .btn-delete:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  /* Grille de Cartes Luxueuses */
+  .calendriers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    padding: 1rem 0;
+  }
+  
+  .calendrier-card {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+    border-top: 4px solid var(--gold);
+    position: relative;
+    backdrop-filter: blur(5px);
+  }
+  
+  .calendrier-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--gold-gradient);
+  }
+  
+  .calendrier-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .card-header {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, #2c2c2c 100%);
+    color: var(--text-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+  
+  .card-header h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  
+  .status-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .status-disponible {
+    background: linear-gradient(135deg, var(--success) 0%, #5cb85c 100%);
+    color: white;
+  }
+  
+  .status-réservé {
+    background: linear-gradient(135deg, #17a2b8 0%, #5bc0de 100%);
+    color: white;
+  }
+  
+  .status-occupé {
+    background: linear-gradient(135deg, var(--warning) 0%, #ffdd87 100%);
+    color: var(--primary-dark);
+  }
+  
+  .status-maintenance {
+    background: linear-gradient(135deg, var(--error) 0%, #e35d6a 100%);
+    color: white;
+  }
+  
+  .card-body {
+    padding: 2rem 1.5rem;
+    background: rgba(255, 255, 255, 0.6);
+  }
+  
+  .date-display {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 0.8rem;
+    color: var(--primary-dark);
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+  
+  .date-display::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 2px;
+    background: var(--gold);
+    border-radius: 1px;
+  }
+  
+  .periode {
+    color: #666;
+    font-style: italic;
+    text-align: center;
+    display: block;
+    font-size: 1.1rem;
+  }
+  
+  .card-actions {
+    padding: 1.5rem;
+    display: flex;
+    gap: 0.8rem;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
+    background: rgba(255, 255, 255, 0.5);
+  }
+  
+  .card-actions .btn {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.85rem;
+    flex: 1;
+    justify-content: center;
+  }
+  
+  /* Modals Luxueux */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+    backdrop-filter: blur(5px);
+  }
+  
+  .modal-content {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
+    border-radius: var(--border-radius);
+    width: 100%;
+    max-width: 550px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    border: 2px solid var(--gold);
+    position: relative;
+  }
+  
+  .modal-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--gold-gradient);
+  }
+  
+  .modal-header {
+    padding: 2rem 2rem 1.5rem;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, #2c2c2c 100%);
+    color: var(--text-light);
+  }
+  
+  .modal-header h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: var(--gold-light);
+    transition: var(--transition);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+  }
+  
+  .modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: rotate(90deg);
+  }
+  
+  .modal-body {
+    padding: 2.5rem 2rem;
+  }
+  
+  /* Forms Élégants */
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    position: relative;
+  }
+  
+  .form-group label {
+    font-weight: 600;
+    color: var(--primary-dark);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .form-group input,
+  .form-group select {
+    padding: 1rem 1.2rem;
+    border: var(--border-gold);
+    border-radius: var(--border-radius);
+    font-family: inherit;
+    background: rgba(255, 255, 255, 0.7);
+    transition: var(--transition);
+    font-size: 1rem;
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--gold-light);
+    border-color: var(--gold);
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
+  }
+  
+  /* View Details Luxueux */
+  .view-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    align-items: center;
+  }
+  
+  .detail-label {
+    font-weight: 600;
+    color: var(--primary-dark);
+    font-size: 1.1rem;
+  }
+  
+  .detail-value {
+    color: #555;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+  
+  /* Toasts Élégants */
+  .toast-container {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .toast {
+    padding: 1.2rem 1.8rem;
+    border-radius: var(--border-radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow-lg);
+    animation: slideIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    max-width: 380px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .toast-success {
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.9) 0%, rgba(92, 184, 92, 0.9) 100%);
+    color: white;
+  }
+  
+  .toast-error {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.9) 0%, rgba(227, 93, 106, 0.9) 100%);
+    color: white;
+  }
+  
+  .toast button {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 1.4rem;
+    margin-left: 1.2rem;
+    transition: var(--transition);
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+  }
+  
+  .toast button:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 968px) {
+    .app-header h1 {
+      font-size: 2.5rem;
+    }
+    
+    .controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .date-inputs {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .calendriers-grid {
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .app-header {
+      padding: 2rem 1.5rem;
+    }
+    
+    .app-header h1 {
+      font-size: 2rem;
+    }
+    
+    .app-main {
+      padding: 2rem 1.5rem;
+    }
+    
+    .calendriers-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+      flex-direction: column;
+    }
+    
+    .modal-body {
+      padding: 1.5rem;
+    }
+    
+    .card-actions {
+      flex-direction: column;
+    }
+  }
+  
+  /* Animations supplémentaires */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .calendrier-card {
+    animation: fadeIn 0.5s ease-out;
+  }
+  
+  /* Effets de brillance */
+  .glow-effect {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .glow-effect::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: rotate(30deg);
+    transition: var(--transition);
+    opacity: 0;
+  }
+  
+  .glow-effect:hover::after {
+    opacity: 1;
+    animation: glow 1.5s ease-in-out infinite alternate;
+  }
+  
+  @keyframes glow {
+    from { left: -50%; }
+    to { left: 150%; }
+  }
