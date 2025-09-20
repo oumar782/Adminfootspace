@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import './calendrier.css';
+import './Calendrier.css';
 
 // Composant Toast pour les retours utilisateur
-const Toast = ({ message, type, onClose }) => {
+const CalLuxeToast = ({ message, type, onClose }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
@@ -11,7 +11,7 @@ const Toast = ({ message, type, onClose }) => {
   }, [onClose]);
 
   return (
-    <div className={`toast toast-${type}`}>
+    <div className={`cal-luxe-toast cal-luxe-toast-${type}`}>
       <span>{message}</span>
       <button onClick={onClose}>&times;</button>
     </div>
@@ -19,26 +19,30 @@ const Toast = ({ message, type, onClose }) => {
 };
 
 // Composant Modal pour les formulaires
-const Modal = ({ isOpen, onClose, title, children }) => {
+const CalLuxeModal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
+    <div className="cal-luxe-modal-overlay" onClick={onClose}>
+      <div className="cal-luxe-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="cal-luxe-decorative-corner cal-luxe-decorative-corner-top-left"></div>
+        <div className="cal-luxe-decorative-corner cal-luxe-decorative-corner-top-right"></div>
+        <div className="cal-luxe-modal-header">
           <h2>{title}</h2>
-          <button className="modal-close" onClick={onClose}>&times;</button>
+          <button className="cal-luxe-modal-close" onClick={onClose}>&times;</button>
         </div>
-        <div className="modal-body">
+        <div className="cal-luxe-modal-body">
           {children}
         </div>
+        <div className="cal-luxe-decorative-corner cal-luxe-decorative-corner-bottom-left"></div>
+        <div className="cal-luxe-decorative-corner cal-luxe-decorative-corner-bottom-right"></div>
       </div>
     </div>
   );
 };
 
 // Composant principal
-const calendrier = () => {
+const CalendrierLuxe = () => {
   const [calendriers, setCalendriers] = useState([]);
   const [selectedCalendrier, setSelectedCalendrier] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -220,24 +224,24 @@ const calendrier = () => {
   };
 
   return (
-    <div className="app">
-      <header className="app-header">
+    <div className="cal-luxe-app">
+      <header className="cal-luxe-app-header">
         <h1>Gestionnaire de Calendriers Premium</h1>
         <p>Administrez vos réservations avec élégance</p>
       </header>
 
-      <main className="app-main">
-        <div className="controls">
+      <main className="cal-luxe-app-main">
+        <div className="cal-luxe-controls">
           <button 
-            className="btn btn-primary"
+            className="cal-luxe-btn cal-luxe-btn-primary cal-luxe-glow-effect"
             onClick={() => setShowCreateModal(true)}
           >
-            Créer un nouveau calendrier
+            <span>+</span> Créer un nouveau calendrier
           </button>
           
-          <div className="date-range-selector">
+          <div className="cal-luxe-date-range-selector">
             <h3>Visualiser par plage de dates</h3>
-            <div className="date-inputs">
+            <div className="cal-luxe-date-inputs">
               <input
                 type="date"
                 value={viewDateRange.startDate}
@@ -249,50 +253,50 @@ const calendrier = () => {
                 value={viewDateRange.endDate}
                 onChange={(e) => setViewDateRange(prev => ({...prev, endDate: e.target.value}))}
               />
-              <button className="btn btn-secondary" onClick={viewByDateRange}>
+              <button className="cal-luxe-btn cal-luxe-btn-secondary" onClick={viewByDateRange}>
                 Appliquer
               </button>
-              <button className="btn btn-outline" onClick={fetchCalendriers}>
+              <button className="cal-luxe-btn cal-luxe-btn-outline" onClick={fetchCalendriers}>
                 Voir tout
               </button>
             </div>
           </div>
         </div>
 
-        <div className="calendriers-grid">
+        <div className="cal-luxe-calendriers-grid">
           {calendriers.map(calendrier => (
-            <div key={calendrier.id} className="calendrier-card">
-              <div className="card-header">
+            <div key={calendrier.id} className="cal-luxe-calendrier-card cal-luxe-glow-effect">
+              <div className="cal-luxe-card-header">
                 <h3>{calendrier.nomterrain || 'Sans nom'}</h3>
-                <span className={`status-badge status-${calendrier.statut}`}>
+                <span className={`cal-luxe-status-badge cal-luxe-status-${calendrier.statut}`}>
                   {calendrier.statut}
                 </span>
               </div>
-              <div className="card-body">
-                <p className="date-display">{formatDate(calendrier.date)}</p>
-                <p className="periode">Période: {calendrier.periode}</p>
+              <div className="cal-luxe-card-body">
+                <p className="cal-luxe-date-display">{formatDate(calendrier.date)}</p>
+                <p className="cal-luxe-periode">Période: {calendrier.periode}</p>
               </div>
-              <div className="card-actions">
+              <div className="cal-luxe-card-actions">
                 <button 
-                  className="btn btn-view"
+                  className="cal-luxe-btn cal-luxe-btn-view"
                   onClick={() => {
                     setSelectedCalendrier(calendrier);
                     setShowViewModal(true);
                   }}
                 >
-                  Voir
+                   Voir
                 </button>
                 <button 
-                  className="btn btn-edit"
+                  className="cal-luxe-btn cal-luxe-btn-edit"
                   onClick={() => openEditModal(calendrier)}
                 >
                   Modifier
                 </button>
                 <button 
-                  className="btn btn-delete"
+                  className="cal-luxe-btn cal-luxe-btn-delete"
                   onClick={() => handleDelete(calendrier.id)}
                 >
-                  Supprimer
+                   Supprimer
                 </button>
               </div>
             </div>
@@ -301,13 +305,13 @@ const calendrier = () => {
       </main>
 
       {/* Modal de création */}
-      <Modal 
+      <CalLuxeModal 
         isOpen={showCreateModal} 
         onClose={() => setShowCreateModal(false)}
         title="Créer un nouveau calendrier"
       >
-        <form onSubmit={handleSubmit} className="form">
-          <div className="form-group">
+        <form onSubmit={handleSubmit} className="cal-luxe-form">
+          <div className="cal-luxe-form-group">
             <label>Date</label>
             <input
               type="date"
@@ -317,7 +321,7 @@ const calendrier = () => {
               required
             />
           </div>
-          <div className="form-group">
+          <div className="cal-luxe-form-group">
             <label>Nom du terrain</label>
             <input
               type="text"
@@ -327,7 +331,7 @@ const calendrier = () => {
               placeholder="Entrez le nom du terrain"
             />
           </div>
-          <div className="form-group">
+          <div className="cal-luxe-form-group">
             <label>Statut</label>
             <select
               name="statut"
@@ -340,7 +344,7 @@ const calendrier = () => {
               <option value="maintenance">Maintenance</option>
             </select>
           </div>
-          <div className="form-group">
+          <div className="cal-luxe-form-group">
             <label>Période</label>
             <select
               name="periode"
@@ -353,57 +357,57 @@ const calendrier = () => {
               <option value="journée">Journée complète</option>
             </select>
           </div>
-          <div className="form-actions">
-            <button type="submit" className="btn btn-primary">Créer</button>
+          <div className="cal-luxe-form-actions">
+            <button type="submit" className="cal-luxe-btn cal-luxe-btn-primary">Créer</button>
             <button 
               type="button" 
-              className="btn btn-outline"
+              className="cal-luxe-btn cal-luxe-btn-outline"
               onClick={() => setShowCreateModal(false)}
             >
               Annuler
             </button>
           </div>
         </form>
-      </Modal>
+      </CalLuxeModal>
 
       {/* Modal de visualisation */}
-      <Modal 
+      <CalLuxeModal 
         isOpen={showViewModal} 
         onClose={() => setShowViewModal(false)}
         title="Détails du calendrier"
       >
         {selectedCalendrier && (
-          <div className="view-details">
-            <div className="detail-item">
-              <span className="detail-label">Date:</span>
-              <span className="detail-value">{formatDate(selectedCalendrier.date)}</span>
+          <div className="cal-luxe-view-details">
+            <div className="cal-luxe-detail-item">
+              <span className="cal-luxe-detail-label">Date:</span>
+              <span className="cal-luxe-detail-value">{formatDate(selectedCalendrier.date)}</span>
             </div>
-            <div className="detail-item">
-              <span className="detail-label">Terrain:</span>
-              <span className="detail-value">{selectedCalendrier.nomterrain || 'Non spécifié'}</span>
+            <div className="cal-luxe-detail-item">
+              <span className="cal-luxe-detail-label">Terrain:</span>
+              <span className="cal-luxe-detail-value">{selectedCalendrier.nomterrain || 'Non spécifié'}</span>
             </div>
-            <div className="detail-item">
-              <span className="detail-label">Statut:</span>
-              <span className={`detail-value status-${selectedCalendrier.statut}`}>
+            <div className="cal-luxe-detail-item">
+              <span className="cal-luxe-detail-label">Statut:</span>
+              <span className={`cal-luxe-detail-value cal-luxe-status-${selectedCalendrier.statut}`}>
                 {selectedCalendrier.statut}
               </span>
             </div>
-            <div className="detail-item">
-              <span className="detail-label">Période:</span>
-              <span className="detail-value">{selectedCalendrier.periode}</span>
+            <div className="cal-luxe-detail-item">
+              <span className="cal-luxe-detail-label">Période:</span>
+              <span className="cal-luxe-detail-value">{selectedCalendrier.periode}</span>
             </div>
           </div>
         )}
-      </Modal>
+      </CalLuxeModal>
 
       {/* Modal d'édition */}
-      <Modal 
+      <CalLuxeModal 
         isOpen={showEditModal} 
         onClose={() => setShowEditModal(false)}
         title="Modifier le calendrier"
       >
-        <form onSubmit={handleUpdate} className="form">
-          <div className="form-group">
+        <form onSubmit={handleUpdate} className="cal-luxe-form">
+          <div className="cal-luxe-form-group">
             <label>Date</label>
             <input
               type="date"
@@ -413,7 +417,7 @@ const calendrier = () => {
               required
             />
           </div>
-          <div className="form-group">
+          <div className="cal-luxe-form-group">
             <label>Nom du terrain</label>
             <input
               type="text"
@@ -423,7 +427,7 @@ const calendrier = () => {
               placeholder="Entrez le nom du terrain"
             />
           </div>
-          <div className="form-group">
+          <div className="cal-luxe-form-group">
             <label>Statut</label>
             <select
               name="statut"
@@ -436,7 +440,7 @@ const calendrier = () => {
               <option value="maintenance">Maintenance</option>
             </select>
           </div>
-          <div className="form-group">
+          <div className="cal-luxe-form-group">
             <label>Période</label>
             <select
               name="periode"
@@ -449,23 +453,23 @@ const calendrier = () => {
               <option value="journée">Journée complète</option>
             </select>
           </div>
-          <div className="form-actions">
-            <button type="submit" className="btn btn-primary">Mettre à jour</button>
+          <div className="cal-luxe-form-actions">
+            <button type="submit" className="cal-luxe-btn cal-luxe-btn-primary">Mettre à jour</button>
             <button 
               type="button" 
-              className="btn btn-outline"
+              className="cal-luxe-btn cal-luxe-btn-outline"
               onClick={() => setShowEditModal(false)}
             >
               Annuler
             </button>
           </div>
         </form>
-      </Modal>
+      </CalLuxeModal>
 
       {/* Container pour les toasts */}
-      <div className="toast-container">
+      <div className="cal-luxe-toast-container">
         {toasts.map(toast => (
-          <Toast
+          <CalLuxeToast
             key={toast.id}
             message={toast.message}
             type={toast.type}
@@ -477,4 +481,4 @@ const calendrier = () => {
   );
 };
 
-export default calendrier;
+export default CalendrierLuxe;

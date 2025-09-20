@@ -52,18 +52,21 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       
       <style jsx>{`
         :root {
-          --primary-color: #4361ee;
-          --primary-light: #eef2ff;
-          --secondary-color: #3a0ca3;
-          --text-color: #2b2d42;
-          --text-muted: #6c757d;
-          --background: #ffffff;
-          --border-color: #e9ecef;
-          --hover-background: #f8f9fa;
-          --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-          --transition: all 0.3s ease;
-          --sidebar-width: 260px;
+          --primary-bg:rgb(255, 252, 252);
+          --secondary-bg:rgb(9, 7, 7);
+          --gold-primary:rgb(6, 64, 23);
+          --gold-secondary:rgb(3, 54, 12);
+          --gold-light:rgb(5, 58, 8);
+          --text-primary: #FFFFFF;
+          --text-secondary: #A0A0A0;
+          --border-color: #2A2A2A;
+          --hover-background: rgba(212, 175, 55, 0.08);
+          --active-background: rgba(89, 212, 55, 0.15);
+          --shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+          --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          --sidebar-width: 280px;
           --sidebar-collapsed: 80px;
+          --border-radius: 12px;
         }
 
         .sidebar {
@@ -72,7 +75,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           left: 0;
           height: 100vh;
           width: var(--sidebar-width);
-          background: var(--background);
+          background: var(--primary-bg);
           border-right: 1px solid var(--border-color);
           display: flex;
           flex-direction: column;
@@ -86,37 +89,39 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
         }
 
         .sidebar-header {
-          height: 70px;
+          height: 90px;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 0 20px;
+          padding: 0 24px;
           border-bottom: 1px solid var(--border-color);
+          background: linear-gradient(to right, rgba(212, 175, 55, 0.05), transparent);
         }
 
         .collapse-toggle {
-          width: 32px;
-          height: 32px;
-          border-radius: 8px;
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
           display: flex;
           align-items: center;
           justify-content: center;
           background: transparent;
           border: 1px solid var(--border-color);
-          color: var(--text-muted);
+          color: var(--gold-primary);
           cursor: pointer;
           transition: var(--transition);
         }
 
         .collapse-toggle:hover {
           background: var(--hover-background);
-          color: var(--text-color);
+          border-color: var(--gold-primary);
+          transform: rotate(180deg);
         }
 
         .sidebar-nav {
           flex: 1;
           overflow-y: auto;
-          padding: 16px 12px;
+          padding: 24px 16px;
         }
 
         .nav-list {
@@ -125,31 +130,34 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           margin: 0;
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 8px;
         }
 
         .sidebar-footer {
-          padding: 16px 12px;
+          padding: 20px 16px;
           border-top: 1px solid var(--border-color);
         }
 
         .support-button {
           width: 100%;
-          padding: 12px;
-          border-radius: 8px;
+          padding: 14px;
+          border-radius: var(--border-radius);
           display: flex;
           align-items: center;
           justify-content: space-between;
-          background: transparent;
-          border: none;
-          color: var(--text-muted);
+          background: linear-gradient(to right, rgba(212, 175, 55, 0.1), transparent);
+          border: 1px solid rgba(212, 175, 55, 0.2);
+          color: var(--gold-light);
           cursor: pointer;
           transition: var(--transition);
+          font-weight: 500;
         }
 
         .support-button:hover {
-          background: var(--hover-background);
-          color: var(--text-color);
+          background: linear-gradient(to right, rgba(212, 175, 55, 0.2), transparent);
+          border-color: var(--gold-primary);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15);
         }
 
         .support-button span {
@@ -166,7 +174,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           left: 0;
           width: 100%;
           height: 100%;
-          background: rgba(0, 0, 0, 0.5);
+          background: rgba(0, 0, 0, 0.7);
           z-index: 999;
           transition: var(--transition);
         }
@@ -231,28 +239,46 @@ const SidebarItem = ({ item, collapsed, isActive, isHovered, onHover, onLeave })
         .nav-link {
           display: flex;
           align-items: center;
-          padding: 12px 16px;
-          border-radius: 8px;
-          color: var(--text-muted);
+          padding: 14px 18px;
+          border-radius: var(--border-radius);
+          color: var(--text-secondary);
           text-decoration: none;
           transition: var(--transition);
           position: relative;
+          overflow: hidden;
+        }
+        
+        .nav-link:before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+          transition: left 0.7s ease;
+        }
+        
+        .nav-link:hover:before {
+          left: 100%;
         }
         
         .nav-link:hover {
           background: var(--hover-background);
-          color: var(--text-color);
+          color: var(--gold-light);
+          transform: translateX(4px);
         }
         
         .nav-link.active {
-          background: var(--primary-light);
-          color: var(--primary-color);
+          background: var(--active-background);
+          color: var(--gold-primary);
           font-weight: 500;
+          box-shadow: 0 4px 12px rgba(212, 175, 55, 0.1);
         }
         
         .nav-link.collapsed {
           justify-content: center;
-          padding: 12px;
+          padding: 14px;
         }
         
         .nav-icon {
@@ -261,15 +287,17 @@ const SidebarItem = ({ item, collapsed, isActive, isHovered, onHover, onLeave })
         }
         
         .nav-link.active .nav-icon {
-          color: var(--primary-color);
+          color: var(--gold-primary);
+          filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.4));
         }
         
         .nav-text {
-          margin-left: 12px;
+          margin-left: 14px;
           font-size: 14px;
           white-space: nowrap;
           overflow: hidden;
           transition: var(--transition);
+          letter-spacing: 0.3px;
         }
         
         .tooltip {
@@ -277,15 +305,17 @@ const SidebarItem = ({ item, collapsed, isActive, isHovered, onHover, onLeave })
           left: 100%;
           top: 50%;
           transform: translateY(-50%);
-          margin-left: 8px;
-          padding: 6px 12px;
-          background: var(--text-color);
-          color: white;
-          border-radius: 4px;
+          margin-left: 12px;
+          padding: 8px 14px;
+          background: var(--primary-bg);
+          color: var(--gold-light);
+          border-radius: 6px;
           font-size: 12px;
           white-space: nowrap;
           z-index: 1001;
           box-shadow: var(--shadow);
+          border: 1px solid var(--border-color);
+          font-weight: 500;
         }
         
         .tooltip:after {
@@ -294,8 +324,8 @@ const SidebarItem = ({ item, collapsed, isActive, isHovered, onHover, onLeave })
           right: 100%;
           top: 50%;
           transform: translateY(-50%);
-          border: 4px solid transparent;
-          border-right-color: var(--text-color);
+          border: 5px solid transparent;
+          border-right-color: var(--primary-bg);
         }
         
         .active-indicator {
@@ -304,9 +334,10 @@ const SidebarItem = ({ item, collapsed, isActive, isHovered, onHover, onLeave })
           top: 50%;
           transform: translateY(-50%);
           width: 3px;
-          height: 20px;
-          background: var(--primary-color);
+          height: 24px;
+          background: linear-gradient(to bottom, var(--gold-primary), var(--gold-secondary));
           border-radius: 0 2px 2px 0;
+          box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
         }
       `}</style>
     </li>
@@ -333,35 +364,54 @@ const Logo = ({ collapsed }) => {
         }
         
         .logo-icon {
-          width: 36px;
-          height: 36px;
-          border-radius: 8px;
-          background: var(--primary-color);
-          color: white;
+          width: 42px;
+          height: 42px;
+          border-radius: 12px;
+          background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+          color: var(--primary-bg);
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: bold;
-          font-size: 18px;
+          font-size: 20px;
           flex-shrink: 0;
+          box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
         }
         
         .logo-text {
-          margin-left: 12px;
-          font-size: 18px;
-          font-weight: 600;
+          margin-left: 14px;
+          font-size: 20px;
+          font-weight: 700;
           white-space: nowrap;
+          color: var(--text-primary);
+          letter-spacing: 0.5px;
         }
         
         .highlight {
-          color: var(--primary-color);
+          background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          text-fill-color: transparent;
+          font-weight: 800;
         }
       `}</style>
     </div>
   );
 };
 
-// Icônes SVG personnalisées
+// Icônes SVG personnalisées avec style doré
+const createGoldenIcon = (IconComponent) => {
+  return ({ isActive }) => (
+    <IconComponent 
+      style={{ 
+        color: isActive ? 'var(--gold-primary)' : 'currentColor',
+        filter: isActive ? 'drop-shadow(0 0 2px rgba(212, 175, 55, 0.4))' : 'none'
+      }} 
+    />
+  );
+};
+
 const LayoutDashboardIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -447,7 +497,7 @@ const ChevronIcon = ({ collapsed }) => (
     fill="none" 
     stroke="currentColor" 
     strokeWidth="2"
-    style={{ transform: collapsed ? 'rotate(180deg)' : 'rotate(0)' }}
+    style={{ transform: collapsed ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.3s ease' }}
   >
     <polyline points="15 18 9 12 15 6" />
   </svg>
