@@ -33,7 +33,7 @@ const TerrainAdmin = () => {
   const fetchTerrains = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://backend-foot-omega.vercel.app/api/terrain/'); // ✅ ESPACES SUPPRIMÉS
+      const response = await fetch('https://backend-foot-omega.vercel.app/api/terrain/');
       const data = await response.json();
       
       if (data.success) {
@@ -66,10 +66,10 @@ const TerrainAdmin = () => {
   const uploadImage = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', 'terrains_preset'); // Votre preset Cloudinary
+    formData.append('upload_preset', 'terrains_preset');
     
     try {
-      const response = await fetch('https://api.cloudinary.com/v1_1/dixm3l18e/image/upload', { // ✅ ESPACES SUPPRIMÉS
+      const response = await fetch('https://api.cloudinary.com/v1_1/dixm3l18e/image/upload', {
         method: 'POST',
         body: formData
       });
@@ -109,7 +109,7 @@ const TerrainAdmin = () => {
     }
     
     try {
-      const response = await fetch('https://backend-foot-omega.vercel.app/api/terrain/', { // ✅ ESPACES SUPPRIMÉS
+      const response = await fetch('https://backend-foot-omega.vercel.app/api/terrain/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -151,7 +151,7 @@ const TerrainAdmin = () => {
     }
     
     try {
-      const response = await fetch(`https://backend-foot-omega.vercel.app/api/terrain/${editingId}`, { // ✅ ESPACES SUPPRIMÉS
+      const response = await fetch(`https://backend-foot-omega.vercel.app/api/terrain/${editingId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -189,7 +189,7 @@ const TerrainAdmin = () => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce terrain ?')) return;
     
     try {
-      const response = await fetch(`https://backend-foot-omega.vercel.app/api/terrain/${id}`, { // ✅ ESPACES SUPPRIMÉS
+      const response = await fetch(`https://backend-foot-omega.vercel.app/api/terrain/${id}`, {
         method: 'DELETE'
       });
       
@@ -211,14 +211,14 @@ const TerrainAdmin = () => {
   const handleEdit = (terrain) => {
     setFormData({
       nomterrain: terrain.nomterrain || '',
-      typeTerrain: terrain.typeTerrain || '', // ✅ CORRECT : correspond au backend
+      typeTerrain: terrain.typeTerrain || '',
       surface: terrain.surface || '',
       descriptions: terrain.descriptions || '',
       tarif: terrain.tarif || '',
       equipementdispo: terrain.equipementdispo || '',
-      photo: terrain.photo || '' // ✅ L'URL de l'image est déjà là
+      photo: terrain.photo || ''
     });
-    setEditingId(terrain.numeroterrain); // ✅ CORRECT : clé primaire
+    setEditingId(terrain.numeroterrain);
     setShowForm(true);
   };
 
@@ -238,117 +238,135 @@ const TerrainAdmin = () => {
   };
 
   return (
-    <div className="terrain-admin">
-      <header className="admin-header">
-        <h1>Administration des Terrains</h1>
+    <div className="ta-container">
+      <header className="ta-header">
+        <h1 className="ta-title">Administration des Terrains</h1>
         <button 
-          className="btn btn-primary"
+          className="ta-btn ta-btn-primary"
           onClick={() => setShowForm(true)}
         >
+          <span className="ta-btn-icon">+</span>
           Ajouter un Terrain
         </button>
       </header>
 
       {/* Formulaire */}
       {showForm && (
-        <div className="form-overlay">
-          <div className="form-container">
-            <h2>{editingId ? 'Modifier le Terrain' : 'Ajouter un Terrain'}</h2>
-            <form onSubmit={editingId ? handleUpdate : handleCreate}>
-              <div className="form-group">
-                <label>Nom du terrain *</label>
-                <input
-                  type="text"
-                  name="nomterrain"
-                  value={formData.nomterrain}
-                  onChange={handleInputChange}
-                  required
-                />
+        <div className="ta-form-overlay">
+          <div className="ta-form-modal">
+            <div className="ta-form-header">
+              <h2>{editingId ? 'Modifier le Terrain' : 'Ajouter un Terrain'}</h2>
+              <button className="ta-close-btn" onClick={handleCancel}>×</button>
+            </div>
+            <form onSubmit={editingId ? handleUpdate : handleCreate} className="ta-form">
+              <div className="ta-form-grid">
+                <div className="ta-form-group">
+                  <label className="ta-input-label">Nom du terrain *</label>
+                  <input
+                    type="text"
+                    name="nomterrain"
+                    value={formData.nomterrain}
+                    onChange={handleInputChange}
+                    className="ta-input"
+                    required
+                  />
+                </div>
+
+                <div className="ta-form-group">
+                  <label className="ta-input-label">Type de terrain *</label>
+                  <select
+                    name="typeTerrain"
+                    value={formData.typeTerrain}
+                    onChange={handleInputChange}
+                    className="ta-input"
+                    required
+                  >
+                    <option value="">Sélectionnez un type</option>
+                    <option value="football">Football</option>
+                    <option value="basketball">Basketball</option>
+                    <option value="tennis">Tennis</option>
+                    <option value="rugby">Rugby</option>
+                  </select>
+                </div>
+
+                <div className="ta-form-group">
+                  <label className="ta-input-label">Surface *</label>
+                  <select
+                    name="surface"
+                    value={formData.surface}
+                    onChange={handleInputChange}
+                    className="ta-input"
+                    required
+                  >
+                    <option value="">Sélectionnez une surface</option>
+                    <option value="7x7">7x7</option>
+                    <option value="9x9">9x9</option>
+                    <option value="11x11">11x11</option>
+                  </select>
+                </div>
+
+                <div className="ta-form-group">
+                  <label className="ta-input-label">Tarif (€/heure) *</label>
+                  <input
+                    type="number"
+                    name="tarif"
+                    value={formData.tarif}
+                    onChange={handleInputChange}
+                    min="0"
+                    step="0.01"
+                    className="ta-input"
+                    required
+                  />
+                </div>
               </div>
 
-              <div className="form-group">
-                <label>Type de terrain *</label>
-                <select
-                  name="typeTerrain"
-                  value={formData.typeTerrain}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">Sélectionnez un type</option>
-                  <option value="football">Football</option>
-                  <option value="basketball">Basketball</option>
-                  <option value="tennis">Tennis</option>
-                  <option value="rugby">Rugby</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Surface *</label>
-                <select
-                  name="surface"
-                  value={formData.surface}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">Sélectionnez une surface</option>
-                  <option value="7x7">7x7</option>
-                  <option value="9x9">9x9</option>
-                  <option value="11x11">11x11</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Tarif (€/heure) *</label>
-                <input
-                  type="number"
-                  name="tarif"
-                  value={formData.tarif}
-                  onChange={handleInputChange}
-                  min="0"
-                  step="0.01"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Description</label>
+              <div className="ta-form-group">
+                <label className="ta-input-label">Description</label>
                 <textarea
                   name="descriptions"
                   value={formData.descriptions}
                   onChange={handleInputChange}
                   rows="3"
+                  className="ta-textarea"
                 />
               </div>
 
-              <div className="form-group">
-                <label>Équipements disponibles</label>
+              <div className="ta-form-group">
+                <label className="ta-input-label">Équipements disponibles</label>
                 <input
                   type="text"
                   name="equipementdispo"
                   value={formData.equipementdispo}
                   onChange={handleInputChange}
+                  className="ta-input"
                 />
               </div>
 
-              <div className="form-group">
-                <label>Photo</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                />
+              <div className="ta-form-group">
+                <label className="ta-input-label">Photo</label>
+                <div className="ta-file-upload">
+                  <label className="ta-file-label">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="ta-file-input"
+                    />
+                    <span className="ta-file-cta">Choisir une image</span>
+                  </label>
+                </div>
                 {formData.photo && (
-                  <div className="image-preview">
-                    <img src={formData.photo} alt="Aperçu" style={{ maxWidth: '100%', borderRadius: '8px', marginTop: '8px' }} />
+                  <div className="ta-image-preview">
+                    <img src={formData.photo} alt="Aperçu" />
                   </div>
                 )}
               </div>
 
-              <div className="form-actions">
-                <button type="submit" className="btn btn-primary">
+              <div className="ta-form-actions">
+                <button type="submit" className="ta-btn ta-btn-primary">
                   {editingId ? 'Modifier' : 'Créer'}
                 </button>
-                <button type="button" className="btn btn-secondary" onClick={handleCancel}>
+                <button type="button" className="ta-btn ta-btn-secondary" onClick={handleCancel}>
                   Annuler
                 </button>
               </div>
@@ -358,51 +376,79 @@ const TerrainAdmin = () => {
       )}
 
       {/* Liste des terrains */}
-      <div className="terrains-list">
+      <div className="ta-content">
         {loading ? (
-          <div className="loading">Chargement...</div>
+          <div className="ta-loading">
+            <div className="ta-spinner"></div>
+            <p>Chargement des terrains...</p>
+          </div>
         ) : terrains.length === 0 ? (
-          <div className="empty-state">
-            <p>Aucun terrain disponible</p>
+          <div className="ta-empty">
+            <div className="ta-empty-icon">⚽</div>
+            <h3>Aucun terrain disponible</h3>
+            <p>Commencez par ajouter votre premier terrain</p>
+            <button 
+              className="ta-btn ta-btn-primary"
+              onClick={() => setShowForm(true)}
+            >
+              Ajouter un terrain
+            </button>
           </div>
         ) : (
-          <div className="terrains-grid">
+          <div className="ta-grid">
             {terrains.map(terrain => (
-              <div key={terrain.numeroterrain} className="terrain-card">
-                <div className="terrain-image">
+              <div key={terrain.numeroterrain} className="ta-card">
+                <div className="ta-card-media">
                   {terrain.photo ? (
-                    <img src={terrain.photo} alt={terrain.nomterrain} style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '8px' }} />
+                    <img src={terrain.photo} alt={terrain.nomterrain} />
                   ) : (
-                    <div style={{ width: '100%', height: '180px', backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}>
-                      <span style={{ color: '#999' }}>Pas d'image</span>
+                    <div className="ta-card-placeholder">
+                      <span>Aucune image</span>
                     </div>
                   )}
+                  <div className="ta-card-overlay">
+                    <button 
+                      className="ta-btn ta-btn-icon"
+                      onClick={() => handleEdit(terrain)}
+                    >
+                      ✏️
+                    </button>
+                    <button 
+                      className="ta-btn ta-btn-icon"
+                      onClick={() => handleDelete(terrain.numeroterrain)}
+                    >
+                      🗑️
+                    </button>
+                  </div>
                 </div>
-                <div className="terrain-info">
-                  <h3>{terrain.nomterrain}</h3>
-                  <p><strong>Type:</strong> {terrain.typeTerrain}</p> {/* ✅ CORRECT : typeTerrain */}
-                  <p><strong>Surface:</strong> {terrain.surface}</p>
-                  <p><strong>Tarif:</strong> {terrain.tarif} €/heure</p>
-                  {terrain.descriptions && (
-                    <p><strong>Description:</strong> {terrain.descriptions}</p>
-                  )}
-                  {terrain.equipementdispo && (
-                    <p><strong>Équipements:</strong> {terrain.equipementdispo}</p>
-                  )}
-                </div>
-                <div className="terrain-actions">
-                  <button 
-                    className="btn btn-edit"
-                    onClick={() => handleEdit(terrain)}
-                  >
-                    Modifier
-                  </button>
-                  <button 
-                    className="btn btn-delete"
-                    onClick={() => handleDelete(terrain.numeroterrain)}
-                  >
-                    Supprimer
-                  </button>
+                <div className="ta-card-content">
+                  <h3 className="ta-card-title">{terrain.nomterrain}</h3>
+                  <div className="ta-card-details">
+                    <div className="ta-detail-item">
+                      <span className="ta-detail-label">Type:</span>
+                      <span className="ta-detail-value">{terrain.typeTerrain}</span>
+                    </div>
+                    <div className="ta-detail-item">
+                      <span className="ta-detail-label">Surface:</span>
+                      <span className="ta-detail-value">{terrain.surface}</span>
+                    </div>
+                    <div className="ta-detail-item">
+                      <span className="ta-detail-label">Tarif:</span>
+                      <span className="ta-detail-value ta-price">{terrain.tarif} €/heure</span>
+                    </div>
+                    {terrain.descriptions && (
+                      <div className="ta-detail-item">
+                        <span className="ta-detail-label">Description:</span>
+                        <span className="ta-detail-value">{terrain.descriptions}</span>
+                      </div>
+                    )}
+                    {terrain.equipementdispo && (
+                      <div className="ta-detail-item">
+                        <span className="ta-detail-label">Équipements:</span>
+                        <span className="ta-detail-value">{terrain.equipementdispo}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -411,10 +457,10 @@ const TerrainAdmin = () => {
       </div>
 
       {/* Toasts */}
-      <div className="toast-container">
+      <div className="ta-toast-container">
         {toasts.map(toast => (
-          <div key={toast.id} className={`toast toast-${toast.type}`}>
-            {toast.message}
+          <div key={toast.id} className={`ta-toast ta-toast-${toast.type}`}>
+            <span className="ta-toast-message">{toast.message}</span>
           </div>
         ))}
       </div>

@@ -6,6 +6,8 @@ import Reservation from "./Page/Reservation";
 import Terrain from "./Page/Terrain";
 import Creneau from "./Page/Crenaux";
 import Calendrier from "./Page/calendriers";
+import User from "./Page/user";
+import Contact from "./Page/contact";
 
 const App = () => {
   return (
@@ -70,7 +72,22 @@ const App = () => {
               <Calendrier />
             </MainLayout>
           }
-        />
+        /> <Route
+        path="/User"
+        element={
+          <MainLayout>
+            <User />
+          </MainLayout>
+        }
+      />
+       <Route
+        path="/contact"
+        element={
+          <MainLayout>
+            <Contact />
+          </MainLayout>
+        }
+      />
       </Routes>
     </BrowserRouter>
   );

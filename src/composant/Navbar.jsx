@@ -47,24 +47,10 @@ const NavbarLuxe = ({ collapsed, setCollapsed }) => {
         </div>
       </div>
 
-      <div className="luxe-navbar-center">
-        <div className={`luxe-search-container ${isSearchFocused ? 'luxe-focused' : ''}`}>
-          <SearchIconLuxe />
-          <input
-            type="text"
-            placeholder="Rechercher..."
-            onFocus={() => setIsSearchFocused(true)}
-            onBlur={() => setIsSearchFocused(false)}
-            className="luxe-search-input"
-          />
-        </div>
-      </div>
+    
 
       <div className="luxe-navbar-right">
-        <button className="luxe-nav-icon" aria-label="Notifications">
-          <BellIconLuxe />
-          <span className="luxe-notification-badge">3</span>
-        </button>
+     
 
         <button className="luxe-nav-icon" aria-label="Paramètres">
           <SettingsIconLuxe />

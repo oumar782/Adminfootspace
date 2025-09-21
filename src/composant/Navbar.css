@@ -26,10 +26,11 @@
   box-shadow: var(--luxe-shadow);
   position: sticky;
   top: 0;
-  width: 100%;
+  width: 96%;
   z-index: 100;
   margin-left: 50px;
   overflow: hidden;
+  position: fixed;
 }
 
 .luxe-navbar-left {
