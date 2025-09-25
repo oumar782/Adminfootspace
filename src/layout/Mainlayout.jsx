@@ -2,7 +2,8 @@ import { ReactNode, useState } from "react";
 
 import Sidebar from "../composant/Sidebar";
 import Navbar from "../composant/Navbar";
-import "../layout/Mainlayout.css";
+import "./Mainlayout.css";
+
 
 const MainLayout = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
