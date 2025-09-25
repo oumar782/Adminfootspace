@@ -21,7 +21,7 @@ const ReservationAdmin = () => {
     prenom: '',
     email: '',
     telephone: '',
-    typeterrain: '', // Correction: "typeTerrain" → "typeterrain"
+    typeterrain: '',
     tarif: '',
     surface: '',
     heurefin: '',
@@ -101,7 +101,7 @@ const ReservationAdmin = () => {
       prenom: '',
       email: '',
       telephone: '',
-      typeterrain: '', // Correction: "typeTerrain" → "typeterrain"
+      typeterrain: '',
       tarif: '',
       surface: '',
       heurefin: '',
@@ -111,7 +111,7 @@ const ReservationAdmin = () => {
     setShowModal(true);
   };
 
-  // Ouvrir modal pour édition - CORRIGÉ pour correspondre à la BDD
+  // Ouvrir modal pour édition
   const openEditModal = (reservation) => {
     setFormData({
       datereservation: reservation.datereservation || '',
@@ -124,7 +124,7 @@ const ReservationAdmin = () => {
       prenom: reservation.prenom || '',
       email: reservation.email || '',
       telephone: reservation.telephone || '',
-      typeterrain: reservation.typeterrain || '', // Correction: "typeTerrain" → "typeterrain"
+      typeterrain: reservation.typeterrain || '',
       tarif: reservation.tarif || '',
       surface: reservation.surface || '',
       nomterrain: reservation.nomterrain || ''
@@ -163,12 +163,15 @@ const ReservationAdmin = () => {
       const data = await response.json();
       
       if (data.success) {
-        addToast(
-          modalMode === 'create' 
-            ? 'Réservation créée avec succès' 
-            : 'Réservation modifiée avec succès',
-          'success'
-        );
+        let message = modalMode === 'create' 
+          ? 'Réservation créée avec succès' 
+          : 'Réservation modifiée avec succès';
+        
+        if (data.emailSent) {
+          message += ' - Email de confirmation envoyé';
+        }
+        
+        addToast(message, 'success');
         closeModal();
         fetchReservations();
       } else {
@@ -207,7 +210,7 @@ const ReservationAdmin = () => {
     }
   };
 
-  // Changer le statut
+  // Changer le statut (avec notification d'envoi d'email)
   const handleStatusChange = async (id, newStatus) => {
     try {
       const url = `https://backend-foot-omega.vercel.app/api/reservation/${id}/statut`;
@@ -223,7 +226,11 @@ const ReservationAdmin = () => {
       const data = await response.json();
       
       if (data.success) {
-        addToast('Statut modifié avec succès', 'success');
+        let message = 'Statut modifié avec succès';
+        if (newStatus === 'confirmée' && data.emailSent) {
+          message += ' - Email de confirmation envoyé au client';
+        }
+        addToast(message, 'success');
         fetchReservations();
       } else {
         addToast(data.message || 'Erreur lors du changement de statut', 'error');
@@ -477,7 +484,7 @@ const ReservationAdmin = () => {
                   <label>Type de terrain</label>
                   <input
                     type="text"
-                    name="typeterrain" // Correction: "typeTerrain" → "typeterrain"
+                    name="typeterrain"
                     value={formData.typeterrain}
                     onChange={handleInputChange}
                     placeholder="Ex: Synthétique, Gazon naturel"
@@ -485,7 +492,7 @@ const ReservationAdmin = () => {
                 </div>
                 
                 <div className="reservation-admin-form-group">
-                  <label>Tarif (€)</label>
+                  <label>Tarif (Dh)</label>
                   <input
                     type="number"
                     step="0.01"
