@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './crenaux.css';
 
-//
 // Composant Toast pour les notifications
 const Toast = ({ message, type, onClose }) => {
   useEffect(() => {
@@ -266,7 +265,7 @@ const CreneauModal = ({ creneau, onClose, onSubmit, isEditing }) => {
 };
 
 // Composant principal
-const crenau = () => {
+const Crenau = () => {
   const [creneaux, setCreneaux] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
@@ -287,6 +286,57 @@ const crenau = () => {
   // Fermer le toast
   const closeToast = () => {
     setToast({ show: false, message: '', type: '' });
+  };
+
+  // Synchroniser les réservations lorsque le statut d'un créneau change
+  const syncReservationStatus = async (creneau, newStatus) => {
+    try {
+      // Rechercher les réservations correspondantes
+      const reservationResponse = await fetch(
+        `https://backend-foot-omega.vercel.app/api/reservation?datereservation=${creneau.datecreneaux}&heurereservation=${creneau.heure}&numeroterrain=${creneau.numeroterrain}`
+      );
+      
+      const reservationData = await reservationResponse.json();
+      
+      if (reservationData.success && reservationData.data.length > 0) {
+        const reservations = reservationData.data;
+        
+        let nouveauStatutReservation = 'en attente';
+        
+        // Synchroniser les statuts
+        if (newStatus === 'réservé') {
+          nouveauStatutReservation = 'confirmée';
+        } else if (newStatus === 'disponible') {
+          // Ne pas modifier automatiquement les réservations existantes vers "disponible"
+          // car cela pourrait annuler des réservations sans consentement
+          return;
+        }
+        
+        // Mettre à jour chaque réservation correspondante
+        for (const reservation of reservations) {
+          if (reservation.statut !== nouveauStatutReservation) {
+            const updateResponse = await fetch(
+              `https://backend-foot-omega.vercel.app/api/reservation/${reservation.id}/statut`,
+              {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ statut: nouveauStatutReservation }),
+              }
+            );
+            
+            const updateData = await updateResponse.json();
+            
+            if (updateData.success) {
+              showToast(`Réservation #${reservation.id} synchronisée: ${nouveauStatutReservation}`, 'success');
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors de la synchronisation des réservations:', error);
+    }
   };
 
   // Récupérer tous les créneaux
@@ -387,6 +437,12 @@ const crenau = () => {
       
       if (result.success) {
         showToast(creneauModal.isEditing ? 'Créneau modifié avec succès' : 'Créneau ajouté avec succès');
+        
+        // Synchroniser les réservations si le statut est "réservé"
+        if (formData.statut === 'réservé') {
+          await syncReservationStatus(formData, 'réservé');
+        }
+        
         setCreneauModal({ show: false, creneau: null, isEditing: false });
         fetchCreneaux();
         fetchStats();
@@ -421,6 +477,41 @@ const crenau = () => {
         fetchStats();
       } else {
         showToast(result.message || 'Erreur lors de la suppression', 'error');
+      }
+    } catch (error) {
+      showToast('Erreur de connexion au serveur', 'error');
+      console.error('Erreur:', error);
+    }
+  };
+
+  // Changer le statut d'un créneau
+  const handleStatusChange = async (creneau, newStatus) => {
+    try {
+      const url = `https://backend-foot-omega.vercel.app/api/gestioncreneaux/${creneau.idcreneaux}`;
+      
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...creneau,
+          statut: newStatus
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        showToast('Statut du créneau modifié avec succès');
+        
+        // Synchroniser automatiquement les réservations
+        await syncReservationStatus(creneau, newStatus);
+        
+        fetchCreneaux();
+        fetchStats();
+      } else {
+        showToast(result.message || 'Erreur lors du changement de statut', 'error');
       }
     } catch (error) {
       showToast('Erreur de connexion au serveur', 'error');
@@ -604,9 +695,15 @@ const crenau = () => {
                         <td>{creneau.heure}</td>
                         <td>{creneau.heurefin || '-'}</td>
                         <td>
-                          <span className={`status-badge status-${creneau.statut}`}>
-                            {creneau.statut}
-                          </span>
+                          <select 
+                            value={creneau.statut} 
+                            onChange={(e) => handleStatusChange(creneau, e.target.value)}
+                            className="status-select"
+                          >
+                            <option value="disponible">Disponible</option>
+                            <option value="réservé">Réservé</option>
+                            <option value="maintenance">Maintenance</option>
+                          </select>
                         </td>
                         <td>{creneau.numeroterrain}</td>
                         <td>{creneau.typeterrain || '-'}</td>
@@ -676,4 +773,4 @@ const crenau = () => {
   );
 };
 
-export default crenau;
+export default Crenau;
