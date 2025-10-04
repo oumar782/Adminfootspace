@@ -288,57 +288,6 @@ const Crenau = () => {
     setToast({ show: false, message: '', type: '' });
   };
 
-  // Synchroniser les réservations lorsque le statut d'un créneau change
-  const syncReservationStatus = async (creneau, newStatus) => {
-    try {
-      // Rechercher les réservations correspondantes
-      const reservationResponse = await fetch(
-        `https://backend-foot-omega.vercel.app/api/reservation?datereservation=${creneau.datecreneaux}&heurereservation=${creneau.heure}&numeroterrain=${creneau.numeroterrain}`
-      );
-      
-      const reservationData = await reservationResponse.json();
-      
-      if (reservationData.success && reservationData.data.length > 0) {
-        const reservations = reservationData.data;
-        
-        let nouveauStatutReservation = 'en attente';
-        
-        // Synchroniser les statuts
-        if (newStatus === 'réservé') {
-          nouveauStatutReservation = 'confirmée';
-        } else if (newStatus === 'disponible') {
-          // Ne pas modifier automatiquement les réservations existantes vers "disponible"
-          // car cela pourrait annuler des réservations sans consentement
-          return;
-        }
-        
-        // Mettre à jour chaque réservation correspondante
-        for (const reservation of reservations) {
-          if (reservation.statut !== nouveauStatutReservation) {
-            const updateResponse = await fetch(
-              `https://backend-foot-omega.vercel.app/api/reservation/${reservation.id}/statut`,
-              {
-                method: 'PUT',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ statut: nouveauStatutReservation }),
-              }
-            );
-            
-            const updateData = await updateResponse.json();
-            
-            if (updateData.success) {
-              showToast(`Réservation #${reservation.id} synchronisée: ${nouveauStatutReservation}`, 'success');
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Erreur lors de la synchronisation des réservations:', error);
-    }
-  };
-
   // Récupérer tous les créneaux
   const fetchCreneaux = async () => {
     try {
@@ -416,9 +365,40 @@ const Crenau = () => {
     }));
   };
 
+  // Vérifier s'il existe une réservation pour ce créneau
+  const checkReservationExists = async (creneauData) => {
+    try {
+      const response = await fetch('https://backend-foot-omega.vercel.app/api/reservation');
+      const result = await response.json();
+      
+      if (result.success) {
+        const reservation = result.data.find(r => 
+          r.numeroterrain == creneauData.numeroterrain &&
+          r.datereservation === creneauData.datecreneaux &&
+          r.heurereservation === creneauData.heure &&
+          r.statut === 'confirmée'
+        );
+        return !!reservation;
+      }
+      return false;
+    } catch (error) {
+      console.error('Erreur lors de la vérification des réservations:', error);
+      return false;
+    }
+  };
+
   // Soumettre le formulaire (ajout ou modification)
   const handleSubmit = async (formData) => {
     try {
+      // Si on essaie de mettre un créneau en "disponible" mais qu'il a une réservation confirmée, empêcher
+      if (formData.statut === 'disponible') {
+        const hasReservation = await checkReservationExists(formData);
+        if (hasReservation) {
+          showToast('Impossible de mettre ce créneau disponible car il a une réservation confirmée', 'error');
+          return;
+        }
+      }
+
       const url = creneauModal.isEditing 
         ? `https://backend-foot-omega.vercel.app/api/gestioncreneaux/${creneauModal.creneau.idcreneaux}`
         : 'https://backend-foot-omega.vercel.app/api/gestioncreneaux/';
@@ -437,12 +417,6 @@ const Crenau = () => {
       
       if (result.success) {
         showToast(creneauModal.isEditing ? 'Créneau modifié avec succès' : 'Créneau ajouté avec succès');
-        
-        // Synchroniser les réservations si le statut est "réservé"
-        if (formData.statut === 'réservé') {
-          await syncReservationStatus(formData, 'réservé');
-        }
-        
         setCreneauModal({ show: false, creneau: null, isEditing: false });
         fetchCreneaux();
         fetchStats();
@@ -465,6 +439,16 @@ const Crenau = () => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce créneau ?')) return;
     
     try {
+      // Vérifier s'il y a une réservation pour ce créneau
+      const creneauToDelete = creneaux.find(c => c.idcreneaux === id);
+      if (creneauToDelete) {
+        const hasReservation = await checkReservationExists(creneauToDelete);
+        if (hasReservation) {
+          showToast('Impossible de supprimer ce créneau car il a une réservation confirmée', 'error');
+          return;
+        }
+      }
+      
       const response = await fetch(`https://backend-foot-omega.vercel.app/api/gestioncreneaux/${id}`, {
         method: 'DELETE'
       });
@@ -477,41 +461,6 @@ const Crenau = () => {
         fetchStats();
       } else {
         showToast(result.message || 'Erreur lors de la suppression', 'error');
-      }
-    } catch (error) {
-      showToast('Erreur de connexion au serveur', 'error');
-      console.error('Erreur:', error);
-    }
-  };
-
-  // Changer le statut d'un créneau
-  const handleStatusChange = async (creneau, newStatus) => {
-    try {
-      const url = `https://backend-foot-omega.vercel.app/api/gestioncreneaux/${creneau.idcreneaux}`;
-      
-      const response = await fetch(url, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...creneau,
-          statut: newStatus
-        })
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        showToast('Statut du créneau modifié avec succès');
-        
-        // Synchroniser automatiquement les réservations
-        await syncReservationStatus(creneau, newStatus);
-        
-        fetchCreneaux();
-        fetchStats();
-      } else {
-        showToast(result.message || 'Erreur lors du changement de statut', 'error');
       }
     } catch (error) {
       showToast('Erreur de connexion au serveur', 'error');
@@ -695,15 +644,9 @@ const Crenau = () => {
                         <td>{creneau.heure}</td>
                         <td>{creneau.heurefin || '-'}</td>
                         <td>
-                          <select 
-                            value={creneau.statut} 
-                            onChange={(e) => handleStatusChange(creneau, e.target.value)}
-                            className="status-select"
-                          >
-                            <option value="disponible">Disponible</option>
-                            <option value="réservé">Réservé</option>
-                            <option value="maintenance">Maintenance</option>
-                          </select>
+                          <span className={`status-badge status-${creneau.statut}`}>
+                            {creneau.statut}
+                          </span>
                         </td>
                         <td>{creneau.numeroterrain}</td>
                         <td>{creneau.typeterrain || '-'}</td>

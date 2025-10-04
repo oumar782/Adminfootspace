@@ -25,8 +25,7 @@ const ReservationAdmin = () => {
     tarif: '',
     surface: '',
     heurefin: '',
-    nomterrain: '',
-    idcreneaux: '' // Nouveau champ pour lier au créneau
+    nomterrain: ''
   });
 
   // Ajouter un toast
@@ -81,27 +80,6 @@ const ReservationAdmin = () => {
     fetchReservations();
   }, [searchTerm, filterStatus]);
 
-  // Mettre à jour le statut du créneau associé
-  const updateCreneauStatus = async (idcreneaux, newStatus) => {
-    if (!idcreneaux) return;
-    
-    try {
-      const response = await fetch(`https://backend-foot-omega.vercel.app/api/gestioncreneaux/${idcreneaux}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ statut: newStatus })
-      });
-      
-      const data = await response.json();
-      return data.success;
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour du créneau:', error);
-      return false;
-    }
-  };
-
   // Gérer les changements de formulaire
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -127,8 +105,7 @@ const ReservationAdmin = () => {
       tarif: '',
       surface: '',
       heurefin: '',
-      nomterrain: '',
-      idcreneaux: ''
+      nomterrain: ''
     });
     setModalMode('create');
     setShowModal(true);
@@ -150,8 +127,7 @@ const ReservationAdmin = () => {
       typeterrain: reservation.typeterrain || '',
       tarif: reservation.tarif || '',
       surface: reservation.surface || '',
-      nomterrain: reservation.nomterrain || '',
-      idcreneaux: reservation.idcreneaux || ''
+      nomterrain: reservation.nomterrain || ''
     });
     setEditingReservation(reservation);
     setModalMode('edit');
@@ -162,6 +138,43 @@ const ReservationAdmin = () => {
   const closeModal = () => {
     setShowModal(false);
     setEditingReservation(null);
+  };
+
+  // Mettre à jour le statut du créneau
+  const updateCreneauStatus = async (numeroterrain, datereservation, heurereservation, newStatus) => {
+    try {
+      // D'abord, trouver le créneau correspondant
+      const creneauxResponse = await fetch('https://backend-foot-omega.vercel.app/api/gestioncreneaux/');
+      const creneauxData = await creneauxResponse.json();
+      
+      if (creneauxData.success) {
+        const creneau = creneauxData.data.find(c => 
+          c.numeroterrain == numeroterrain && 
+          c.datecreneaux === datereservation && 
+          c.heure === heurereservation
+        );
+        
+        if (creneau) {
+          const updateResponse = await fetch(`https://backend-foot-omega.vercel.app/api/gestioncreneaux/${creneau.idcreneaux}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              ...creneau,
+              statut: newStatus
+            })
+          });
+          
+          const updateData = await updateResponse.json();
+          return updateData.success;
+        }
+      }
+      return false;
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du créneau:', error);
+      return false;
+    }
   };
 
   // Soumettre le formulaire (création ou modification)
@@ -187,17 +200,22 @@ const ReservationAdmin = () => {
       const data = await response.json();
       
       if (data.success) {
-        // Si la réservation est confirmée, mettre à jour le créneau associé
-        if (formData.statut === 'confirmée' && formData.idcreneaux) {
-          const creneauUpdated = await updateCreneauStatus(formData.idcreneaux, 'réservé');
-          if (creneauUpdated) {
-            addToast('Créneau associé marqué comme réservé', 'success');
-          }
-        }
-        
         let message = modalMode === 'create' 
           ? 'Réservation créée avec succès' 
           : 'Réservation modifiée avec succès';
+        
+        // Si la réservation est confirmée, mettre à jour le statut du créneau
+        if (formData.statut === 'confirmée') {
+          const creneauUpdated = await updateCreneauStatus(
+            formData.numeroterrain,
+            formData.datereservation,
+            formData.heurereservation,
+            'réservé'
+          );
+          if (creneauUpdated) {
+            message += ' - Créneau marqué comme réservé';
+          }
+        }
         
         if (data.emailSent) {
           message += ' - Email de confirmation envoyé';
@@ -222,7 +240,7 @@ const ReservationAdmin = () => {
     }
     
     try {
-      // Récupérer la réservation pour avoir l'idcreneaux
+      // Récupérer la réservation pour avoir les infos du créneau
       const reservation = reservations.find(r => r.id === id);
       
       const url = `https://backend-foot-omega.vercel.app/api/reservation/${id}`;
@@ -234,9 +252,14 @@ const ReservationAdmin = () => {
       const data = await response.json();
       
       if (data.success) {
-        // Si la réservation était confirmée, remettre le créneau en disponible
-        if (reservation && reservation.statut === 'confirmée' && reservation.idcreneaux) {
-          await updateCreneauStatus(reservation.idcreneaux, 'disponible');
+        // Si la réservation était confirmée, remettre le créneau disponible
+        if (reservation && reservation.statut === 'confirmée') {
+          await updateCreneauStatus(
+            reservation.numeroterrain,
+            reservation.datereservation,
+            reservation.heurereservation,
+            'disponible'
+          );
         }
         
         addToast('Réservation supprimée avec succès', 'success');
@@ -250,9 +273,10 @@ const ReservationAdmin = () => {
     }
   };
 
-  // Changer le statut (avec notification d'envoi d'email et mise à jour du créneau)
+  // Changer le statut (avec notification d'envoi d'email)
   const handleStatusChange = async (id, newStatus) => {
     try {
+      // Récupérer la réservation actuelle
       const reservation = reservations.find(r => r.id === id);
       
       const url = `https://backend-foot-omega.vercel.app/api/reservation/${id}/statut`;
@@ -268,25 +292,39 @@ const ReservationAdmin = () => {
       const data = await response.json();
       
       if (data.success) {
-        // Mettre à jour le statut du créneau associé
-        if (reservation && reservation.idcreneaux) {
-          let newCreneauStatus = 'disponible';
+        let message = 'Statut modifié avec succès';
+        
+        // Gérer le statut du créneau
+        if (reservation) {
           if (newStatus === 'confirmée') {
-            newCreneauStatus = 'réservé';
-          } else if (newStatus === 'en attente') {
-            newCreneauStatus = 'disponible';
-          }
-          
-          const creneauUpdated = await updateCreneauStatus(reservation.idcreneaux, newCreneauStatus);
-          if (creneauUpdated) {
-            addToast(`Créneau associé marqué comme ${newCreneauStatus}`, 'success');
+            // Marquer le créneau comme réservé
+            const creneauUpdated = await updateCreneauStatus(
+              reservation.numeroterrain,
+              reservation.datereservation,
+              reservation.heurereservation,
+              'réservé'
+            );
+            if (creneauUpdated) {
+              message += ' - Créneau marqué comme réservé';
+            }
+          } else if (newStatus === 'annulée' && reservation.statut === 'confirmée') {
+            // Si on annule une réservation confirmée, remettre le créneau disponible
+            const creneauUpdated = await updateCreneauStatus(
+              reservation.numeroterrain,
+              reservation.datereservation,
+              reservation.heurereservation,
+              'disponible'
+            );
+            if (creneauUpdated) {
+              message += ' - Créneau remis disponible';
+            }
           }
         }
         
-        let message = 'Statut modifié avec succès';
         if (newStatus === 'confirmée' && data.emailSent) {
           message += ' - Email de confirmation envoyé au client';
         }
+        
         addToast(message, 'success');
         fetchReservations();
       } else {
@@ -372,7 +410,6 @@ const ReservationAdmin = () => {
                   <p><strong>Type:</strong> <span>{reservation.typeterrain || 'Non spécifié'}</span></p>
                   <p><strong>Surface:</strong> <span>{reservation.surface}</span></p>
                   <p><strong>Tarif:</strong> <span>{reservation.tarif} Dh</span></p>
-                  <p><strong>ID Créneau:</strong> <span>{reservation.idcreneaux || 'Non associé'}</span></p>
                 </div>
                 
                 <div className="reservation-admin-card-actions">
@@ -491,17 +528,6 @@ const ReservationAdmin = () => {
                     value={formData.numeroterrain}
                     onChange={handleInputChange}
                     required
-                  />
-                </div>
-
-                <div className="reservation-admin-form-group">
-                  <label>ID Créneau</label>
-                  <input
-                    type="number"
-                    name="idcreneaux"
-                    value={formData.idcreneaux}
-                    onChange={handleInputChange}
-                    placeholder="ID du créneau associé"
                   />
                 </div>
                 
