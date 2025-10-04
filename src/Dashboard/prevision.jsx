@@ -4,51 +4,97 @@ import './prevision.css';
 const PrevisionForecast = () => {
   const [hoveredDay, setHoveredDay] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [forecastData, setForecastData] = useState([]);
+  const [statistiques, setStatistiques] = useState(null);
+  const [periode, setPeriode] = useState(14);
+  const [erreur, setErreur] = useState(null);
 
-  const forecastData = [
-    { day: "J+1", prevision: 82, date: "12 Nov", trend: "up" },
-    { day: "J+2", prevision: 75, date: "13 Nov", trend: "down" },
-    { day: "J+3", prevision: 68, date: "14 Nov", trend: "down" },
-    { day: "J+4", prevision: 82, date: "15 Nov", trend: "up" },
-    { day: "J+5", prevision: 94, date: "16 Nov", trend: "up" },
-    { day: "J+6", prevision: 97, date: "17 Nov", trend: "up" },
-    { day: "J+7", prevision: 95, date: "18 Nov", trend: "down" },
-    { day: "J+8", prevision: 85, date: "19 Nov", trend: "down" },
-    { day: "J+9", prevision: 75, date: "20 Nov", trend: "down" },
-    { day: "J+10", prevision: 72, date: "21 Nov", trend: "down" },
-    { day: "J+11", prevision: 78, date: "22 Nov", trend: "up" },
-    { day: "J+12", prevision: 82, date: "23 Nov", trend: "up" },
-    { day: "J+13", prevision: 85, date: "24 Nov", trend: "up" },
-    { day: "J+14", prevision: 92, date: "25 Nov", trend: "up" },
-  ];
+  // Fonction pour récupérer les données depuis l'API
+  const fetchPrevisions = async () => {
+    try {
+      setIsLoading(true);
+      setErreur(null);
+      
+      const response = await fetch(`https://backend-foot-omega.vercel.app/api/reservation/previsions/detaillees?jours=${periode}`);
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // Formater les données pour le graphique
+        const formattedData = result.data.map((item, index) => ({
+          day: `J+${index + 1}`,
+          prevision: parseFloat(item.taux_occupation_prevu),
+          date: item.date_formattee,
+          trend: item.tendance,
+          rawData: item
+        }));
+        
+        setForecastData(formattedData);
+        setStatistiques(result.statistiques);
+      } else {
+        throw new Error(result.message || 'Erreur lors de la récupération des données');
+      }
+    } catch (error) {
+      console.error('❌ Erreur chargement prévisions:', error);
+      setErreur(error.message);
+      // Données de démonstration en cas d'erreur
+      setForecastData(generateDemoData());
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Générer des données de démonstration
+  const generateDemoData = () => {
+    const today = new Date();
+    return Array.from({ length: periode }, (_, i) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i + 1);
+      
+      return {
+        day: `J+${i + 1}`,
+        prevision: Math.floor(Math.random() * 40) + 50, // 50-90%
+        date: date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
+        trend: Math.random() > 0.5 ? 'up' : 'down',
+        rawData: {
+          taux_occupation_prevu: Math.floor(Math.random() * 40) + 50,
+          revenu_attendu: Math.floor(Math.random() * 500) + 100
+        }
+      };
+    });
+  };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, []);
+    fetchPrevisions();
+  }, [periode]);
 
-  const averagePrevision = Math.round(
-    forecastData.reduce((sum, item) => sum + item.prevision, 0) / forecastData.length
-  );
+  const handlePeriodeChange = (nouvellePeriode) => {
+    setPeriode(nouvellePeriode);
+  };
 
-  const peakDay = forecastData.reduce(
-    (max, item) => (item.prevision > max.prevision ? item : max),
-    forecastData[0]
-  );
+  const handleRetry = () => {
+    fetchPrevisions();
+  };
 
   const renderSkeleton = () => (
-    <div className="forecast-skeleton">
-      <div className="skeleton-header"></div>
-      <div className="skeleton-chart">
-        {Array.from({ length: 14 }).map((_, i) => (
-          <div key={i} className="skeleton-bar" style={{ height: `${30 + Math.random() * 60}%` }}></div>
+    <div className="prevision-forecast-skeleton">
+      <div className="prevision-skeleton-header">
+        <div className="prevision-skeleton-title"></div>
+        <div className="prevision-skeleton-filters"></div>
+      </div>
+      <div className="prevision-skeleton-chart">
+        {Array.from({ length: periode }).map((_, i) => (
+          <div key={i} className="prevision-skeleton-bar" style={{ height: `${30 + Math.random() * 60}%` }}></div>
         ))}
       </div>
-      <div className="skeleton-footer">
-        <div className="skeleton-stat"></div>
-        <div className="skeleton-stat"></div>
+      <div className="prevision-skeleton-footer">
+        <div className="prevision-skeleton-stat"></div>
+        <div className="prevision-skeleton-stat"></div>
+        <div className="prevision-skeleton-stat"></div>
       </div>
     </div>
   );
@@ -60,101 +106,231 @@ const PrevisionForecast = () => {
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
       );
-    } else {
+    } else if (trend === "down") {
       return (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       );
+    } else {
+      return (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <line x1="18" y1="12" x2="6" y2="12"></line>
+        </svg>
+      );
     }
   };
 
+  const getTrendColor = (trend) => {
+    switch (trend) {
+      case 'up': return '#10b981';
+      case 'down': return '#ef4444';
+      default: return '#6b7280';
+    }
+  };
+
+  const getOccupationColor = (percentage) => {
+    if (percentage >= 80) return '#ef4444'; // Rouge pour haute occupation
+    if (percentage >= 60) return '#f59e0b'; // Orange pour moyenne-haute
+    if (percentage >= 40) return '#10b981'; // Vert pour moyenne
+    return '#6b7280'; // Gris pour faible
+  };
+
+  if (erreur && forecastData.length === 0) {
+    return (
+      <div className="prevision-forecast-card error">
+        <div className="prevision-error-content">
+          <div className="prevision-error-icon">⚠️</div>
+          <h3>Erreur de chargement</h3>
+          <p>{erreur}</p>
+          <button onClick={handleRetry} className="prevision-retry-btn">
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const dataToShow = forecastData.length > 0 ? forecastData : generateDemoData();
+  const averagePrevision = Math.round(
+    dataToShow.reduce((sum, item) => sum + item.prevision, 0) / dataToShow.length
+  );
+
+  const peakDay = dataToShow.reduce(
+    (max, item) => (item.prevision > max.prevision ? item : max),
+    dataToShow[0]
+  );
+
+  const lowestDay = dataToShow.reduce(
+    (min, item) => (item.prevision < min.prevision ? item : min),
+    dataToShow[0]
+  );
+
   return (
-    <div className="forecast-card">
-      <div className="forecast-header">
-        <h2>Prévisions à 14 jours</h2>
-        <div className="header-actions">
-          <button className="action-btn">
+    <div className="prevision-forecast-card">
+      <div className="prevision-forecast-header">
+        <div className="prevision-header-title">
+          <h2>📊 Prévisions d'occupation</h2>
+          <span className="prevision-periode-badge">{periode} jours</span>
+        </div>
+        
+        <div className="prevision-header-actions">
+          <div className="prevision-periode-selector">
+            <button 
+              className={`prevision-periode-btn ${periode === 7 ? 'active' : ''}`}
+              onClick={() => handlePeriodeChange(7)}
+            >
+              7j
+            </button>
+            <button 
+              className={`prevision-periode-btn ${periode === 14 ? 'active' : ''}`}
+              onClick={() => handlePeriodeChange(14)}
+            >
+              14j
+            </button>
+            <button 
+              className={`prevision-periode-btn ${periode === 30 ? 'active' : ''}`}
+              onClick={() => handlePeriodeChange(30)}
+            >
+              30j
+            </button>
+          </div>
+          
+          <button className="prevision-action-btn refresh" onClick={handleRetry} title="Actualiser">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="16"></line>
-              <line x1="8" y1="12" x2="16" y2="12"></line>
+              <path d="M23 4v6h-6"></path>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
             </svg>
           </button>
-          <button className="action-btn">
+          
+          <button className="prevision-action-btn" title="Exporter">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-              <polyline points="22,6 12,13 2,6"></polyline>
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
           </button>
         </div>
       </div>
 
-      <div className="forecast-content">
+      <div className="prevision-forecast-content">
         {isLoading ? (
           renderSkeleton()
         ) : (
           <>
-            <div className="forecast-chart">
-              {forecastData.map((item, index) => (
+            <div className="prevision-forecast-chart">
+              {dataToShow.map((item, index) => (
                 <div
                   key={index}
-                  className="chart-column"
+                  className="prevision-chart-column"
                   onMouseEnter={() => setHoveredDay(index)}
                   onMouseLeave={() => setHoveredDay(null)}
                 >
-                  <div className="column-background">
+                  <div className="prevision-column-background">
                     <div
-                      className="column-fill"
-                      style={{ height: `${item.prevision}%` }}
+                      className="prevision-column-fill"
+                      style={{ 
+                        height: `${item.prevision}%`,
+                        backgroundColor: getOccupationColor(item.prevision)
+                      }}
                     ></div>
                   </div>
-                  <div className="column-label">{item.day.replace("J+", "")}</div>
+                  <div className="prevision-column-label">{item.day.replace("J+", "")}</div>
                   
                   {hoveredDay === index && (
-                    <div className="column-tooltip">
-                      <div className="tooltip-date">{item.date}</div>
-                      <div className="tooltip-value">
-                        {item.prevision}% d'occupation
+                    <div className="prevision-column-tooltip">
+                      <div className="prevision-tooltip-header">
+                        <div className="prevision-tooltip-date">{item.date}</div>
+                        <div className="prevision-tooltip-trend" style={{ color: getTrendColor(item.trend) }}>
+                          {getTrendIcon(item.trend)}
+                          {item.trend === "up" ? "En hausse" : item.trend === "down" ? "En baisse" : "Stable"}
+                        </div>
                       </div>
-                      <div className="tooltip-trend">
-                        {getTrendIcon(item.trend)}
-                        {item.trend === "up" ? "En hausse" : "En baisse"}
+                      <div className="prevision-tooltip-value">
+                        <strong>{item.prevision}%</strong> d'occupation
                       </div>
+                      {item.rawData && (
+                        <>
+                          <div className="prevision-tooltip-detail">
+                            Revenu: <strong>{item.rawData.revenu_attendu} DH</strong>
+                          </div>
+                          <div className="prevision-tooltip-detail">
+                            Réservations: <strong>{item.rawData.nb_reservations || 0}</strong>
+                          </div>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
               ))}
             </div>
 
-            <div className="forecast-stats">
-              <div className="stat-item">
-                <div className="stat-icon">
+            <div className="prevision-forecast-stats">
+              <div className="prevision-stat-item">
+                <div className="prevision-stat-icon average">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <line x1="18" y1="20" x2="18" y2="10"></line>
                     <line x1="12" y1="20" x2="12" y2="4"></line>
                     <line x1="6" y1="20" x2="6" y2="14"></line>
                   </svg>
                 </div>
-                <div className="stat-content">
-                  <div className="stat-label">Moyenne sur 14 jours</div>
-                  <div className="stat-value">{averagePrevision}%</div>
+                <div className="prevision-stat-content">
+                  <div className="prevision-stat-label">Moyenne sur {periode} jours</div>
+                  <div className="prevision-stat-value">{averagePrevision}%</div>
                 </div>
               </div>
 
-              <div className="stat-item">
-                <div className="stat-icon peak">
+              <div className="prevision-stat-item">
+                <div className="prevision-stat-icon peak">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                     <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                   </svg>
                 </div>
-                <div className="stat-content">
-                  <div className="stat-label">Jour le plus chargé</div>
-                  <div className="stat-value">{peakDay.day.replace("J+", "")} ({peakDay.prevision}%)</div>
+                <div className="prevision-stat-content">
+                  <div className="prevision-stat-label">Pic d'occupation</div>
+                  <div className="prevision-stat-value">{peakDay.day.replace("J+", "")} ({peakDay.prevision}%)</div>
+                </div>
+              </div>
+
+              <div className="prevision-stat-item">
+                <div className="prevision-stat-icon low">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 2v20"></path>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                  </svg>
+                </div>
+                <div className="prevision-stat-content">
+                  <div className="prevision-stat-label">Plus faible</div>
+                  <div className="prevision-stat-value">{lowestDay.day.replace("J+", "")} ({lowestDay.prevision}%)</div>
                 </div>
               </div>
             </div>
+
+            {statistiques && (
+              <div className="prevision-advanced-stats">
+                <div className="prevision-stats-grid">
+                  <div className="prevision-advanced-stat">
+                    <div className="prevision-advanced-stat-value">
+                      {statistiques.revenu_total_attendu} DH
+                    </div>
+                    <div className="prevision-advanced-stat-label">Revenu total attendu</div>
+                  </div>
+                  <div className="prevision-advanced-stat">
+                    <div className="prevision-advanced-stat-value">{statistiques.reservations_total}</div>
+                    <div className="prevision-advanced-stat-label">Réservations totales</div>
+                  </div>
+                  <div className="prevision-advanced-stat">
+                    <div className="prevision-advanced-stat-value">{statistiques.jours_eleves}</div>
+                    <div className="prevision-advanced-stat-label">Jours chargés (&gt;80%)</div>
+                  </div>
+                  <div className="prevision-advanced-stat">
+                    <div className="prevision-advanced-stat-value">{statistiques.jours_faibles}</div>
+                    <div className="prevision-advanced-stat-label">Jours calmes (&lt;50%)</div>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

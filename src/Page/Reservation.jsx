@@ -217,8 +217,12 @@ const ReservationAdmin = () => {
           }
         }
         
+        // Afficher le message d'email si envoyé
         if (data.emailSent) {
-          message += ' - Email de confirmation envoyé';
+          message += ' - Email de confirmation envoyé au client';
+        }
+        if (data.emailError) {
+          message += ` - Erreur email: ${data.emailError}`;
         }
         
         addToast(message, 'success');
@@ -321,8 +325,12 @@ const ReservationAdmin = () => {
           }
         }
         
+        // Afficher le message d'email
         if (newStatus === 'confirmée' && data.emailSent) {
           message += ' - Email de confirmation envoyé au client';
+        }
+        if (data.emailError) {
+          message += ` - Erreur email: ${data.emailError}`;
         }
         
         addToast(message, 'success');
