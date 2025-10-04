@@ -2,7 +2,7 @@ import { ReactNode, useState } from "react";
 
 import Sidebar from "../composant/Sidebar";
 import Navbar from "../composant/Navbar";
-import "/src/layout/Mainlayout.css";
+import "./lay.css";
  
 
 const MainLayout = ({ children }) => {
