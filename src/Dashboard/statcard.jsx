@@ -10,7 +10,7 @@ import {
   BarChart3,
   Target
 } from 'lucide-react';
-import './DashboardStats.css';
+import './dashboardStats.css';
 
 const DashboardStats = () => {
   const [stats, setStats] = useState(null);
