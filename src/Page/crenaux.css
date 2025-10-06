@@ -32,11 +32,14 @@
     line-height: 1.5;
     min-height: 100vh;
     font-size: 14px;
+  margin-top: 80px;
+
   }
   
   .app {
     min-height: 100vh;
     padding-bottom: 1rem;
+    
   }
   
   .app-header {
@@ -45,6 +48,8 @@
     padding: 1.5rem 2rem;
     margin-bottom: 1.5rem;
     box-shadow: var(--box-shadow);
+  margin-left: 90px;
+border-radius: 50px;
   }
   
   .header-content {
@@ -65,9 +70,10 @@
   }
   
   .app-main {
-    max-width: 1200px;
+    max-width: 1350px;
     margin: 0 auto;
     padding: 0 1rem;
+    margin-right: 7px;
   }
   
   section {
@@ -77,6 +83,12 @@
     margin-bottom: 1.5rem;
     box-shadow: var(--box-shadow);
     transition: var(--transition);
+    margin-top: 50px;
+    width: 1350px;
+    margin-top: 50px;
+  margin-left: -34px;
+
+
   }
   
   .section-header {
@@ -85,7 +97,8 @@
     align-items: center;
     margin-bottom: 1.25rem;
     flex-wrap: wrap;
-    gap: 0.75rem;
+  gap: 0.75rem;
+
   }
   
   h2 {
@@ -99,6 +112,9 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 1rem;
+  margin-top: 50px;
+  margin-left: 7px;
+
   }
   
   .stat-card {

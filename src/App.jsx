@@ -16,14 +16,7 @@ const App = () => {
         {/* Redirige "/" vers "/dashboard" */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-        <Route
-          path="/dashboard"
-          element={
-            <MainLayout>
-              <Dashboard />
-            </MainLayout>
-          }
-        />
+      
          <Route
           path="/dashboard"
           element={

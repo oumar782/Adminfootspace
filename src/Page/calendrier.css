@@ -33,6 +33,9 @@
     min-height: 100vh;
     position: relative;
     overflow-x: hidden;
+  margin-top: 90px;
+  margin-left: 60px;
+
   }
   
   .cal-luxe-app::before {
@@ -51,12 +54,15 @@
   .cal-luxe-app-header {
     background: linear-gradient(135deg,white 0%, white 100%);
     color: green;
-    padding: 3rem 2rem;
+    padding: 2rem 2rem;
     text-align: center;
     position: relative;
     overflow: hidden;
     border-bottom: 3px solid var(--cal-luxe-gold);
+    width: 90%;
     box-shadow: var(--cal-luxe-shadow-lg);
+    margin-left: 70px;
+    border-radius: 50px;
   }
   
   .cal-luxe-app-header::before {

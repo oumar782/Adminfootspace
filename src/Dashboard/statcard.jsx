@@ -1,142 +1,249 @@
-import React from 'react';
-import './custom.css';
+import React, { useState, useEffect } from 'react';
+import { 
+  TrendingUp, 
+  TrendingDown, 
+  RefreshCw, 
+  AlertCircle,
+  DollarSign,
+  Calendar,
+  Users,
+  BarChart3,
+  Target
+} from 'lucide-react';
+import './DashboardStats.css';
 
-const StatCard = ({ 
-  title, 
-  value, 
-  subtitle, 
-  icon, 
-  trend, 
-  loading = false, 
-  className = '', 
-  onClick 
-}) => {
-  return (
-    <div 
-      className={`stat-card ${className} ${onClick ? 'clickable' : ''}`}
-      onClick={onClick}
-    >
-      {loading ? (
-        <div className="stat-card-skeleton">
-          <div className="skeleton-header">
-            <div className="skeleton-title"></div>
-            <div className="skeleton-icon"></div>
+const DashboardStats = () => {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedPeriod, setSelectedPeriod] = useState('mois');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    fetchDashboardStats();
+  }, [selectedPeriod]);
+
+  const fetchDashboardStats = async () => {
+    try {
+      setLoading(true);
+      setIsRefreshing(true);
+      const url = 'https://backend-foot-omega.vercel.app/api/prevision/dashboard';
+      const params = new URLSearchParams({ periode: selectedPeriod });
+      
+      const response = await fetch(`${url}?${params}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setStats(data.data);
+      }
+    } catch (error) {
+      console.error('Erreur chargement stats:', error);
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'MAD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  const getPeriodLabel = () => {
+    switch (selectedPeriod) {
+      case 'jour': return "Aujourd'hui";
+      case 'semaine': return "Cette semaine";
+      case 'mois': return "Ce mois";
+      case 'annee': return "Cette année";
+      default: return "Cette période";
+    }
+  };
+
+  const StatCard = ({ 
+    title, 
+    value, 
+    subtitle, 
+    trend, 
+    footer, 
+    icon: Icon,
+    type = 'default'
+  }) => (
+    <div className={`foot-stat-card foot-stat-${type}`}>
+      <div className="foot-card-glow"></div>
+      <div className="foot-card-content">
+        <div className="foot-card-header">
+          <div className="foot-card-icon">
+            <Icon size={20} />
           </div>
-          <div className="skeleton-value"></div>
-          {trend && <div className="skeleton-trend"></div>}
+          <span className="foot-card-title">{title}</span>
         </div>
-      ) : (
-        <>
-          <div className="stat-card-header">
-            <span className="stat-title">{title}</span>
-            <div className="stat-icon">
-              {icon}
-            </div>
-          </div>
-          
-          <div className="stat-content">
-            <span className="stat-value">{value}</span>
-            {subtitle && <span className="stat-subtitle">{subtitle}</span>}
-          </div>
+        
+        <div className="foot-card-main">
+          <div className="foot-main-value">{value}</div>
+          <div className="foot-period-label">{subtitle}</div>
           
           {trend && (
-            <div className={`stat-trend ${trend.isPositive ? 'positive' : 'negative'}`}>
-              <div className="trend-icon">
-                {trend.isPositive ? (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="18 15 12 9 6 15"></polyline>
-                  </svg>
-                ) : (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
-                )}
+            <div className={`foot-trend ${trend.isPositive ? 'foot-positive' : 'foot-negative'}`}>
+              <div className="foot-trend-icon">
+                {trend.isPositive ? 
+                  <TrendingUp size={16} /> : 
+                  <TrendingDown size={16} />
+                }
               </div>
-              <span className="trend-value">
-                {trend.value}% {trend.label || 'vs mois dernier'}
-              </span>
+              <span className="foot-trend-value">{trend.value}%</span>
+              <span className="foot-trend-label">vs période précédente</span>
             </div>
           )}
-        </>
+        </div>
+
+        {footer && (
+          <div className="foot-card-footer">
+            {footer}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="foot-dashboard-stats">
+      {/* Header */}
+      <div className="foot-dashboard-header">
+        <div className="foot-header-content">
+          <h1 className="foot-dashboard-title">Tableau de Bord</h1>
+          <p className="foot-dashboard-subtitle">
+            Vue d'ensemble de votre activité {getPeriodLabel().toLowerCase()}
+          </p>
+        </div>
+        
+        <div className="foot-header-controls">
+          <div className="foot-period-selector">
+            <select 
+              value={selectedPeriod} 
+              onChange={(e) => setSelectedPeriod(e.target.value)}
+              className="foot-period-select"
+            >
+              <option value="jour">Aujourd'hui</option>
+              <option value="semaine">Cette semaine</option>
+              <option value="mois">Ce mois</option>
+              <option value="annee">Cette année</option>
+            </select>
+          </div>
+          
+          <button 
+            onClick={fetchDashboardStats} 
+            className={`foot-refresh-btn ${isRefreshing ? 'foot-refreshing' : ''}`}
+            disabled={isRefreshing}
+          >
+            <RefreshCw size={16} />
+            {isRefreshing ? 'Actualisation...' : 'Actualiser'}
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="foot-dashboard-container">
+        {loading ? (
+          <div className="foot-stats-loading">
+            <div className="foot-loading-spinner"></div>
+            <p>Chargement des données...</p>
+          </div>
+        ) : !stats ? (
+          <div className="foot-stats-error">
+            <AlertCircle size={48} />
+            <h3>Données non disponibles</h3>
+            <p>Impossible de charger les données du tableau de bord</p>
+            <button onClick={fetchDashboardStats} className="foot-retry-btn">
+              Réessayer
+            </button>
+          </div>
+        ) : (
+          <div className="foot-stats-grid">
+            {/* Revenus */}
+            <StatCard
+              title="Revenus (MAD)"
+              value={formatCurrency(stats.revenus_mois)}
+              subtitle={getPeriodLabel()}
+              trend={stats.trends?.revenus}
+              footer={
+                <div className="foot-footer-item">
+                  <span className="foot-footer-label">Annuel:</span>
+                  <span className="foot-footer-value">{formatCurrency(stats.revenus_annee)}</span>
+                </div>
+              }
+              icon={DollarSign}
+              type="revenue"
+            />
+
+            {/* Réservations */}
+            <StatCard
+              title="Réservations"
+              value={stats.reservations_mois}
+              subtitle={`Confirmées ${getPeriodLabel().toLowerCase()}`}
+              trend={stats.trends?.reservations}
+              footer={
+                <div className="foot-footer-item">
+                  <span className="foot-footer-label">Aujourd'hui:</span>
+                  <span className="foot-footer-value foot-highlight">
+                    {stats.confirmes_aujourdhui}/{stats.reservations_aujourdhui}
+                  </span>
+                </div>
+              }
+              icon={Calendar}
+              type="bookings"
+            />
+
+            {/* Clients */}
+            <StatCard
+              title="Clients"
+              value={stats.clients_actifs}
+              subtitle="Clients actifs"
+              trend={stats.trends?.clients}
+              footer={
+                <div className="foot-footer-item">
+                  <span className="foot-footer-label">Fidélité:</span>
+                  <span className="foot-footer-value foot-success">Élevée</span>
+                </div>
+              }
+              icon={Users}
+              type="clients"
+            />
+
+            {/* Performance */}
+            <StatCard
+              title="Performance"
+              value={`${stats.taux_remplissage}%`}
+              subtitle="Taux de remplissage"
+              trend={stats.trends?.remplissage}
+              footer={
+                <div className="foot-footer-item">
+                  <span className="foot-footer-label">Objectif:</span>
+                  <span className="foot-footer-value">
+                    <Target size={14} />
+                    85%
+                  </span>
+                </div>
+              }
+              icon={BarChart3}
+              type="performance"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      {stats && (
+        <div className="foot-dashboard-footer">
+          <span className="foot-last-update">
+            Dernière mise à jour: {new Date(stats.last_updated).toLocaleString('fr-FR')}
+          </span>
+        </div>
       )}
     </div>
   );
 };
 
-// Composant d'exemple d'utilisation
-const StatsGrid = () => {
-  const stats = [
-    {
-      title: "Réservations totales",
-      value: "128",
-      subtitle: "Ce mois-ci",
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="16" y1="2" x2="16" y2="6"></line>
-          <line x1="8" y1="2" x2="8" y2="6"></line>
-          <line x1="3" y1="10" x2="21" y2="10"></line>
-        </svg>
-      ),
-      trend: { value: 12, isPositive: true }
-    },
-    {
-      title: "Taux d'occupation",
-      value: "78%",
-      subtitle: "Moyenne quotidienne",
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-          <circle cx="9" cy="7" r="4"></circle>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-        </svg>
-      ),
-      trend: { value: 5, isPositive: true }
-    },
-    {
-      title: "Revenus",
-      value: "8 420€",
-      subtitle: "Chiffre d'affaires",
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <line x1="12" y1="1" x2="12" y2="23"></line>
-          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-        </svg>
-      ),
-      trend: { value: 18, isPositive: true }
-    },
-    {
-      title: "Clients actifs",
-      value: "64",
-      subtitle: "Ce mois-ci",
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-          <circle cx="9" cy="7" r="4"></circle>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-        </svg>
-      ),
-      trend: { value: 3, isPositive: false }
-    }
-  ];
-
-  return (
-    <div className="stats-grids">
-      {stats.map((stat, index) => (
-        <StatCard
-          key={index}
-          title={stat.title}
-          value={stat.value}
-          subtitle={stat.subtitle}
-          icon={stat.icon}
-          trend={stat.trend}
-        />
-      ))}
-    </div>
-  );
-};
-
-export { StatsGrid };
-export default StatCard;
+export default DashboardStats;
