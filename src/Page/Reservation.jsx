@@ -143,7 +143,6 @@ const ReservationAdmin = () => {
   // Mettre à jour le statut du créneau
   const updateCreneauStatus = async (numeroterrain, datereservation, heurereservation, newStatus) => {
     try {
-      // D'abord, trouver le créneau correspondant
       const creneauxResponse = await fetch('https://backend-foot-omega.vercel.app/api/gestioncreneaux/');
       const creneauxData = await creneauxResponse.json();
       
@@ -244,7 +243,6 @@ const ReservationAdmin = () => {
     }
     
     try {
-      // Récupérer la réservation pour avoir les infos du créneau
       const reservation = reservations.find(r => r.id === id);
       
       const url = `https://backend-foot-omega.vercel.app/api/reservation/${id}`;
@@ -256,7 +254,6 @@ const ReservationAdmin = () => {
       const data = await response.json();
       
       if (data.success) {
-        // Si la réservation était confirmée, remettre le créneau disponible
         if (reservation && reservation.statut === 'confirmée') {
           await updateCreneauStatus(
             reservation.numeroterrain,
@@ -280,7 +277,6 @@ const ReservationAdmin = () => {
   // Changer le statut (avec notification d'envoi d'email)
   const handleStatusChange = async (id, newStatus) => {
     try {
-      // Récupérer la réservation actuelle
       const reservation = reservations.find(r => r.id === id);
       
       const url = `https://backend-foot-omega.vercel.app/api/reservation/${id}/statut`;
@@ -298,10 +294,8 @@ const ReservationAdmin = () => {
       if (data.success) {
         let message = 'Statut modifié avec succès';
         
-        // Gérer le statut du créneau
         if (reservation) {
           if (newStatus === 'confirmée') {
-            // Marquer le créneau comme réservé
             const creneauUpdated = await updateCreneauStatus(
               reservation.numeroterrain,
               reservation.datereservation,
@@ -312,7 +306,6 @@ const ReservationAdmin = () => {
               message += ' - Créneau marqué comme réservé';
             }
           } else if (newStatus === 'annulée' && reservation.statut === 'confirmée') {
-            // Si on annule une réservation confirmée, remettre le créneau disponible
             const creneauUpdated = await updateCreneauStatus(
               reservation.numeroterrain,
               reservation.datereservation,
@@ -325,7 +318,6 @@ const ReservationAdmin = () => {
           }
         }
         
-        // Afficher le message d'email
         if (newStatus === 'confirmée' && data.emailSent) {
           message += ' - Email de confirmation envoyé au client';
         }

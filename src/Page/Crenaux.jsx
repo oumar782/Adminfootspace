@@ -195,7 +195,7 @@ const CreneauModal = ({ creneau, onClose, onSubmit, isEditing }) => {
               </div>
               
               <div className="form-group">
-                <label htmlFor="tarif">Tarif (€) *</label>
+                <label htmlFor="tarif">Tarif (DH) *</label>
                 <input
                   type="number"
                   id="tarif"
@@ -483,7 +483,7 @@ const Crenau = () => {
       <header className="app-header">
         <div className="header-content">
           <h1>Administration des Créneaux</h1>
-          <p>Gestion des créneaux horaires des terrains de sport</p>
+          <p>Gestion des créneaux horaires des terrains de Football</p>
         </div>
       </header>
 
@@ -504,16 +504,13 @@ const Crenau = () => {
                 <div className="stat-value">{stats.reserves}</div>
                 <div className="stat-label">Réservés</div>
               </div>
-              <div className="stat-card">
-                <div className="stat-value">{stats.maintenance}</div>
-                <div className="stat-label">Maintenance</div>
-              </div>
+          
               <div className="stat-card">
                 <div className="stat-value">{stats.terrains_actifs}</div>
                 <div className="stat-label">Terrains actifs</div>
               </div>
               <div className="stat-card">
-                <div className="stat-value">{parseFloat(stats.tarif_moyen).toFixed(2)}€</div>
+                <div className="stat-value">{parseFloat(stats.tarif_moyen).toFixed(2)}DH</div>
                 <div className="stat-label">Tarif moyen</div>
               </div>
             </div>
@@ -556,7 +553,6 @@ const Crenau = () => {
                 <option value="">Tous</option>
                 <option value="disponible">Disponible</option>
                 <option value="réservé">Réservé</option>
-                <option value="maintenance">Maintenance</option>
               </select>
             </div>
             
@@ -652,7 +648,7 @@ const Crenau = () => {
                         <td>{creneau.typeterrain || '-'}</td>
                         <td>{creneau.nomterrain || '-'}</td>
                         <td>{creneau.surfaceterrains || '-'}</td>
-                        <td>{creneau.tarif} €</td>
+                        <td>{creneau.tarif} DH</td>
                         <td className="actions">
                           <button 
                             className="btn-icon view" 

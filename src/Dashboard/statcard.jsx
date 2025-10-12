@@ -234,14 +234,7 @@ const DashboardStats = () => {
         )}
       </div>
 
-      {/* Footer */}
-      {stats && (
-        <div className="foot-dashboard-footer">
-          <span className="foot-last-update">
-            Dernière mise à jour: {new Date(stats.last_updated).toLocaleString('fr-FR')}
-          </span>
-        </div>
-      )}
+     
     </div>
   );
 };

@@ -1,1080 +1,364 @@
-/* CalendrierLuxe.css - Design Ultra Premium */
-:root {
-    --cal-luxe-primary-dark: #044a0d;
-    --cal-luxe-primary-light: #1a1a1a;
-    --cal-luxe-gold: #f4f3f0;
-    --cal-luxe-gold-light: #095c22;
-    --cal-luxe-gold-dark: #b8941f;
-    --cal-luxe-gold-gradient: linear-gradient(135deg, #0b4604 0%, #3a8649 100%);
-    --cal-luxe-gold-gradient-reverse: linear-gradient(135deg, #151615 0%, #fafaf9 100%);
-    --cal-luxe-platinum: #e5e4e2;
-    --cal-luxe-ivory: #fffff0;
-    --cal-luxe-champagne: #085d24;
-    --cal-luxe-text-dark: #2c2c2c;
-    --cal-luxe-text-light: #ffffff;
-    --cal-luxe-success: #28a745;
-    --cal-luxe-error: #dc3545;
-    --cal-luxe-warning: #ffc107;
-    --cal-luxe-border-radius: 16px;
-    --cal-luxe-transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    --cal-luxe-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --cal-luxe-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
-    --cal-luxe-shadow-lg: 0 15px 50px rgba(0, 0, 0, 0.2);
-    --cal-luxe-border-gold: 1px solid rgba(3, 80, 21, 0.4);
-    --cal-luxe-border-light: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  /* Reset et styles de base */
-  .cal-luxe-app {
-    font-family: 'Cormorant Garamond', 'Playfair Display', serif;
-    background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
-    color: var(--cal-luxe-text-dark);
-    line-height: 1.7;
-    min-height: 100vh;
-    position: relative;
-    overflow-x: hidden;
-  margin-top: 90px;
-  margin-left: 60px;
+/* Login.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-  }
-  
-  .cal-luxe-app::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23d4af37' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: -1;
-  }
-  
-  /* Header Luxueux */
-  .cal-luxe-app-header {
-    background: linear-gradient(135deg,white 0%, white 100%);
-    color: green;
-    padding: 2rem 2rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    border-bottom: 3px solid var(--cal-luxe-gold);
-    width: 90%;
-    box-shadow: var(--cal-luxe-shadow-lg);
-    margin-left: 70px;
-    border-radius: 50px;
-  }
-  
-  .cal-luxe-app-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--cal-luxe-gold-gradient);
-    opacity: 0.6;
-  }
-  
-  .cal-luxe-app-header::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    opacity: 0.4;
-  }
-  
-  .cal-luxe-app-header h1 {
-    font-size: 3.2rem;
-    margin-bottom: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
-    position: relative;
-    display: inline-block;
-    background: var(--cal-luxe-gold-gradient);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    padding: 0 1rem;
-  }
-  
-  .cal-luxe-app-header h1::after {
-    content: '';
-    position: absolute;
-    bottom: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100px;
-    height: 3px;
-    background: var(--cal-luxe-gold);
-    border-radius: 2px;
-  }
-  
-  .cal-luxe-app-header p {
-    font-size: 1.4rem;
-    opacity: 0.9;
-    font-style: italic;
-    margin-top: 1.2rem;
-    color: rgb(191, 7, 7);
-    letter-spacing: 0.5px;
-  }
-  
-  .cal-luxe-app-main {
-    flex: 1;
-    padding: 3rem 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
-    width: 100%;
-  }
-  
-  /* Contrôles Élégants */
-  .cal-luxe-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 3rem;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    padding: 2.5rem;
-    background: rgba(253, 251, 251, 0.85);
-    backdrop-filter: blur(12px);
-    border-radius: var(--cal-luxe-border-radius);
-    box-shadow: var(--cal-luxe-shadow-md);
-    border: var(--cal-luxe-border-gold);
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .cal-luxe-controls::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--cal-luxe-gold-gradient);
-    opacity: 0.5;
-  }
-  
-  .cal-luxe-date-range-selector {
-    background: rgba(255, 255, 255, 0.75);
-    padding: 1.8rem;
-    border-radius: var(--cal-luxe-border-radius);
-    box-shadow: var(--cal-luxe-shadow-sm);
-    border: var(--cal-luxe-border-gold);
-    flex-grow: 1;
-    position: relative;
-  }
-  
-  .cal-luxe-date-range-selector::before {
-    content: '';
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
-    border: 1px solid rgba(212, 175, 55, 0.1);
-    border-radius: calc(var(--cal-luxe-border-radius) - 4px);
-    pointer-events: none;
-  }
-  
-  .cal-luxe-date-range-selector h3 {
-    margin-bottom: 1.2rem;
-    font-size: 1.2rem;
-    color: var(--cal-luxe-primary-dark);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-  }
-  
-  .cal-luxe-date-range-selector h3::before {
-    font-size: 1.4rem;
-  }
-  
-  .cal-luxe-date-inputs {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-  
-  .cal-luxe-date-inputs input {
-    padding: 1rem 1.2rem;
-    border: var(--cal-luxe-border-gold);
-    border-radius: var(--cal-luxe-border-radius);
-    font-family: inherit;
-    background: rgba(255, 255, 255, 0.8);
-    transition: var(--cal-luxe-transition);
-    min-width: 160px;
-    font-size: 1rem;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-  }
-  
-  .cal-luxe-date-inputs input:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
-    border-color: var(--cal-luxe-gold);
-  }
-  
-  .cal-luxe-date-inputs span {
-    margin: 0 0.5rem;
-    color: var(--cal-luxe-text-dark);
-    font-weight: 500;
-  }
-  
-  /* Boutons de Luxe */
-  .cal-luxe-btn {
-    padding: 1rem 2rem;
-    border: none;
-    border-radius: var(--cal-luxe-border-radius);
-    cursor: pointer;
-    font-family: inherit;
-    font-weight: 600;
-    transition: var(--cal-luxe-transition);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    position: relative;
-    overflow: hidden;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.8rem;
-    font-size: 0.95rem;
-    box-shadow: var(--cal-luxe-shadow-sm);
-  }
-  
-  .cal-luxe-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: var(--cal-luxe-transition);
-  }
-  
-  .cal-luxe-btn:hover::before {
-    left: 100%;
-  }
-  
-  .cal-luxe-btn-primary {
-    background: var(--cal-luxe-gold-gradient);
-    color: white;
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-    box-shadow: var(--cal-luxe-shadow-md);
-  }
-  
-  .cal-luxe-btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--cal-luxe-shadow-lg);
-  }
-  
-  .cal-luxe-btn-secondary {
-    background: var(--cal-luxe-primary-dark);
-    color: var(--cal-luxe-text-light);
-    box-shadow: var(--cal-luxe-shadow-md);
-  }
-  
-  .cal-luxe-btn-secondary:hover {
-    background: #333;
-    transform: translateY(-3px);
-    box-shadow: var(--cal-luxe-shadow-lg);
-  }
-  
-  .cal-luxe-btn-outline {
-    background: transparent;
-    border: 2px solid var(--cal-luxe-primary-dark);
-    color: var(--cal-luxe-primary-dark);
-    box-shadow: var(--cal-luxe-shadow-sm);
-  }
-  
-  .cal-luxe-btn-outline:hover {
-    background: var(--cal-luxe-primary-dark);
-    color: var(--cal-luxe-text-light);
-    transform: translateY(-3px);
-    box-shadow: var(--cal-luxe-shadow-lg);
-  }
-  
-  .cal-luxe-btn-view {
-    background: linear-gradient(135deg, #02310c 0%, #03680f 100%);
-    color: white;
-    box-shadow: var(--cal-luxe-shadow-sm);
-  }
-  
-  .cal-luxe-btn-view:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--cal-luxe-shadow-md);
-  }
-  
-  .cal-luxe-btn-edit {
-    background: linear-gradient(135deg, var(--cal-luxe-warning) 0%, #ffdb70 100%);
-    color: var(--cal-luxe-primary-dark);
-    box-shadow: var(--cal-luxe-shadow-sm);
-  }
-  
-  .cal-luxe-btn-edit:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--cal-luxe-shadow-md);
-  }
-  
-  .cal-luxe-btn-delete {
-    background: linear-gradient(135deg, rgb(114, 6, 6) 0%, #7b0410 100%);
-    color: white;
-    box-shadow: var(--cal-luxe-shadow-sm);
-  }
-  
-  .cal-luxe-btn-delete:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--cal-luxe-shadow-md);
-  }
-  
-  /* Grille de Cartes Luxueuses */
-  .cal-luxe-calendriers-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 2.5rem;
-    padding: 1.5rem 0;
-  }
-  
-  .cal-luxe-calendrier-card {
-    background: rgba(255, 255, 255, 0.85);
-    border-radius: var(--cal-luxe-border-radius);
-    overflow: hidden;
-    box-shadow: var(--cal-luxe-shadow-md);
-    transition: var(--cal-luxe-transition);
-    border-top: 4px solid var(--cal-luxe-gold);
-    position: relative;
-    backdrop-filter: blur(8px);
-    animation: cal-luxe-fadeIn 0.6s ease-out;
-  }
-  
-  .cal-luxe-calendrier-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--cal-luxe-gold-gradient);
-  }
-  
-  .cal-luxe-calendrier-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: var(--cal-luxe-shadow-lg);
-  }
-  
-  .cal-luxe-card-header {
-    padding: 1.8rem;
-    background: linear-gradient(135deg, var(--cal-luxe-primary-dark) 0%, #2c2c2c 100%);
-    color: var(--cal-luxe-text-light);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-  }
-  
-  .cal-luxe-card-header h3 {
-    font-size: 1.4rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-  }
-  
-  .cal-luxe-status-badge {
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: bold;
-    box-shadow: var(--cal-luxe-shadow-sm);
-  }
-  
-  .cal-luxe-status-disponible {
-    background: linear-gradient(135deg, var(--cal-luxe-success) 0%, #5cb85c 100%);
-    color: white;
-  }
-  
-  .cal-luxe-status-réservé {
-    background: linear-gradient(135deg, #17a2b8 0%, #5bc0de 100%);
-    color: white;
-  }
-  
-  .cal-luxe-status-occupé {
-    background: linear-gradient(135deg, var(--cal-luxe-warning) 0%, #ffdd87 100%);
-    color: var(--cal-luxe-primary-dark);
-  }
-  
-  .cal-luxe-status-maintenance {
-    background: linear-gradient(135deg, var(--cal-luxe-error) 0%, #e35d6a 100%);
-    color: white;
-  }
-  
-  .cal-luxe-card-body {
-    padding: 2.2rem 1.8rem;
-    background: rgba(255, 255, 255, 0.7);
-  }
-  
-  .cal-luxe-date-display {
-    font-size: 2rem;
-    font-weight: bold;
-    margin-bottom: 1rem;
-    color: var(--cal-luxe-primary-dark);
-    text-align: center;
-    font-family: 'Playfair Display', serif;
-    position: relative;
-    display: inline-block;
-    width: 100%;
-  }
-  
-  .cal-luxe-date-display::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60px;
-    height: 2px;
-    background: var(--cal-luxe-gold);
-    border-radius: 1px;
-  }
-  
-  .cal-luxe-periode {
-    color: #c00303;
-    font-style: italic;
-    text-align: center;
-    display: block;
-    font-size: 1.2rem;
-    margin-top: 1rem;
-  }
-  
-  .cal-luxe-card-actions {
-    padding: 1.8rem;
-    display: flex;
-    gap: 1rem;
-    border-top: 1px solid rgba(212, 175, 55, 0.2);
-    background: rgba(255, 255, 255, 0.6);
-  }
-  
-  .cal-luxe-card-actions .cal-luxe-btn {
-    padding: 0.8rem 1.4rem;
-    font-size: 0.9rem;
-    flex: 1;
-    justify-content: center;
-  }
-  
-  /* Modals Luxueux */
-  .cal-luxe-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.85);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    padding: 1rem;
-    backdrop-filter: blur(8px);
-  }
-  
-  .cal-luxe-modal-content {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
-    border-radius: var(--cal-luxe-border-radius);
-    width: 100%;
-    max-width: 580px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: var(--cal-luxe-shadow-lg);
-    border: 2px solid var(--cal-luxe-gold);
-    position: relative;
-  }
-  
-  .cal-luxe-modal-content::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 6px;
-    background: var(--cal-luxe-gold-gradient);
-  }
-  
-  .cal-luxe-modal-header {
-    padding: 2.2rem 2.2rem 1.8rem;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: linear-gradient(135deg, var(--cal-luxe-primary-dark) 0%, #2c2c2c 100%);
-    color: var(--cal-luxe-text-light);
-  }
-  
-  .cal-luxe-modal-header h2 {
-    font-size: 1.9rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    color: white;
-  }
-  
-  .cal-luxe-modal-close {
-    background: none;
-    border: none;
-    font-size: 2.2rem;
-    cursor: pointer;
-    color: white;
-    transition: var(--cal-luxe-transition);
-    width: 42px;
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-  }
-  
-  .cal-luxe-modal-close:hover {
-    background: rgba(255, 255, 255, 0.932);
-    transform: rotate(90deg);
-  }
-  
-  .cal-luxe-modal-body {
-    padding: 2.8rem 2.2rem;
-  }
-  
-  /* Forms Élégants */
-  .cal-luxe-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.8rem;
-  }
-  
-  .cal-luxe-form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    position: relative;
-  }
-  
-  .cal-luxe-form-group label {
-    font-weight: 600;
-    color: var(--cal-luxe-primary-dark);
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-  }
-  
-  .cal-luxe-form-group input,
-  .cal-luxe-form-group select {
-    padding: 1.2rem 1.5rem;
-    border: var(--cal-luxe-border-gold);
-    border-radius: var(--cal-luxe-border-radius);
-    font-family: inherit;
-    background: rgba(255, 255, 255, 0.8);
-    transition: var(--cal-luxe-transition);
-    font-size: 1.1rem;
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.06);
-  }
-  
-  .cal-luxe-form-group input:focus,
-  .cal-luxe-form-group select:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
-    border-color: var(--cal-luxe-gold);
-  }
-  
-  .cal-luxe-form-actions {
-    display: flex;
-    gap: 1.2rem;
-    justify-content: flex-end;
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid rgba(212, 175, 55, 0.2);
-  }
-  
-  /* View Details Luxueux */
-  .cal-luxe-view-details {
-    display: flex;
-    flex-direction: column;
-    gap: 1.8rem;
-  }
-  
-  .cal-luxe-detail-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 1.2rem 0;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-    align-items: center;
-  }
-  
-  .cal-luxe-detail-label {
-    font-weight: 600;
-    color: var(--cal-luxe-primary-dark);
-    font-size: 1.2rem;
-  }
-  
-  .cal-luxe-detail-value {
-    color: #555;
-    font-size: 1.2rem;
-    font-weight: 500;
-  }
-  
-  /* Toasts Élégants */
-  .cal-luxe-toast-container {
-    position: fixed;
-    top: 2rem;
-    right: 2rem;
-    z-index: 1100;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .cal-luxe-toast {
-    padding: 1.4rem 2rem;
-    border-radius: var(--cal-luxe-border-radius);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: var(--cal-luxe-shadow-lg);
-    animation: cal-luxe-slideIn 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-    max-width: 400px;
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-  }
-  
-  .cal-luxe-toast-success {
-    background: linear-gradient(135deg, rgba(40, 167, 69, 0.9) 0%, rgba(92, 184, 92, 0.9) 100%);
-    color: white;
-  }
-  
-  .cal-luxe-toast-error {
-    background: linear-gradient(135deg, rgba(220, 53, 69, 0.9) 0%, rgba(227, 93, 106, 0.9) 100%);
-    color: white;
-  }
-  
-  .cal-luxe-toast button {
-    background: none;
-    border: none;
-    color: inherit;
-    cursor: pointer;
-    font-size: 1.5rem;
-    margin-left: 1.5rem;
-    transition: var(--cal-luxe-transition);
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-  }
-  
-  .cal-luxe-toast button:hover {
-    background: rgba(255, 255, 255, 0.2);
-  }
-  
-  @keyframes cal-luxe-slideIn {
-    from {
-      transform: translateX(100%);
+.login-container {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 20px;
+}
+
+/* Carte de connexion */
+.login-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 40px;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  z-index: 10;
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from {
       opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
+      transform: translateY(30px);
   }
-  
-  @keyframes cal-luxe-fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
+  to {
       opacity: 1;
       transform: translateY(0);
-    }
-  }/* ============================ */
-/* RESPONSIVITÉ HAUTE QUALITÉ */
-/* ============================ */
+  }
+}
 
-/* Tablettes en mode paysage (1024px et moins) */
-@media (max-width: 1024px) {
-    .cal-luxe-app-header h1 {
-      font-size: 2.8rem;
-    }
-    
-    .cal-luxe-controls {
-      flex-direction: column;
-      align-items: stretch;
-      padding: 2rem;
-    }
-    
-    .cal-luxe-date-inputs {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 0.8rem;
-    }
-    
-    .cal-luxe-date-inputs span {
-      text-align: center;
-      margin: 0.5rem 0;
-    }
-    
-    .cal-luxe-calendriers-grid {
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 2rem;
-    }
-    
-    .cal-luxe-modal-content {
-      max-width: 90%;
-      margin: 1rem;
-    }
+/* En-tête */
+.login-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.logo-icon {
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 12px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.logo h1 {
+  font-size: 1.8rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.login-header h2 {
+  color: #333;
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.login-header p {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+/* Formulaire */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: #333;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.form-group input {
+  padding: 15px;
+  border: 2px solid #e1e5e9;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: #fff;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  transform: translateY(-2px);
+}
+
+.form-group input.error {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+/* Bouton de connexion */
+.login-button {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.login-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+}
+
+.login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.login-button.loading {
+  pointer-events: none;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Pied de page */
+.login-footer {
+  text-align: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e1e5e9;
+}
+
+.forgot-password {
+  color: #667eea;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+
+.forgot-password:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+.signup-link {
+  margin-top: 15px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.signup-link a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.signup-link a:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+/* Formes de fond animées */
+.background-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.shape {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  animation: float 6s ease-in-out infinite;
+}
+
+.shape-1 {
+  width: 200px;
+  height: 200px;
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.shape-2 {
+  width: 150px;
+  height: 150px;
+  top: 60%;
+  right: 10%;
+  animation-delay: 2s;
+}
+
+.shape-3 {
+  width: 100px;
+  height: 100px;
+  bottom: 20%;
+  left: 20%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%, 100% {
+      transform: translateY(0) rotate(0deg);
+  }
+  50% {
+      transform: translateY(-20px) rotate(180deg);
+  }
+}
+
+/* Toasts */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toast {
+  background: white;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border-left: 4px solid #2ecc71;
+  transform: translateX(400px);
+  opacity: 0;
+  transition: all 0.3s ease;
+  max-width: 300px;
+  font-weight: 500;
+}
+
+.toast.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toast.success {
+  border-left-color: #2ecc71;
+  color: #27ae60;
+}
+
+.toast.error {
+  border-left-color: #e74c3c;
+  color: #c0392b;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .login-container {
+      padding: 15px;
   }
   
-  /* Tablettes en mode portrait (768px et moins) */
-  @media (max-width: 768px) {
-    .cal-luxe-app-header {
-      padding: 2rem 1.5rem;
-    }
-    
-    .cal-luxe-app-header h1 {
-      font-size: 2.4rem;
-      padding: 0 0.5rem;
-    }
-    
-    .cal-luxe-app-header h1::after {
-      width: 80px;
-    }
-    
-    .cal-luxe-app-header p {
-      font-size: 1.2rem;
-    }
-    
-    .cal-luxe-app-main {
-      padding: 2rem 1.5rem;
-    }
-    
-    .cal-luxe-controls {
-      padding: 1.5rem;
-    }
-    
-    .cal-luxe-date-range-selector {
-      padding: 1.5rem;
-    }
-    
-    .cal-luxe-calendriers-grid {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-    
-    .cal-luxe-card-header,
-    .cal-luxe-card-body,
-    .cal-luxe-card-actions {
-      padding: 1.5rem;
-    }
-    
-    .cal-luxe-modal-header {
-      padding: 1.8rem 1.8rem 1.5rem;
-    }
-    
-    .cal-luxe-modal-body {
-      padding: 2rem 1.8rem;
-    }
-    
-    .cal-luxe-form-actions {
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-    
-    .cal-luxe-form-actions .cal-luxe-btn {
-      width: 100%;
-    }
-    
-    .cal-luxe-card-actions {
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-    
-    .cal-luxe-card-actions .cal-luxe-btn {
-      width: 100%;
-    }
+  .login-card {
+      padding: 30px 25px;
   }
   
-  /* Smartphones grands (576px et moins) */
-  @media (max-width: 576px) {
-    .cal-luxe-app-header {
-      padding: 1.5rem 1rem;
-    }
-    
-    .cal-luxe-app-header h1 {
-      font-size: 2rem;
-      letter-spacing: 1px;
-    }
-    
-    .cal-luxe-app-header p {
-      font-size: 1.1rem;
-      margin-top: 0.8rem;
-    }
-    
-    .cal-luxe-controls {
-      padding: 1.2rem;
-      border-radius: 12px;
-    }
-    
-    .cal-luxe-date-range-selector {
-      padding: 1.2rem;
-    }
-    
-    .cal-luxe-date-range-selector h3 {
-      font-size: 1.1rem;
-    }
-    
-    .cal-luxe-date-inputs input {
-      min-width: unset;
-      width: 100%;
-    }
-    
-    .cal-luxe-btn {
-      padding: 0.9rem 1.5rem;
-      font-size: 0.9rem;
-      width: 100%;
-      justify-content: center;
-    }
-    
-    .cal-luxe-calendrier-card {
-      border-radius: 12px;
-    }
-    
-    .cal-luxe-card-header h3 {
-      font-size: 1.2rem;
-    }
-    
-    .cal-luxe-date-display {
-      font-size: 1.7rem;
-    }
-    
-    .cal-luxe-periode {
-      font-size: 1.1rem;
-    }
-    
-    .cal-luxe-modal-content {
-      max-width: 95%;
-      margin: 0.5rem;
-      border-radius: 12px;
-    }
-    
-    .cal-luxe-modal-header {
-      padding: 1.5rem;
-    }
-    
-    .cal-luxe-modal-header h2 {
-      font-size: 1.6rem;
-    }
-    
-    .cal-luxe-modal-body {
-      padding: 1.5rem;
-    }
-    
-    .cal-luxe-form-group label {
-      font-size: 1.1rem;
-    }
-    
-    .cal-luxe-form-group input,
-    .cal-luxe-form-group select {
-      padding: 1rem 1.2rem;
-      font-size: 1rem;
-    }
-    
-    .cal-luxe-view-details {
-      gap: 1.2rem;
-    }
-    
-    .cal-luxe-detail-item {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.5rem;
-      padding: 1rem 0;
-    }
-    
-    .cal-luxe-detail-label,
-    .cal-luxe-detail-value {
-      font-size: 1.1rem;
-    }
-    
-    .cal-luxe-toast-container {
-      top: 1rem;
-      right: 1rem;
-      left: 1rem;
-    }
-    
-    .cal-luxe-toast {
-      max-width: 100%;
-      padding: 1.2rem 1.5rem;
-    }
-  }
-  
-  /* Smartphones très petits (400px et moins) */
-  @media (max-width: 400px) {
-    .cal-luxe-app-header h1 {
-      font-size: 1.8rem;
-    }
-    
-    .cal-luxe-app-header p {
-      font-size: 1rem;
-    }
-    
-    .cal-luxe-controls {
-      padding: 1rem;
-    }
-    
-    .cal-luxe-date-range-selector {
-      padding: 1rem;
-    }
-    
-    .cal-luxe-date-inputs {
-      gap: 0.5rem;
-    }
-    
-    .cal-luxe-card-header,
-    .cal-luxe-card-body,
-    .cal-luxe-card-actions {
-      padding: 1.2rem;
-    }
-    
-    .cal-luxe-date-display {
+  .logo h1 {
       font-size: 1.5rem;
-    }
-    
-    .cal-luxe-modal-header {
-      padding: 1.2rem;
-    }
-    
-    .cal-luxe-modal-header h2 {
-      font-size: 1.4rem;
-    }
-    
-    .cal-luxe-modal-body {
-      padding: 1.2rem;
-    }
-    
-    .cal-luxe-form-group {
-      gap: 0.8rem;
-    }
-    
-    .cal-luxe-form-group label {
-      font-size: 1rem;
-    }
   }
   
-  /* Ajustements pour le mode paysage sur mobile */
-  @media (max-height: 500px) and (orientation: landscape) {
-    .cal-luxe-app-header {
-      padding: 1.5rem 2rem;
-    }
-    
-    .cal-luxe-app-main {
-      padding: 1.5rem 2rem;
-    }
-    
-    .cal-luxe-controls {
-      padding: 1.2rem;
-    }
-    
-    .cal-luxe-modal-content {
-      max-height: 80vh;
-    }
-    
-    .cal-luxe-calendriers-grid {
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 1.2rem;
-    }
-  }
-  
-  /* Support des préférences de contraste élevé */
-  @media (prefers-contrast: high) {
-    .cal-luxe-app {
-      background: #ffffff;
-    }
-    
-    .cal-luxe-calendrier-card {
-      background: #ffffff;
-      border: 2px solid var(--cal-luxe-primary-dark);
-    }
-    
-    .cal-luxe-controls,
-    .cal-luxe-date-range-selector {
-      background: #ffffff;
-      border: 2px solid var(--cal-luxe-primary-dark);
-    }
-  }
-  
-  /* Support du mode réduit (prefers-reduced-motion) */
-  @media (prefers-reduced-motion: reduce) {
-    .cal-luxe-app *,
-    .cal-luxe-app *::before,
-    .cal-luxe-app *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
-    
-    .cal-luxe-calendrier-card:hover {
-      transform: none;
-    }
-    
-    .cal-luxe-btn:hover::before {
-      animation: none;
-    }
-  }
-  
-  /* Améliorations pour les très grands écrans */
-  @media (min-width: 1920px) {
-    .cal-luxe-app-main {
-      max-width: 1800px;
-    }
-    
-    .cal-luxe-calendriers-grid {
-      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-      gap: 3rem;
-    }
-    
-    .cal-luxe-app-header {
-      padding: 4rem 2rem;
-    }
-    
-    .cal-luxe-app-header h1 {
-      font-size: 3.5rem;
-    }
-    
-    .cal-luxe-app-header p {
+  .login-header h2 {
       font-size: 1.5rem;
-    }
   }
   
-  /* Ajustements pour l'impression */
-  @media print {
-    .cal-luxe-controls,
-    .cal-luxe-card-actions,
-    .cal-luxe-modal-overlay,
-    .cal-luxe-toast-container {
-      display: none !important;
-    }
-    
-    .cal-luxe-app {
-      background: white;
-    }
-    
-    .cal-luxe-calendrier-card {
-      break-inside: avoid;
-      box-shadow: none;
-      border: 1px solid #ccc;
-    }
-    
-    .cal-luxe-calendriers-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-    }
+  .toast-container {
+      top: 10px;
+      right: 10px;
+      left: 10px;
   }
+  
+  .toast {
+      max-width: none;
+  }
+}
+
+/* Animation de pulsation pour le bouton loading */
+@keyframes pulse {
+  0% {
+      box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+  }
+  70% {
+      box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+  }
+  100% {
+      box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+  }
+}
+
+.login-button.loading {
+  animation: pulse 2s infinite;
+}

@@ -282,10 +282,9 @@ const TerrainAdmin = () => {
                     required
                   >
                     <option value="">Sélectionnez un type</option>
-                    <option value="football">Football</option>
-                    <option value="basketball">Basketball</option>
-                    <option value="tennis">Tennis</option>
-                    <option value="rugby">Rugby</option>
+                    <option value="football">Normak</option>
+                    <option value="basketball">Synthétique</option>
+                  
                   </select>
                 </div>
 
@@ -306,14 +305,13 @@ const TerrainAdmin = () => {
                 </div>
 
                 <div className="ta-form-group">
-                  <label className="ta-input-label">Tarif (€/heure) *</label>
+                  <label className="ta-input-label">Tarif (DH/heure) *</label>
                   <input
                     type="number"
                     name="tarif"
                     value={formData.tarif}
                     onChange={handleInputChange}
                     min="0"
-                    step="0.01"
                     className="ta-input"
                     required
                   />
@@ -384,7 +382,7 @@ const TerrainAdmin = () => {
           </div>
         ) : terrains.length === 0 ? (
           <div className="ta-empty">
-            <div className="ta-empty-icon">⚽</div>
+            <div className="ta-empty-icon"></div>
             <h3>Aucun terrain disponible</h3>
             <p>Commencez par ajouter votre premier terrain</p>
             <button 
@@ -434,7 +432,7 @@ const TerrainAdmin = () => {
                     </div>
                     <div className="ta-detail-item">
                       <span className="ta-detail-label">Tarif:</span>
-                      <span className="ta-detail-value ta-price">{terrain.tarif} €/heure</span>
+                      <span className="ta-detail-value ta-price">{terrain.tarif} DH/heure</span>
                     </div>
                     {terrain.descriptions && (
                       <div className="ta-detail-item">

@@ -8,16 +8,20 @@ import Creneau from "./Page/Crenaux";
 import Calendrier from "./Page/calendriers";
 import User from "./Page/user";
 import Contact from "./Page/contact";
+import Connexion from "./Page/connexion";
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Redirige "/" vers "/dashboard" */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
-      
-         <Route
+        {/* Redirige "/" vers "/connexion" */}
+        <Route path="/" element={<Navigate to="/connexion" replace />} />
+        
+        {/* Route pour la connexion */}
+        <Route path="/connexion" element={<Connexion />} />
+        
+        {/* Routes protégées avec MainLayout */}
+        <Route
           path="/dashboard"
           element={
             <MainLayout>
@@ -50,7 +54,7 @@ const App = () => {
             </MainLayout>
           }
         />
-          <Route
+        <Route
           path="/creneaux"
           element={
             <MainLayout>
@@ -65,22 +69,23 @@ const App = () => {
               <Calendrier />
             </MainLayout>
           }
-        /> <Route
-        path="/User"
-        element={
-          <MainLayout>
-            <User />
-          </MainLayout>
-        }
-      />
-       <Route
-        path="/contact"
-        element={
-          <MainLayout>
-            <Contact />
-          </MainLayout>
-        }
-      />
+        />
+        <Route
+          path="/user"
+          element={
+            <MainLayout>
+              <User />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/contact"
+          element={
+            <MainLayout>
+              <Contact />
+            </MainLayout>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
