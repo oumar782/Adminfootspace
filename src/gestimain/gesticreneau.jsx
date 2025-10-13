@@ -482,7 +482,7 @@ const Crenau = () => {
     <div className="crenau-app">
       <header className="crenau-header">
         <div className="crenau-header-content">
-          <h1>Administration des Créneaux</h1>
+          <h1>Gestionnaire des Créneaux</h1>
           <p>Gestion des créneaux horaires des terrains de Football</p>
         </div>
       </header>

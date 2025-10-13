@@ -8,13 +8,16 @@
   font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #2d3748;
   line-height: 1.6;
+  margin-left: 288px;
+  width: 1200px;
+
 }
 
 /* Header */
 .cal-luxe-app-header {
-  background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+  background: linear-gradient(135deg, #20471a 0%, #037f03 100%);
   color: white;
-  padding: 50px 40px;
+  padding: 30px 20px;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -122,7 +125,7 @@
 
 .cal-luxe-date-input:focus {
   outline: none;
-  border-color: #27ae60;
+  border-color: #39ae27;
   box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
 }
 
@@ -150,7 +153,7 @@
 }
 
 .cal-luxe-btn-primary {
-  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  background: linear-gradient(135deg, #32ae27, #026c0f);
   color: white;
   box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
 }
@@ -158,7 +161,7 @@
 .cal-luxe-btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
-  background: linear-gradient(135deg, #219653, #27ae60);
+  background: linear-gradient(135deg, #349621, #3dae27);
 }
 
 .cal-luxe-btn-outline {
@@ -168,8 +171,8 @@
 }
 
 .cal-luxe-btn-outline:hover:not(:disabled) {
-  border-color: #27ae60;
-  color: #27ae60;
+  border-color: #32ae27;
+  color: #34ae27;
   background: rgba(39, 174, 96, 0.05);
   transform: translateY(-2px);
 }
@@ -206,7 +209,7 @@
 }
 
 .cal-luxe-table-header {
-  background: linear-gradient(135deg, #1a472a, #2d5a3d);
+  background: linear-gradient(135deg, #235016, #1d6407);
 }
 
 .cal-luxe-table-header th {

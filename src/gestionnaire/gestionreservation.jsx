@@ -357,7 +357,7 @@ const ReservationAdmin = () => {
   return (
     <div className="admin-container">
       <header className="admin-header">
-        <h1>Administration des Réservations</h1>
+        <h1>Gestionnaire des Réservations</h1>
         <p>Gérez toutes les réservations de terrains de football</p>
       </header>
 

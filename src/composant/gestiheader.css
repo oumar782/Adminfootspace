@@ -12,8 +12,8 @@
   --hd-text-secondary: #64748b;
   --hd-accent-primary: #2e8b57;
   --hd-accent-secondary: #3cb371;
-  --hd-gradient-primary: linear-gradient(135deg, #2e8b57, #3cb371);
-  --hd-gradient-secondary: linear-gradient(180deg, #2e8b57, #3cb371);
+  --hd-gradient-primary: linear-gradient(135deg, #448b2e, #096f03);
+  --hd-gradient-secondary: linear-gradient(180deg, #2e8b34, #176603);
 }
 
 /* Reset et base */
