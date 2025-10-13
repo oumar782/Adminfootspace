@@ -12,8 +12,10 @@ const CalLuxeToast = ({ message, type, onClose }) => {
 
   return (
     <div className={`cal-luxe-toast cal-luxe-toast-${type}`}>
-      <span>{message}</span>
-      <button onClick={onClose}>&times;</button>
+      <div className="cal-luxe-toast-content">
+        <span className="cal-luxe-toast-message">{message}</span>
+        <button className="cal-luxe-toast-close" onClick={onClose}>&times;</button>
+      </div>
     </div>
   );
 };
@@ -25,17 +27,15 @@ const CalLuxeModal = ({ isOpen, onClose, title, children }) => {
   return (
     <div className="cal-luxe-modal-overlay" onClick={onClose}>
       <div className="cal-luxe-modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="cal-luxe-decorative-corner cal-luxe-decorative-corner-top-left"></div>
-        <div className="cal-luxe-decorative-corner cal-luxe-decorative-corner-top-right"></div>
         <div className="cal-luxe-modal-header">
           <h2>{title}</h2>
-          <button className="cal-luxe-modal-close" onClick={onClose}>&times;</button>
+          <button className="cal-luxe-modal-close" onClick={onClose}>
+            <span>&times;</span>
+          </button>
         </div>
         <div className="cal-luxe-modal-body">
           {children}
         </div>
-        <div className="cal-luxe-decorative-corner cal-luxe-decorative-corner-bottom-left"></div>
-        <div className="cal-luxe-decorative-corner cal-luxe-decorative-corner-bottom-right"></div>
       </div>
     </div>
   );
@@ -54,7 +54,7 @@ const CalendrierLuxe = () => {
     endDate: ''
   });
 
-  // États pour le formulaire - mis à jour selon la nouvelle structure
+  // États pour le formulaire
   const [formData, setFormData] = useState({
     date_debut: '',
     heure_debut: '09:00',
@@ -260,101 +260,127 @@ const CalendrierLuxe = () => {
   return (
     <div className="cal-luxe-app">
       <header className="cal-luxe-app-header">
-        <h1>Gestionnaire de calendrier de reservation </h1>
-        <p>Administrez vos calendriers avec élégance</p>
+        <div className="cal-luxe-header-content">
+          <h1 className="cal-luxe-main-title">Gestionnaire de Réservations</h1>
+          <p className="cal-luxe-subtitle">Planifiez et gérez vos créneaux horaires avec précision</p>
+        </div>
       </header>
 
       <main className="cal-luxe-app-main">
-        <div className="cal-luxe-controls">
-          <button 
-            className="cal-luxe-btn cal-luxe-btn-primary cal-luxe-glow-effect"
-            onClick={() => setShowCreateModal(true)}
-          >
-            <span>+</span> Créer un nouveau calendrier
-          </button>
-          
-          <div className="cal-luxe-date-range-selector">
-            <h3>Visualiser par plage de dates</h3>
-            <div className="cal-luxe-date-inputs">
-              <input
-                type="date"
-                value={viewDateRange.startDate}
-                onChange={(e) => setViewDateRange(prev => ({...prev, startDate: e.target.value}))}
-              />
-              <span>à</span>
-              <input
-                type="date"
-                value={viewDateRange.endDate}
-                onChange={(e) => setViewDateRange(prev => ({...prev, endDate: e.target.value}))}
-              />
-              <button className="cal-luxe-btn cal-luxe-btn-secondary" onClick={viewByDateRange}>
-                Appliquer
-              </button>
-              <button className="cal-luxe-btn cal-luxe-btn-outline" onClick={fetchCalendriers}>
-                Voir tout
-              </button>
+        <div className="cal-luxe-controls-section">
+          <div className="cal-luxe-controls-card">
+            <button 
+              className="cal-luxe-btn cal-luxe-btn-primary"
+              onClick={() => setShowCreateModal(true)}
+            >
+              <span className="cal-luxe-btn-icon">+</span>
+              Nouvelle Réservation
+            </button>
+            
+            <div className="cal-luxe-date-filter">
+              <h3 className="cal-luxe-filter-title">Filtrer par période</h3>
+              <div className="cal-luxe-date-inputs">
+                <div className="cal-luxe-input-group">
+                  <label>Du</label>
+                  <input
+                    type="date"
+                    value={viewDateRange.startDate}
+                    onChange={(e) => setViewDateRange(prev => ({...prev, startDate: e.target.value}))}
+                    className="cal-luxe-date-input"
+                  />
+                </div>
+                <div className="cal-luxe-input-group">
+                  <label>Au</label>
+                  <input
+                    type="date"
+                    value={viewDateRange.endDate}
+                    onChange={(e) => setViewDateRange(prev => ({...prev, endDate: e.target.value}))}
+                    className="cal-luxe-date-input"
+                  />
+                </div>
+                <button className="cal-luxe-btn cal-luxe-btn-secondary" onClick={viewByDateRange}>
+                  Appliquer
+                </button>
+                <button className="cal-luxe-btn cal-luxe-btn-outline" onClick={fetchCalendriers}>
+                  Tout voir
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="cal-luxe-calendriers-grid">
-          {calendriers.map(calendrier => (
-            <div key={calendrier.id} className="cal-luxe-calendrier-card cal-luxe-glow-effect">
-              <div className="cal-luxe-card-header">
-                <h3>{calendrier.nom_terrain || 'Sans nom'}</h3>
-                <span className="cal-luxe-date-badge">
-                  {formatDate(calendrier.date_debut)}
-                </span>
-              </div>
-              <div className="cal-luxe-card-body">
-                <div className="cal-luxe-time-info">
-                  <div className="cal-luxe-time-slot">
-                    <span className="cal-luxe-time-label">Début:</span>
-                    <span className="cal-luxe-time-value">{formatTime(calendrier.heure_debut)}</span>
+        <div className="cal-luxe-reservations-section">
+          <h2 className="cal-luxe-section-title">Réservations en cours</h2>
+          <div className="cal-luxe-calendriers-grid">
+            {calendriers.map(calendrier => (
+              <div key={calendrier.id} className="cal-luxe-reservation-card">
+                <div className="cal-luxe-card-header">
+                  <div className="cal-luxe-terrain-info">
+                    <h3 className="cal-luxe-terrain-name">{calendrier.nom_terrain || 'Terrain Principal'}</h3>
+                    <span className="cal-luxe-date-badge">
+                      {formatDate(calendrier.date_debut)}
+                    </span>
                   </div>
-                  <div className="cal-luxe-time-slot">
-                    <span className="cal-luxe-time-label">Fin:</span>
-                    <span className="cal-luxe-time-value">{formatTime(calendrier.heure_fin)}</span>
+                  <div className="cal-luxe-status-indicator"></div>
+                </div>
+                
+                <div className="cal-luxe-card-body">
+                  <div className="cal-luxe-time-slots">
+                    <div className="cal-luxe-time-slot">
+                      <span className="cal-luxe-time-label">Début</span>
+                      <span className="cal-luxe-time-value">{formatTime(calendrier.heure_debut)}</span>
+                    </div>
+                    <div className="cal-luxe-time-separator">→</div>
+                    <div className="cal-luxe-time-slot">
+                      <span className="cal-luxe-time-label">Fin</span>
+                      <span className="cal-luxe-time-value">{formatTime(calendrier.heure_fin)}</span>
+                    </div>
                   </div>
-                  <div className="cal-luxe-duree">
-                    <span className="cal-luxe-duree-label">Durée:</span>
-                    <span className="cal-luxe-duree-value">
+                  
+                  <div className="cal-luxe-duration-info">
+                    <span className="cal-luxe-duration-label">Durée totale</span>
+                    <span className="cal-luxe-duration-value">
                       {getDuree(calendrier.heure_debut, calendrier.heure_fin)}
                     </span>
                   </div>
+
+                  {calendrier.date_debut !== calendrier.date_fin && (
+                    <div className="cal-luxe-multi-day-notice">
+                      <span className="cal-luxe-multi-day-icon">📅</span>
+                      <span>Réservation multi-jours jusqu'au {formatDate(calendrier.date_fin)}</span>
+                    </div>
+                  )}
                 </div>
-                {calendrier.date_debut !== calendrier.date_fin && (
-                  <div className="cal-luxe-multi-day">
-                    <span className="cal-luxe-multi-day-badge">Multi-jours</span>
-                    <span>Jusqu'au {formatDate(calendrier.date_fin)}</span>
-                  </div>
-                )}
+
+                <div className="cal-luxe-card-actions">
+                  <button 
+                    className="cal-luxe-action-btn cal-luxe-action-view"
+                    onClick={() => {
+                      setSelectedCalendrier(calendrier);
+                      setShowViewModal(true);
+                    }}
+                  >
+                    <span className="cal-luxe-action-icon">👁️</span>
+                    Détails
+                  </button>
+                  <button 
+                    className="cal-luxe-action-btn cal-luxe-action-edit"
+                    onClick={() => openEditModal(calendrier)}
+                  >
+                    <span className="cal-luxe-action-icon">✏️</span>
+                    Modifier
+                  </button>
+                  <button 
+                    className="cal-luxe-action-btn cal-luxe-action-delete"
+                    onClick={() => handleDelete(calendrier.id)}
+                  >
+                    <span className="cal-luxe-action-icon">🗑️</span>
+                    Supprimer
+                  </button>
+                </div>
               </div>
-              <div className="cal-luxe-card-actions">
-                <button 
-                  className="cal-luxe-btn cal-luxe-btn-view"
-                  onClick={() => {
-                    setSelectedCalendrier(calendrier);
-                    setShowViewModal(true);
-                  }}
-                >
-                  Voir
-                </button>
-                <button 
-                  className="cal-luxe-btn cal-luxe-btn-edit"
-                  onClick={() => openEditModal(calendrier)}
-                >
-                  Modifier
-                </button>
-                <button 
-                  className="cal-luxe-btn cal-luxe-btn-delete"
-                  onClick={() => handleDelete(calendrier.id)}
-                >
-                  Supprimer
-                </button>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </main>
 
@@ -362,61 +388,77 @@ const CalendrierLuxe = () => {
       <CalLuxeModal 
         isOpen={showCreateModal} 
         onClose={() => setShowCreateModal(false)}
-        title="Créer un nouveau créneau"
+        title="Nouvelle Réservation"
       >
         <form onSubmit={handleSubmit} className="cal-luxe-form">
-          <div className="cal-luxe-form-group">
-            <label>Date de début *</label>
-            <input
-              type="date"
-              name="date_debut"
-              value={formData.date_debut}
-              onChange={handleInputChange}
-              required
-            />
+          <div className="cal-luxe-form-row">
+            <div className="cal-luxe-form-group">
+              <label className="cal-luxe-form-label">Nom du terrain *</label>
+              <input
+                type="text"
+                name="nom_terrain"
+                value={formData.nom_terrain}
+                onChange={handleInputChange}
+                placeholder="Ex: Terrain A, Stade Principal..."
+                className="cal-luxe-form-input"
+                required
+              />
+            </div>
           </div>
-          <div className="cal-luxe-form-group">
-            <label>Heure de début</label>
-            <input
-              type="time"
-              name="heure_debut"
-              value={formData.heure_debut}
-              onChange={handleInputChange}
-            />
+
+          <div className="cal-luxe-form-row">
+            <div className="cal-luxe-form-group">
+              <label className="cal-luxe-form-label">Date de début *</label>
+              <input
+                type="date"
+                name="date_debut"
+                value={formData.date_debut}
+                onChange={handleInputChange}
+                className="cal-luxe-form-input"
+                required
+              />
+            </div>
+            <div className="cal-luxe-form-group">
+              <label className="cal-luxe-form-label">Heure de début</label>
+              <input
+                type="time"
+                name="heure_debut"
+                value={formData.heure_debut}
+                onChange={handleInputChange}
+                className="cal-luxe-form-input"
+              />
+            </div>
           </div>
-          <div className="cal-luxe-form-group">
-            <label>Date de fin *</label>
-            <input
-              type="date"
-              name="date_fin"
-              value={formData.date_fin}
-              onChange={handleInputChange}
-              required
-            />
+
+          <div className="cal-luxe-form-row">
+            <div className="cal-luxe-form-group">
+              <label className="cal-luxe-form-label">Date de fin *</label>
+              <input
+                type="date"
+                name="date_fin"
+                value={formData.date_fin}
+                onChange={handleInputChange}
+                className="cal-luxe-form-input"
+                required
+              />
+            </div>
+            <div className="cal-luxe-form-group">
+              <label className="cal-luxe-form-label">Heure de fin *</label>
+              <input
+                type="time"
+                name="heure_fin"
+                value={formData.heure_fin}
+                onChange={handleInputChange}
+                className="cal-luxe-form-input"
+                required
+              />
+            </div>
           </div>
-          <div className="cal-luxe-form-group">
-            <label>Heure de fin *</label>
-            <input
-              type="time"
-              name="heure_fin"
-              value={formData.heure_fin}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          <div className="cal-luxe-form-group">
-            <label>Nom du terrain *</label>
-            <input
-              type="text"
-              name="nom_terrain"
-              value={formData.nom_terrain}
-              onChange={handleInputChange}
-              placeholder="Entrez le nom du terrain"
-              required
-            />
-          </div>
+
           <div className="cal-luxe-form-actions">
-            <button type="submit" className="cal-luxe-btn cal-luxe-btn-primary">Créer</button>
+            <button type="submit" className="cal-luxe-btn cal-luxe-btn-primary cal-luxe-btn-large">
+              Créer la réservation
+            </button>
             <button 
               type="button" 
               className="cal-luxe-btn cal-luxe-btn-outline"
@@ -432,41 +474,52 @@ const CalendrierLuxe = () => {
       <CalLuxeModal 
         isOpen={showViewModal} 
         onClose={() => setShowViewModal(false)}
-        title="Détails du créneau"
+        title="Détails de la Réservation"
       >
         {selectedCalendrier && (
-          <div className="cal-luxe-view-details">
-            <div className="cal-luxe-detail-item">
-              <span className="cal-luxe-detail-label">Terrain:</span>
-              <span className="cal-luxe-detail-value">{selectedCalendrier.nom_terrain || 'Non spécifié'}</span>
+          <div className="cal-luxe-details-view">
+            <div className="cal-luxe-detail-section">
+              <h3 className="cal-luxe-detail-section-title">Informations Terrain</h3>
+              <div className="cal-luxe-detail-item">
+                <span className="cal-luxe-detail-label">Nom du terrain</span>
+                <span className="cal-luxe-detail-value">{selectedCalendrier.nom_terrain || 'Non spécifié'}</span>
+              </div>
             </div>
-            <div className="cal-luxe-detail-item">
-              <span className="cal-luxe-detail-label">Date de début:</span>
-              <span className="cal-luxe-detail-value">{formatDate(selectedCalendrier.date_debut)}</span>
+
+            <div className="cal-luxe-detail-section">
+              <h3 className="cal-luxe-detail-section-title">Période de Réservation</h3>
+              <div className="cal-luxe-detail-item">
+                <span className="cal-luxe-detail-label">Date de début</span>
+                <span className="cal-luxe-detail-value">{formatDate(selectedCalendrier.date_debut)}</span>
+              </div>
+              <div className="cal-luxe-detail-item">
+                <span className="cal-luxe-detail-label">Heure de début</span>
+                <span className="cal-luxe-detail-value">{formatTime(selectedCalendrier.heure_debut)}</span>
+              </div>
+              <div className="cal-luxe-detail-item">
+                <span className="cal-luxe-detail-label">Date de fin</span>
+                <span className="cal-luxe-detail-value">{formatDate(selectedCalendrier.date_fin)}</span>
+              </div>
+              <div className="cal-luxe-detail-item">
+                <span className="cal-luxe-detail-label">Heure de fin</span>
+                <span className="cal-luxe-detail-value">{formatTime(selectedCalendrier.heure_fin)}</span>
+              </div>
+              <div className="cal-luxe-detail-item cal-luxe-duration-item">
+                <span className="cal-luxe-detail-label">Durée totale</span>
+                <span className="cal-luxe-detail-value cal-luxe-duration-value">
+                  {getDuree(selectedCalendrier.heure_debut, selectedCalendrier.heure_fin)}
+                </span>
+              </div>
             </div>
-            <div className="cal-luxe-detail-item">
-              <span className="cal-luxe-detail-label">Heure de début:</span>
-              <span className="cal-luxe-detail-value">{formatTime(selectedCalendrier.heure_debut)}</span>
-            </div>
-            <div className="cal-luxe-detail-item">
-              <span className="cal-luxe-detail-label">Date de fin:</span>
-              <span className="cal-luxe-detail-value">{formatDate(selectedCalendrier.date_fin)}</span>
-            </div>
-            <div className="cal-luxe-detail-item">
-              <span className="cal-luxe-detail-label">Heure de fin:</span>
-              <span className="cal-luxe-detail-value">{formatTime(selectedCalendrier.heure_fin)}</span>
-            </div>
-            <div className="cal-luxe-detail-item">
-              <span className="cal-luxe-detail-label">Durée:</span>
-              <span className="cal-luxe-detail-value">
-                {getDuree(selectedCalendrier.heure_debut, selectedCalendrier.heure_fin)}
-              </span>
-            </div>
-            <div className="cal-luxe-detail-item">
-              <span className="cal-luxe-detail-label">Créé le:</span>
-              <span className="cal-luxe-detail-value">
-                {new Date(selectedCalendrier.created_at).toLocaleString('fr-FR')}
-              </span>
+
+            <div className="cal-luxe-detail-section">
+              <h3 className="cal-luxe-detail-section-title">Informations Système</h3>
+              <div className="cal-luxe-detail-item">
+                <span className="cal-luxe-detail-label">Créé le</span>
+                <span className="cal-luxe-detail-value">
+                  {new Date(selectedCalendrier.created_at).toLocaleString('fr-FR')}
+                </span>
+              </div>
             </div>
           </div>
         )}
@@ -476,61 +529,77 @@ const CalendrierLuxe = () => {
       <CalLuxeModal 
         isOpen={showEditModal} 
         onClose={() => setShowEditModal(false)}
-        title="Modifier le créneau"
+        title="Modifier la Réservation"
       >
         <form onSubmit={handleUpdate} className="cal-luxe-form">
-          <div className="cal-luxe-form-group">
-            <label>Date de début *</label>
-            <input
-              type="date"
-              name="date_debut"
-              value={formData.date_debut}
-              onChange={handleInputChange}
-              required
-            />
+          <div className="cal-luxe-form-row">
+            <div className="cal-luxe-form-group">
+              <label className="cal-luxe-form-label">Nom du terrain *</label>
+              <input
+                type="text"
+                name="nom_terrain"
+                value={formData.nom_terrain}
+                onChange={handleInputChange}
+                placeholder="Ex: Terrain A, Stade Principal..."
+                className="cal-luxe-form-input"
+                required
+              />
+            </div>
           </div>
-          <div className="cal-luxe-form-group">
-            <label>Heure de début</label>
-            <input
-              type="time"
-              name="heure_debut"
-              value={formData.heure_debut}
-              onChange={handleInputChange}
-            />
+
+          <div className="cal-luxe-form-row">
+            <div className="cal-luxe-form-group">
+              <label className="cal-luxe-form-label">Date de début *</label>
+              <input
+                type="date"
+                name="date_debut"
+                value={formData.date_debut}
+                onChange={handleInputChange}
+                className="cal-luxe-form-input"
+                required
+              />
+            </div>
+            <div className="cal-luxe-form-group">
+              <label className="cal-luxe-form-label">Heure de début</label>
+              <input
+                type="time"
+                name="heure_debut"
+                value={formData.heure_debut}
+                onChange={handleInputChange}
+                className="cal-luxe-form-input"
+              />
+            </div>
           </div>
-          <div className="cal-luxe-form-group">
-            <label>Date de fin *</label>
-            <input
-              type="date"
-              name="date_fin"
-              value={formData.date_fin}
-              onChange={handleInputChange}
-              required
-            />
+
+          <div className="cal-luxe-form-row">
+            <div className="cal-luxe-form-group">
+              <label className="cal-luxe-form-label">Date de fin *</label>
+              <input
+                type="date"
+                name="date_fin"
+                value={formData.date_fin}
+                onChange={handleInputChange}
+                className="cal-luxe-form-input"
+                required
+              />
+            </div>
+            <div className="cal-luxe-form-group">
+              <label className="cal-luxe-form-label">Heure de fin *</label>
+              <input
+                type="time"
+                name="heure_fin"
+                value={formData.heure_fin}
+                onChange={handleInputChange}
+                className="cal-luxe-form-input"
+                required
+              />
+            </div>
           </div>
-          <div className="cal-luxe-form-group">
-            <label>Heure de fin *</label>
-            <input
-              type="time"
-              name="heure_fin"
-              value={formData.heure_fin}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          <div className="cal-luxe-form-group">
-            <label>Nom du terrain *</label>
-            <input
-              type="text"
-              name="nom_terrain"
-              value={formData.nom_terrain}
-              onChange={handleInputChange}
-              placeholder="Entrez le nom du terrain"
-              required
-            />
-          </div>
+
           <div className="cal-luxe-form-actions">
-            <button type="submit" className="cal-luxe-btn cal-luxe-btn-primary">Mettre à jour</button>
+            <button type="submit" className="cal-luxe-btn cal-luxe-btn-primary cal-luxe-btn-large">
+              Mettre à jour
+            </button>
             <button 
               type="button" 
               className="cal-luxe-btn cal-luxe-btn-outline"

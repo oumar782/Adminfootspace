@@ -1,7 +1,9 @@
 import { ReactNode, useState } from "react";
-import Sidebar from "../composant/Sidebar";
-import Navbar from "../composant/Navbar";
-import "./lay.css";
+
+import Sidebar from "../composant/gestiside";
+import Navbar from "../composant/gestiheader";
+import "../layout/lay.css";
+ 
 
 const MainLayout = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -12,7 +14,6 @@ const MainLayout = ({ children }) => {
         <div className={`flex-1 flex flex-col transition-all duration-300 ${collapsed ? "ml-20" : "ml-64"}`}>
           <Navbar collapsed={collapsed} setCollapsed={setCollapsed} />
           <main className="flex-1 p-6">{children}</main>
-          <Footer />
         </div>
       </div>
   );
@@ -20,14 +21,14 @@ const MainLayout = ({ children }) => {
 
 const Footer = () => {
   return (
-    <footer className="main-layout-footer footer-py-4 footer-px-6 footer-border-t footer-text-xs footer-text-muted footer-flex footer-justify-between footer-responsive-column">
+    <footer className="py-4 px-6 border-t text-xs text-muted-foreground flex items-center justify-between">
       <div>
         <p>© 2025 FootSpace Solutions. Tous droits réservés.</p>
       </div>
-      <div className="footer-flex footer-gap-4">
+      <div className="flex items-center gap-4">
         <p>v1.0.0</p>
-        <a href="#" className="footer-link">Conditions d'utilisation</a>
-        <a href="#" className="footer-link">Confidentialité</a>
+        <a href="#" className="hover:text-footspace-600 transition-colors">Conditions d'utilisation</a>
+        <a href="#" className="hover:text-footspace-600 transition-colors">Confidentialité</a>
       </div>
     </footer>
   );

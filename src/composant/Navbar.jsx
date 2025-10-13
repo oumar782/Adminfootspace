@@ -49,54 +49,6 @@ const NavbarLuxe = ({ collapsed, setCollapsed }) => {
 
     
 
-      <div className="luxe-navbar-right">
-     
-
-        <button className="luxe-nav-icon" aria-label="Paramètres">
-          <SettingsIconLuxe />
-        </button>
-
-        <div className="luxe-profile-dropdown">
-          <button 
-            className="luxe-profile-trigger"
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            aria-expanded={isDropdownOpen}
-          >
-            <div className="luxe-profile-avatar">
-              <span>AD</span>
-            </div>
-          </button>
-
-          {isDropdownOpen && (
-            <div className="luxe-dropdown-menu">
-              <div className="luxe-dropdown-content">
-                <div className="luxe-dropdown-header">
-                  <div className="luxe-user-info">
-                    <div className="luxe-user-name">Admin User</div>
-                    <div className="luxe-user-email">admin@footspace.com</div>
-                  </div>
-                </div>
-                
-                <div className="luxe-dropdown-divider"></div>
-                
-                <button className="luxe-dropdown-item">
-                  <UserIconLuxe /> Mon profil
-                </button>
-                
-                <button className="luxe-dropdown-item">
-                  <SettingsIconLuxe /> Paramètres
-                </button>
-                
-                <div className="luxe-dropdown-divider"></div>
-                
-                <button className="luxe-dropdown-item">
-                  <LogoutIconLuxe /> Déconnexion
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
     </header>
   );
 };

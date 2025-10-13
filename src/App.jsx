@@ -9,6 +9,7 @@ import Calendrier from "./Page/calendriers";
 import User from "./Page/user";
 import Contact from "./Page/contact";
 import Connexion from "./Page/connexion";
+import Gestionnaire from "./Page/Gestionnaire";
 
 const App = () => {
   return (
@@ -19,6 +20,9 @@ const App = () => {
         
         {/* Route pour la connexion */}
         <Route path="/connexion" element={<Connexion />} />
+        
+        {/* Route pour l'interface gestionnaire avec routes imbriquées */}
+        <Route path="/interface-gestionnaire/*" element={<Gestionnaire />} />
         
         {/* Routes protégées avec MainLayout */}
         <Route
@@ -37,7 +41,6 @@ const App = () => {
             </MainLayout>
           }
         />
-        
         <Route
           path="/client"
           element={
