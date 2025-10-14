@@ -48,7 +48,7 @@ const Login = () => {
                     if (data.data.typeuser === 'administrateur') {
                         window.location.href = '/dashboard';
                     } else if (data.data.typeuser === 'gestionnaire') {
-                        window.location.href = '/interface-gestionnaire/*';
+                        window.location.href = 'interface-gestionnaire/Gestion-creneau';
                     } else {
                         window.location.href = '/profile';
                     }
