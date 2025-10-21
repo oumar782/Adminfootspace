@@ -1,4 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  BarChart3, 
+  Calendar, 
+  TrendingUp, 
+  Flame, 
+  Zap,
+  Target,
+  Clock,
+  RefreshCw,
+  AlertCircle
+} from 'lucide-react';
 import './custom.css';
 
 const OccupationChart = () => {
@@ -10,7 +21,6 @@ const OccupationChart = () => {
 
   const API_URL = 'https://backend-foot-omega.vercel.app/api/reservation';
 
-  // Fonction pour récupérer les réservations depuis l'API
   const fetchReservations = async () => {
     try {
       setIsLoading(true);
@@ -39,7 +49,6 @@ const OccupationChart = () => {
     fetchReservations();
   }, []);
 
-  // Fonction pour calculer les données d'occupation basées sur les réservations réelles
   const calculateOccupationData = () => {
     if (!reservations.length) {
       return {
@@ -49,15 +58,13 @@ const OccupationChart = () => {
       };
     }
 
-    // Obtenir la date actuelle pour les calculs
     const now = new Date();
     
-    // Données pour le jour (groupées par heure)
+    // Données pour le jour
     const dayData = Array.from({ length: 14 }, (_, i) => {
-      const hour = i + 8; // De 8h à 22h
+      const hour = i + 8;
       const hourStr = `${hour}h`;
       
-      // Compter les réservations pour cette heure aujourd'hui
       const todayReservations = reservations.filter(res => {
         const resDate = new Date(res.datereservation);
         return resDate.toDateString() === now.toDateString() && 
@@ -65,22 +72,21 @@ const OccupationChart = () => {
                res.statut === 'confirmée';
       });
       
-      // Calculer le taux d'occupation (basé sur le nombre de terrains occupés)
-      // Supposons 4 terrains disponibles maximum
       const maxTerrains = 4;
       const occupation = Math.min(100, (todayReservations.length / maxTerrains) * 100);
       
       return {
         time: hourStr,
         occupation: Math.round(occupation),
-        capacity: 100
+        capacity: 100,
+        count: todayReservations.length,
+        max: maxTerrains
       };
     });
 
-    // Données pour la semaine (groupées par jour)
+    // Données pour la semaine
     const weekDays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
     const weekData = weekDays.map((day, index) => {
-      // Calculer la date pour ce jour de la semaine
       const dayDate = new Date(now);
       dayDate.setDate(now.getDate() - now.getDay() + index + 1);
       
@@ -90,22 +96,22 @@ const OccupationChart = () => {
                res.statut === 'confirmée';
       });
       
-      // Taux d'occupation moyen pour la journée
-      const maxReservationsPerDay = 28; // 14h * 2 réservations par heure max
+      const maxReservationsPerDay = 28;
       const occupation = Math.min(100, (dayReservations.length / maxReservationsPerDay) * 100);
       
       return {
         time: day,
         occupation: Math.round(occupation),
-        capacity: 100
+        capacity: 100,
+        count: dayReservations.length,
+        max: maxReservationsPerDay
       };
     });
 
-    // Données pour le mois (groupées par semaine)
+    // Données pour le mois
     const monthData = Array.from({ length: 4 }, (_, i) => {
       const weekLabel = `Sem ${i + 1}`;
       
-      // Calculer les dates pour cette semaine
       const startDate = new Date(now.getFullYear(), now.getMonth(), i * 7 + 1);
       const endDate = new Date(now.getFullYear(), now.getMonth(), (i + 1) * 7);
       
@@ -114,14 +120,15 @@ const OccupationChart = () => {
         return resDate >= startDate && resDate <= endDate && res.statut === 'confirmée';
       });
       
-      // Taux d'occupation moyen pour la semaine
-      const maxReservationsPerWeek = 196; // 7 jours * 28 réservations max
+      const maxReservationsPerWeek = 196;
       const occupation = Math.min(100, (weekReservations.length / maxReservationsPerWeek) * 100);
       
       return {
         time: weekLabel,
         occupation: Math.round(occupation),
-        capacity: 100
+        capacity: 100,
+        count: weekReservations.length,
+        max: maxReservationsPerWeek
       };
     });
 
@@ -133,34 +140,33 @@ const OccupationChart = () => {
     ? occupationData[period] 
     : getDefaultData()[period];
 
-  // Données par défaut si aucune donnée réelle
   function getDefaultData() {
     const dayData = [
-      { time: '8h', occupation: 20, capacity: 100 },
-      { time: '10h', occupation: 40, capacity: 100 },
-      { time: '12h', occupation: 30, capacity: 100 },
-      { time: '14h', occupation: 35, capacity: 100 },
-      { time: '16h', occupation: 50, capacity: 100 },
-      { time: '18h', occupation: 90, capacity: 100 },
-      { time: '20h', occupation: 85, capacity: 100 },
-      { time: '22h', occupation: 40, capacity: 100 },
+      { time: '8h', occupation: 20, capacity: 100, count: 1, max: 4 },
+      { time: '10h', occupation: 40, capacity: 100, count: 2, max: 4 },
+      { time: '12h', occupation: 30, capacity: 100, count: 1, max: 4 },
+      { time: '14h', occupation: 35, capacity: 100, count: 1, max: 4 },
+      { time: '16h', occupation: 50, capacity: 100, count: 2, max: 4 },
+      { time: '18h', occupation: 90, capacity: 100, count: 4, max: 4 },
+      { time: '20h', occupation: 85, capacity: 100, count: 3, max: 4 },
+      { time: '22h', occupation: 40, capacity: 100, count: 2, max: 4 },
     ];
 
     const weekData = [
-      { time: 'Lun', occupation: 45, capacity: 100 },
-      { time: 'Mar', occupation: 52, capacity: 100 },
-      { time: 'Mer', occupation: 49, capacity: 100 },
-      { time: 'Jeu', occupation: 63, capacity: 100 },
-      { time: 'Ven', occupation: 75, capacity: 100 },
-      { time: 'Sam', occupation: 95, capacity: 100 },
-      { time: 'Dim', occupation: 88, capacity: 100 },
+      { time: 'Lun', occupation: 45, capacity: 100, count: 12, max: 28 },
+      { time: 'Mar', occupation: 52, capacity: 100, count: 15, max: 28 },
+      { time: 'Mer', occupation: 49, capacity: 100, count: 14, max: 28 },
+      { time: 'Jeu', occupation: 63, capacity: 100, count: 18, max: 28 },
+      { time: 'Ven', occupation: 75, capacity: 100, count: 21, max: 28 },
+      { time: 'Sam', occupation: 95, capacity: 100, count: 27, max: 28 },
+      { time: 'Dim', occupation: 88, capacity: 100, count: 25, max: 28 },
     ];
 
     const monthData = [
-      { time: 'Sem 1', occupation: 58, capacity: 100 },
-      { time: 'Sem 2', occupation: 66, capacity: 100 },
-      { time: 'Sem 3', occupation: 72, capacity: 100 },
-      { time: 'Sem 4', occupation: 80, capacity: 100 },
+      { time: 'Sem 1', occupation: 58, capacity: 100, count: 114, max: 196 },
+      { time: 'Sem 2', occupation: 66, capacity: 100, count: 129, max: 196 },
+      { time: 'Sem 3', occupation: 72, capacity: 100, count: 141, max: 196 },
+      { time: 'Sem 4', occupation: 80, capacity: 100, count: 157, max: 196 },
     ];
 
     return { day: dayData, week: weekData, month: monthData };
@@ -199,8 +205,10 @@ const OccupationChart = () => {
     return (
       <div className="occupation-chart-card">
         <div className="error-message">
+          <AlertCircle size={48} className="error-icon" />
           <p>Erreur de chargement: {error}</p>
           <button onClick={fetchReservations} className="retry-btn">
+            <RefreshCw size={16} />
             Réessayer
           </button>
         </div>
@@ -211,24 +219,35 @@ const OccupationChart = () => {
   return (
     <div className="occupation-chart-card">
       <div className="chart-header">
-        <h2>Taux d'occupation</h2>
+        <div className="header-content">
+          <div className="title-section">
+            <BarChart3 size={28} className="header-icon" />
+            <h2>Tableau de Bord d'Occupation</h2>
+          </div>
+          <p className="chart-subtitle">
+            Surveillance en temps réel des réservations et de l'occupation des terrains
+          </p>
+        </div>
         <div className="period-selector">
           <button 
             className={`period-btn ${period === 'day' ? 'active' : ''}`}
             onClick={() => setPeriod('day')}
           >
+            <Calendar size={16} />
             Jour
           </button>
           <button 
             className={`period-btn ${period === 'week' ? 'active' : ''}`}
             onClick={() => setPeriod('week')}
           >
+            <Calendar size={16} />
             Semaine
           </button>
           <button 
             className={`period-btn ${period === 'month' ? 'active' : ''}`}
             onClick={() => setPeriod('month')}
           >
+            <BarChart3 size={16} />
             Mois
           </button>
         </div>
@@ -251,14 +270,18 @@ const OccupationChart = () => {
                       className="bar-fill" 
                       style={{ 
                         height: `${item.occupation}%`,
-                        opacity: hoveredData === item ? 1 : 0.8
+                        opacity: hoveredData === item ? 1 : 0.9
                       }}
                       onMouseEnter={() => setHoveredData(item)}
                       onMouseLeave={() => setHoveredData(null)}
                     >
-                      {hoveredData === item && (
-                        <div className="bar-value">{item.occupation}%</div>
-                      )}
+                      {/* Étiquette d'occupation toujours visible */}
+                      <div className="occupation-label">
+                        <span className="occupation-percent">{item.occupation}%</span>
+                        <span className="occupation-details">
+                          {item.count}/{item.max} terrains
+                        </span>
+                      </div>
                     </div>
                     <div className="bar-label">{item.time}</div>
                   </div>
@@ -276,6 +299,9 @@ const OccupationChart = () => {
                   <div className="tooltip-content">
                     <span className="tooltip-title">{hoveredData.time}</span>
                     <span className="tooltip-metric">{hoveredData.occupation}% d'occupation</span>
+                    <span className="tooltip-details">
+                      {hoveredData.count} réservation{hoveredData.count > 1 ? 's' : ''} sur {hoveredData.max}
+                    </span>
                   </div>
                 </div>
               )}
@@ -283,33 +309,68 @@ const OccupationChart = () => {
 
             <div className="chart-stats">
               <div className="stat-item">
-                <div className="stat-labels">Occupation moyenne</div>
-                <div className="stat-values">{averageOccupation}%</div>
-                <div className="stat-bar">
-                  <div 
-                    className="stat-bar-fill" 
-                    style={{ width: `${averageOccupation}%` }}
-                  ></div>
+                <div className="stat-icon">
+                  <TrendingUp size={24} />
+                </div>
+                <div className="stat-content">
+                  <div className="stat-labels">Occupation moyenne</div>
+                  <div className="stat-values">{averageOccupation}%</div>
+                  <div className="stat-bar">
+                    <div 
+                      className="stat-bar-fill" 
+                      style={{ width: `${averageOccupation}%` }}
+                    ></div>
+                  </div>
                 </div>
               </div>
               
               <div className="stat-item">
-                <div className="stat-labels">Pic d'occupation</div>
-                <div className="stat-values">{peakOccupation}%</div>
-                <div className="stat-bar">
-                  <div 
-                    className="stat-bar-fill peak" 
-                    style={{ width: `${peakOccupation}%` }}
-                  ></div>
+                <div className="stat-icon">
+                  <Flame size={24} />
+                </div>
+                <div className="stat-content">
+                  <div className="stat-labels">Pic d'occupation</div>
+                  <div className="stat-values">{peakOccupation}%</div>
+                  <div className="stat-bar">
+                    <div 
+                      className="stat-bar-fill peak" 
+                      style={{ width: `${peakOccupation}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="stat-item">
+                <div className="stat-icon">
+                  <Zap size={24} />
+                </div>
+                <div className="stat-content">
+                  <div className="stat-labels">Période actuelle</div>
+                  <div className="stat-values">
+                    {period === 'day' ? 'Aujourd\'hui' : 
+                     period === 'week' ? 'Cette semaine' : 
+                     'Ce mois'}
+                  </div>
+                  <div className="stat-period">
+                    {data.length} créneau{data.length > 1 ? 'x' : ''} analysé{data.length > 1 ? 's' : ''}
+                  </div>
                 </div>
               </div>
             </div>
 
             <div className="data-info">
-              <small>
-                Données basées sur {reservations.filter(r => r.statut === 'confirmée').length} réservations confirmées
-              </small>
+              <div className="data-summary">
+                <span className="data-badge">
+                  <Target size={14} />
+                  {reservations.filter(r => r.statut === 'confirmée').length} réservations confirmées
+                </span>
+                <span className="data-badge">
+                  <Clock size={14} />
+                  Données mises à jour à {new Date().toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}
+                </span>
+              </div>
               <button onClick={fetchReservations} className="refresh-btn">
+                <RefreshCw size={16} />
                 Actualiser
               </button>
             </div>

@@ -6,7 +6,8 @@ import {
   Users, 
   User,
   Menu,
-  X
+  X,
+  LogOut // Ajout de l'icône de déconnexion
 } from 'lucide-react';
 import './sidebarStyles.css';
 
@@ -14,6 +15,28 @@ const SidebarNavigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileOpen, setIsMobileOpen] = React.useState(false);
+
+  // Récupérer les informations utilisateur depuis le localStorage
+  const [userInfo, setUserInfo] = React.useState({
+    email: '',
+    role: ''
+  });
+
+  // Charger les informations utilisateur au montage du composant
+  React.useEffect(() => {
+    const userData = localStorage.getItem('userData');
+    if (userData) {
+      try {
+        const parsedData = JSON.parse(userData);
+        setUserInfo({
+          email: parsedData.email || 'Utilisateur',
+          role: parsedData.typeuser || 'Administrateur'
+        });
+      } catch (error) {
+        console.error('Erreur lors du parsing des données utilisateur:', error);
+      }
+    }
+  }, []);
 
   const menus = [
     { 
@@ -41,12 +64,24 @@ const SidebarNavigation = () => {
       path: '/interface-gestionnaire/Gestion-client' 
     }
   ];
+
   const estMenuActif = (menuPath) => {
     return location.pathname.startsWith(menuPath);
   };
 
   const handleNavigation = (path) => {
     navigate(path);
+    setIsMobileOpen(false);
+  };
+
+  // Fonction de déconnexion
+  const handleLogout = () => {
+    // Supprimer les données utilisateur du localStorage
+    localStorage.removeItem('userData');
+    localStorage.removeItem('token');
+    
+    // Rediriger vers la page de connexion
+    navigate('/login');
     setIsMobileOpen(false);
   };
 
@@ -99,10 +134,20 @@ const SidebarNavigation = () => {
               <User size={20} />
             </div>
             <div className="sidebar-info">
-              <p className="sidebar-nom">Utilisateur</p>
-              <p className="sidebar-role">Administrateur</p>
+              <p className="sidebar-nom">{userInfo.email}</p>
+              <p className="sidebar-role">{userInfo.role}</p>
             </div>
           </div>
+          
+          {/* Bouton de déconnexion */}
+          <button 
+            className="sidebar-logout-btn"
+            onClick={handleLogout}
+            title="Déconnexion"
+          >
+            <LogOut size={18} />
+            <span>Déconnexion</span>
+          </button>
         </div>
       </div>
     </>

@@ -11,7 +11,53 @@
     --sidebar-ombre: rgba(0, 0, 0, 0.2);
     --sidebar-bordure: rgba(255, 255, 255, 0.1);
   }
-  
+  /* Bouton de déconnexion */
+.sidebar-logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.sidebar-logout-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--sidebar-blanc);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-logout-btn:active {
+  transform: translateY(0);
+}
+
+/* Ajustement du footer pour inclure le bouton de déconnexion */
+.sidebar-footer {
+  padding: 1.5rem;
+  border-top: 1px solid var(--sidebar-bordure);
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  color: var(--sidebar-blanc);
+  margin-bottom: 1rem;
+}
   /* Import de la police Orbitron */
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap');
   

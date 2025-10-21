@@ -1,4 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  Search, 
+  Filter, 
+  Plus, 
+  Edit, 
+  Trash2, 
+  Eye, 
+  X, 
+  Calendar,
+  Clock,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  DollarSign,
+  CheckCircle,
+  XCircle,
+  Loader2
+} from 'lucide-react';
 import './gestionreservation.css';
 
 const ReservationAdmin = () => {
@@ -10,12 +29,13 @@ const ReservationAdmin = () => {
   const [toasts, setToasts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [selectedReservation, setSelectedReservation] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const [formData, setFormData] = useState({
     datereservation: '',
     heurereservation: '',
     statut: 'en attente',
-    idclient: '',
     numeroterrain: '',
     nomclient: '',
     prenom: '',
@@ -95,7 +115,6 @@ const ReservationAdmin = () => {
       datereservation: '',
       heurereservation: '',
       statut: 'en attente',
-      idclient: '',
       numeroterrain: '',
       nomclient: '',
       prenom: '',
@@ -118,7 +137,6 @@ const ReservationAdmin = () => {
       heurereservation: reservation.heurereservation || '',
       heurefin: reservation.heurefin || '',
       statut: reservation.statut || 'en attente',
-      idclient: reservation.idclient || '',
       numeroterrain: reservation.numeroterrain || '',
       nomclient: reservation.nomclient || '',
       prenom: reservation.prenom || '',
@@ -134,46 +152,21 @@ const ReservationAdmin = () => {
     setShowModal(true);
   };
 
-  // Fermer modal
+  // Ouvrir modal de détails
+  const openDetailModal = (reservation) => {
+    setSelectedReservation(reservation);
+    setShowDetailModal(true);
+  };
+
+  // Fermer modals
   const closeModal = () => {
     setShowModal(false);
     setEditingReservation(null);
   };
 
-  // Mettre à jour le statut du créneau
-  const updateCreneauStatus = async (numeroterrain, datereservation, heurereservation, newStatus) => {
-    try {
-      const creneauxResponse = await fetch('https://backend-foot-omega.vercel.app/api/gestioncreneaux/');
-      const creneauxData = await creneauxResponse.json();
-      
-      if (creneauxData.success) {
-        const creneau = creneauxData.data.find(c => 
-          c.numeroterrain == numeroterrain && 
-          c.datecreneaux === datereservation && 
-          c.heure === heurereservation
-        );
-        
-        if (creneau) {
-          const updateResponse = await fetch(`https://backend-foot-omega.vercel.app/api/gestioncreneaux/${creneau.idcreneaux}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              ...creneau,
-              statut: newStatus
-            })
-          });
-          
-          const updateData = await updateResponse.json();
-          return updateData.success;
-        }
-      }
-      return false;
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour du créneau:', error);
-      return false;
-    }
+  const closeDetailModal = () => {
+    setShowDetailModal(false);
+    setSelectedReservation(null);
   };
 
   // Soumettre le formulaire (création ou modification)
@@ -203,25 +196,12 @@ const ReservationAdmin = () => {
           ? 'Réservation créée avec succès' 
           : 'Réservation modifiée avec succès';
         
-        // Si la réservation est confirmée, mettre à jour le statut du créneau
-        if (formData.statut === 'confirmée') {
-          const creneauUpdated = await updateCreneauStatus(
-            formData.numeroterrain,
-            formData.datereservation,
-            formData.heurereservation,
-            'réservé'
-          );
-          if (creneauUpdated) {
-            message += ' - Créneau marqué comme réservé';
-          }
-        }
-        
         // Afficher le message d'email si envoyé
-        if (data.emailSent) {
+        if (data.email && data.email.success) {
           message += ' - Email de confirmation envoyé au client';
         }
-        if (data.emailError) {
-          message += ` - Erreur email: ${data.emailError}`;
+        if (data.email && data.email.error) {
+          message += ` - Erreur email: ${data.email.error}`;
         }
         
         addToast(message, 'success');
@@ -243,8 +223,6 @@ const ReservationAdmin = () => {
     }
     
     try {
-      const reservation = reservations.find(r => r.id === id);
-      
       const url = `https://backend-foot-omega.vercel.app/api/reservation/${id}`;
       
       const response = await fetch(url, {
@@ -254,15 +232,6 @@ const ReservationAdmin = () => {
       const data = await response.json();
       
       if (data.success) {
-        if (reservation && reservation.statut === 'confirmée') {
-          await updateCreneauStatus(
-            reservation.numeroterrain,
-            reservation.datereservation,
-            reservation.heurereservation,
-            'disponible'
-          );
-        }
-        
         addToast('Réservation supprimée avec succès', 'success');
         fetchReservations();
       } else {
@@ -274,11 +243,9 @@ const ReservationAdmin = () => {
     }
   };
 
-  // Changer le statut (avec notification d'envoi d'email)
+  // Changer le statut
   const handleStatusChange = async (id, newStatus) => {
     try {
-      const reservation = reservations.find(r => r.id === id);
-      
       const url = `https://backend-foot-omega.vercel.app/api/reservation/${id}/statut`;
       
       const response = await fetch(url, {
@@ -294,35 +261,11 @@ const ReservationAdmin = () => {
       if (data.success) {
         let message = 'Statut modifié avec succès';
         
-        if (reservation) {
-          if (newStatus === 'confirmée') {
-            const creneauUpdated = await updateCreneauStatus(
-              reservation.numeroterrain,
-              reservation.datereservation,
-              reservation.heurereservation,
-              'réservé'
-            );
-            if (creneauUpdated) {
-              message += ' - Créneau marqué comme réservé';
-            }
-          } else if (newStatus === 'annulée' && reservation.statut === 'confirmée') {
-            const creneauUpdated = await updateCreneauStatus(
-              reservation.numeroterrain,
-              reservation.datereservation,
-              reservation.heurereservation,
-              'disponible'
-            );
-            if (creneauUpdated) {
-              message += ' - Créneau remis disponible';
-            }
-          }
-        }
-        
-        if (newStatus === 'confirmée' && data.emailSent) {
+        if (newStatus === 'confirmée' && data.email && data.email.success) {
           message += ' - Email de confirmation envoyé au client';
         }
-        if (data.emailError) {
-          message += ` - Erreur email: ${data.emailError}`;
+        if (data.email && data.email.error) {
+          message += ` - Erreur email: ${data.email.error}`;
         }
         
         addToast(message, 'success');
@@ -343,11 +286,22 @@ const ReservationAdmin = () => {
     return new Date(dateString).toLocaleDateString('fr-FR', options);
   };
 
+  // Obtenir la couleur du statut
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'confirmée': return 'var(--reservation-success)';
+      case 'en attente': return 'var(--reservation-warning)';
+      case 'annulée': return 'var(--reservation-danger)';
+      case 'terminée': return 'var(--reservation-info)';
+      default: return 'var(--reservation-muted)';
+    }
+  };
+
   if (loading) {
     return (
-      <div className="admin-container">
-        <div className="admin-loading">
-          <div className="admin-loading-spinner"></div>
+      <div className="reservation-admin-container">
+        <div className="reservation-admin-loading">
+          <Loader2 className="reservation-admin-loading-spinner" />
           <p>Chargement des réservations...</p>
         </div>
       </div>
@@ -355,15 +309,16 @@ const ReservationAdmin = () => {
   }
 
   return (
-    <div className="admin-container">
-      <header className="admin-header">
+    <div className="reservation-admin-container">
+      <header className="reservation-admin-header">
         <h1>Gestionnaire des Réservations</h1>
         <p>Gérez toutes les réservations de terrains de football</p>
       </header>
 
-      <div className="admin-controls">
-        <div className="admin-search-filters">
-          <div className="admin-search-box">
+      <div className="reservation-admin-controls">
+        <div className="reservation-admin-search-filters">
+          <div className="reservation-admin-search-box">
+            <Search className="reservation-admin-search-icon" />
             <input
               type="text"
               placeholder="Rechercher par nom ou email..."
@@ -372,99 +327,142 @@ const ReservationAdmin = () => {
             />
           </div>
           
-          <select 
-            value={filterStatus} 
-            onChange={(e) => setFilterStatus(e.target.value)}
-          >
-            <option value="">Tous les statuts</option>
-            <option value="en attente">En attente</option>
-            <option value="confirmée">Confirmée</option>
-            <option value="annulée">Annulée</option>
-            <option value="terminée">Terminée</option>
-          </select>
+          <div className="reservation-admin-filter-box">
+            <Filter className="reservation-admin-filter-icon" />
+            <select 
+              value={filterStatus} 
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="">Tous les statuts</option>
+              <option value="en attente">En attente</option>
+              <option value="confirmée">Confirmée</option>
+              <option value="annulée">Annulée</option>
+              <option value="terminée">Terminée</option>
+            </select>
+          </div>
         </div>
         
-        <button className="admin-btn admin-btn-primary" onClick={openCreateModal}>
-          + Nouvelle Réservation
+        <button className="reservation-admin-btn reservation-admin-btn-primary" onClick={openCreateModal}>
+          <Plus className="reservation-admin-btn-icon" />
+          Nouvelle Réservation
         </button>
       </div>
 
-      <div className="admin-table-container">
+      <div className="reservation-admin-table-container">
         {reservations.length > 0 ? (
-          <table className="admin-table">
-            <thead className="admin-table-header">
-              <tr>
-                <th>Terrain</th>
-                <th>Date</th>
-                <th>Heure</th>
-                <th>Client</th>
-                <th>Contact</th>
-                <th>Type</th>
-                <th>Surface</th>
-                <th>Tarif</th>
-                <th>Statut</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody className="admin-table-body">
-              {reservations.map(reservation => (
-                <tr key={reservation.id} className="admin-table-row">
-                  <td>
-                    <div className="admin-terrain-info">
-                      <strong>{reservation.nomterrain}</strong>
-                      <span>Terrain {reservation.numeroterrain}</span>
-                    </div>
-                  </td>
-                  <td>{formatDate(reservation.datereservation)}</td>
-                  <td>{reservation.heurereservation} - {reservation.heurefin}</td>
-                  <td>
-                    <div className="admin-client-info">
-                      <strong>{reservation.prenom} {reservation.nomclient}</strong>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="admin-contact-info">
-                      <span>{reservation.email}</span>
-                      <span>{reservation.telephone}</span>
-                    </div>
-                  </td>
-                  <td>{reservation.typeterrain || 'Non spécifié'}</td>
-                  <td>{reservation.surface}</td>
-                  <td>{reservation.tarif} Dh</td>
-                  <td>
-                    <select 
-                      value={reservation.statut} 
-                      onChange={(e) => handleStatusChange(reservation.id, e.target.value)}
-                      className="admin-status-select"
-                    >
-                      <option value="en attente">En attente</option>
-                      <option value="confirmée">Confirmée</option>
-                      <option value="annulée">Annulée</option>
-                      <option value="terminée">Terminée</option>
-                    </select>
-                  </td>
-                  <td>
-                    <div className="admin-action-buttons">
-                      <button 
-                        className="admin-btn admin-btn-secondary admin-btn-small"
-                        onClick={() => openEditModal(reservation)}
-                      >
-                        Modifier
-                      </button>
-                      <button 
-                        className="admin-btn admin-btn-danger admin-btn-small"
-                        onClick={() => handleDelete(reservation.id)}
-                      >
-                        Supprimer
-                      </button>
-                    </div>
-                  </td>
+          <div className="reservation-admin-table-wrapper">
+            <table className="reservation-admin-table">
+              <thead className="reservation-admin-table-header">
+                <tr>
+                  <th>Terrain</th>
+                  <th>Date</th>
+                  <th>Heure</th>
+                  <th>Client</th>
+                  <th>Contact</th>
+                  <th>Type</th>
+                  <th>Surface</th>
+                  <th>Tarif</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="reservation-admin-table-body">
+                {reservations.map(reservation => (
+                  <tr key={reservation.id} className="reservation-admin-table-row">
+                    <td>
+                      <div className="reservation-admin-terrain-info">
+                        <strong>{reservation.nomterrain}</strong>
+                        <span>Terrain {reservation.numeroterrain}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="reservation-admin-date-info">
+                        <Calendar className="reservation-admin-date-icon" />
+                        {formatDate(reservation.datereservation)}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="reservation-admin-time-info">
+                        <Clock className="reservation-admin-time-icon" />
+                        {reservation.heurereservation} - {reservation.heurefin}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="reservation-admin-client-info">
+                        <User className="reservation-admin-client-icon" />
+                        <strong>{reservation.prenom} {reservation.nomclient}</strong>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="reservation-admin-contact-info">
+                        <div className="reservation-admin-contact-item">
+                          <Mail className="reservation-admin-contact-icon" />
+                          <span>{reservation.email}</span>
+                        </div>
+                        <div className="reservation-admin-contact-item">
+                          <Phone className="reservation-admin-contact-icon" />
+                          <span>{reservation.telephone}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{reservation.typeterrain || 'Non spécifié'}</td>
+                    <td>
+                      <div className="reservation-admin-surface-info">
+                        <MapPin className="reservation-admin-surface-icon" />
+                        {reservation.surface}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="reservation-admin-tarif-info">
+                        <DollarSign className="reservation-admin-tarif-icon" />
+                        {reservation.tarif} Dh
+                      </div>
+                    </td>
+                    <td>
+                      <select 
+                        value={reservation.statut} 
+                        onChange={(e) => handleStatusChange(reservation.id, e.target.value)}
+                        className="reservation-admin-status-select"
+                        style={{ borderColor: getStatusColor(reservation.statut) }}
+                      >
+                        <option value="en attente">En attente</option>
+                        <option value="confirmée">Confirmée</option>
+                        <option value="annulée">Annulée</option>
+                        <option value="terminée">Terminée</option>
+                      </select>
+                    </td>
+                    <td>
+                      <div className="reservation-admin-action-buttons">
+                        <button 
+                          className="reservation-admin-btn reservation-admin-btn-info reservation-admin-btn-small"
+                          onClick={() => openDetailModal(reservation)}
+                          title="Voir les détails"
+                        >
+                          <Eye className="reservation-admin-btn-icon" />
+                        </button>
+                        <button 
+                          className="reservation-admin-btn reservation-admin-btn-secondary reservation-admin-btn-small"
+                          onClick={() => openEditModal(reservation)}
+                          title="Modifier"
+                        >
+                          <Edit className="reservation-admin-btn-icon" />
+                        </button>
+                        <button 
+                          className="reservation-admin-btn reservation-admin-btn-danger reservation-admin-btn-small"
+                          onClick={() => handleDelete(reservation.id)}
+                          title="Supprimer"
+                        >
+                          <Trash2 className="reservation-admin-btn-icon" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <div className="admin-no-results">
+          <div className="reservation-admin-no-results">
             <p>Aucune réservation trouvée</p>
           </div>
         )}
@@ -472,16 +470,18 @@ const ReservationAdmin = () => {
 
       {/* Modal de création/édition */}
       {showModal && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal">
-            <div className="admin-modal-header">
+        <div className="reservation-admin-modal-overlay">
+          <div className="reservation-admin-modal">
+            <div className="reservation-admin-modal-header">
               <h2>{modalMode === 'create' ? 'Créer une réservation' : 'Modifier la réservation'}</h2>
-              <button className="admin-close-btn" onClick={closeModal}>×</button>
+              <button className="reservation-admin-close-btn" onClick={closeModal}>
+                <X />
+              </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="admin-form">
-              <div className="admin-form-grid">
-                <div className="admin-form-group">
+            <form onSubmit={handleSubmit} className="reservation-admin-form">
+              <div className="reservation-admin-form-grid">
+                <div className="reservation-admin-form-group">
                   <label>Date de réservation</label>
                   <input
                     type="date"
@@ -492,7 +492,7 @@ const ReservationAdmin = () => {
                   />
                 </div>
                 
-                <div className="admin-form-group">
+                <div className="reservation-admin-form-group">
                   <label>Heure de début</label>
                   <input
                     type="time"
@@ -503,7 +503,7 @@ const ReservationAdmin = () => {
                   />
                 </div>
                 
-                <div className="admin-form-group">
+                <div className="reservation-admin-form-group">
                   <label>Heure de fin</label>
                   <input
                     type="time"
@@ -514,7 +514,7 @@ const ReservationAdmin = () => {
                   />
                 </div>
                 
-                <div className="admin-form-group">
+                <div className="reservation-admin-form-group">
                   <label>Statut</label>
                   <select
                     name="statut"
@@ -529,18 +529,7 @@ const ReservationAdmin = () => {
                   </select>
                 </div>
                 
-                <div className="admin-form-group">
-                  <label>ID Client</label>
-                  <input
-                    type="number"
-                    name="idclient"
-                    value={formData.idclient}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                
-                <div className="admin-form-group">
+                <div className="reservation-admin-form-group">
                   <label>Numéro de terrain</label>
                   <input
                     type="number"
@@ -551,7 +540,7 @@ const ReservationAdmin = () => {
                   />
                 </div>
                 
-                <div className="admin-form-group">
+                <div className="reservation-admin-form-group">
                   <label>Nom du client</label>
                   <input
                     type="text"
@@ -562,7 +551,7 @@ const ReservationAdmin = () => {
                   />
                 </div>
                 
-                <div className="admin-form-group">
+                <div className="reservation-admin-form-group">
                   <label>Prénom</label>
                   <input
                     type="text"
@@ -573,7 +562,7 @@ const ReservationAdmin = () => {
                   />
                 </div>
                 
-                <div className="admin-form-group">
+                <div className="reservation-admin-form-group">
                   <label>Email</label>
                   <input
                     type="email"
@@ -584,7 +573,7 @@ const ReservationAdmin = () => {
                   />
                 </div>
                 
-                <div className="admin-form-group">
+                <div className="reservation-admin-form-group">
                   <label>Téléphone</label>
                   <input
                     type="tel"
@@ -595,7 +584,7 @@ const ReservationAdmin = () => {
                   />
                 </div>
                 
-                <div className="admin-form-group">
+                <div className="reservation-admin-form-group">
                   <label>Type de terrain</label>
                   <input
                     type="text"
@@ -606,7 +595,7 @@ const ReservationAdmin = () => {
                   />
                 </div>
                 
-                <div className="admin-form-group">
+                <div className="reservation-admin-form-group">
                   <label>Tarif (Dh)</label>
                   <input
                     type="number"
@@ -617,7 +606,7 @@ const ReservationAdmin = () => {
                   />
                 </div>
                 
-                <div className="admin-form-group">
+                <div className="reservation-admin-form-group">
                   <label>Surface</label>
                   <input
                     type="text"
@@ -628,7 +617,7 @@ const ReservationAdmin = () => {
                   />
                 </div>
                 
-                <div className="admin-form-group">
+                <div className="reservation-admin-form-group">
                   <label>Nom du terrain</label>
                   <input
                     type="text"
@@ -639,11 +628,11 @@ const ReservationAdmin = () => {
                 </div>
               </div>
               
-              <div className="admin-form-actions">
-                <button type="button" className="admin-btn admin-btn-secondary" onClick={closeModal}>
+              <div className="reservation-admin-form-actions">
+                <button type="button" className="reservation-admin-btn reservation-admin-btn-secondary" onClick={closeModal}>
                   Annuler
                 </button>
-                <button type="submit" className="admin-btn admin-btn-primary">
+                <button type="submit" className="reservation-admin-btn reservation-admin-btn-primary">
                   {modalMode === 'create' ? 'Créer' : 'Modifier'}
                 </button>
               </div>
@@ -652,10 +641,90 @@ const ReservationAdmin = () => {
         </div>
       )}
 
+      {/* Modal de détails */}
+      {showDetailModal && selectedReservation && (
+        <div className="reservation-admin-modal-overlay">
+          <div className="reservation-admin-modal reservation-admin-detail-modal">
+            <div className="reservation-admin-modal-header">
+              <h2>Détails de la Réservation</h2>
+              <button className="reservation-admin-close-btn" onClick={closeDetailModal}>
+                <X />
+              </button>
+            </div>
+            
+            <div className="reservation-admin-detail-content">
+              <div className="reservation-admin-detail-grid">
+                <div className="reservation-admin-detail-section">
+                  <h3>Informations du Terrain</h3>
+                  <div className="reservation-admin-detail-item">
+                    <strong>Nom:</strong>
+                    <span>{selectedReservation.nomterrain}</span>
+                  </div>
+                  <div className="reservation-admin-detail-item">
+                    <strong>Numéro:</strong>
+                    <span>{selectedReservation.numeroterrain}</span>
+                  </div>
+                  <div className="reservation-admin-detail-item">
+                    <strong>Type:</strong>
+                    <span>{selectedReservation.typeterrain || 'Non spécifié'}</span>
+                  </div>
+                  <div className="reservation-admin-detail-item">
+                    <strong>Surface:</strong>
+                    <span>{selectedReservation.surface}</span>
+                  </div>
+                </div>
+                
+                <div className="reservation-admin-detail-section">
+                  <h3>Informations de Réservation</h3>
+                  <div className="reservation-admin-detail-item">
+                    <strong>Date:</strong>
+                    <span>{formatDate(selectedReservation.datereservation)}</span>
+                  </div>
+                  <div className="reservation-admin-detail-item">
+                    <strong>Heure:</strong>
+                    <span>{selectedReservation.heurereservation} - {selectedReservation.heurefin}</span>
+                  </div>
+                  <div className="reservation-admin-detail-item">
+                    <strong>Tarif:</strong>
+                    <span>{selectedReservation.tarif} Dh</span>
+                  </div>
+                  <div className="reservation-admin-detail-item">
+                    <strong>Statut:</strong>
+                    <span className="reservation-admin-detail-status" 
+                          style={{ color: getStatusColor(selectedReservation.statut) }}>
+                      {selectedReservation.statut}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="reservation-admin-detail-section">
+                  <h3>Informations du Client</h3>
+                  <div className="reservation-admin-detail-item">
+                    <strong>Nom complet:</strong>
+                    <span>{selectedReservation.prenom} {selectedReservation.nomclient}</span>
+                  </div>
+                  <div className="reservation-admin-detail-item">
+                    <strong>Email:</strong>
+                    <span>{selectedReservation.email}</span>
+                  </div>
+                  <div className="reservation-admin-detail-item">
+                    <strong>Téléphone:</strong>
+                    <span>{selectedReservation.telephone}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Toast notifications */}
-      <div className="admin-toast-container">
+      <div className="reservation-admin-toast-container">
         {toasts.map(toast => (
-          <div key={toast.id} className={`admin-toast ${toast.type}`}>
+          <div key={toast.id} className={`reservation-admin-toast ${toast.type}`}>
+            {toast.type === 'success' && <CheckCircle className="reservation-admin-toast-icon" />}
+            {toast.type === 'error' && <XCircle className="reservation-admin-toast-icon" />}
+            {toast.type === 'info' && <CheckCircle className="reservation-admin-toast-icon" />}
             {toast.message}
           </div>
         ))}

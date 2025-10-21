@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, LogIn, HelpCircle, User, Check, X, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, LogIn, User, Check, X, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -44,11 +44,22 @@ const Login = () => {
             if (data.success) {
                 showToast('Connexion réussie ! Redirection en cours...', 'success');
                 
+                // Stocker les informations utilisateur dans le localStorage
+                localStorage.setItem('userData', JSON.stringify({
+                    email: formData.email,
+                    typeuser: data.data.typeuser
+                }));
+                
+                // Stocker le token si disponible
+                if (data.data.token) {
+                    localStorage.setItem('token', data.data.token);
+                }
+                
                 setTimeout(() => {
                     if (data.data.typeuser === 'administrateur') {
                         window.location.href = '/dashboard';
                     } else if (data.data.typeuser === 'gestionnaire') {
-                        window.location.href = 'interface-gestionnaire/Gestion-creneau';
+                        window.location.href = '/interface-gestionnaire/Gestion-creneau';
                     } else {
                         window.location.href = '/profile';
                     }
@@ -781,9 +792,7 @@ const Login = () => {
                             <span className="login-checkbox-mark"></span>
                             Se souvenir de moi
                         </label>
-                        <a href="/forgot-password" className="login-forgot-link">
-                            Mot de passe oublié ?
-                        </a>
+                     
                     </div>
 
                     <button 
@@ -804,8 +813,6 @@ const Login = () => {
                         )}
                     </button>
                 </form>
-
-               
             </div>
 
             <div className="login-bg-shapes">
