@@ -1,22 +1,50 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { 
+  Search, 
+  Filter, 
+  Plus, 
+  Edit, 
+  Trash2, 
+  Phone, 
+  Calendar, 
+  Clock, 
+  User, 
+  Mail, 
+  MapPin, 
+  Ruler,
+  DollarSign,
+  X,
+  CheckCircle,
+  AlertCircle,
+  Info,
+  MessageCircle
+} from 'lucide-react';
 import './ReservationAdmin.css';
 
-const ReservationAdmin = () => {
+const ReservationDashboard = () => {
   const [reservations, setReservations] = useState([]);
+  const [allReservations, setAllReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingReservation, setEditingReservation] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('create');
   const [toasts, setToasts] = useState([]);
+  
+  // États des filtres
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [filterDate, setFilterDate] = useState('');
+  const [filterDateRange, setFilterDateRange] = useState({ start: '', end: '' });
+  const [filterPriceRange, setFilterPriceRange] = useState({ min: '', max: '' });
+  const [filterSurface, setFilterSurface] = useState('');
+  const [sortBy, setSortBy] = useState('date');
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const [formData, setFormData] = useState({
     datereservation: '',
     heurereservation: '',
     statut: 'en attente',
-    idclient: '',
-    numeroterrain: '',
     nomclient: '',
     prenom: '',
     email: '',
@@ -24,11 +52,9 @@ const ReservationAdmin = () => {
     typeterrain: '',
     tarif: '',
     surface: '',
-    heurefin: '',
-    nomterrain: ''
+    heurefin: ''
   });
 
-  // Ajouter un toast
   const addToast = (message, type = 'info') => {
     const id = Date.now();
     const newToast = { id, message, type };
@@ -39,23 +65,11 @@ const ReservationAdmin = () => {
     }, 5000);
   };
 
-  // Récupérer les réservations
+  // Récupérer toutes les réservations
   const fetchReservations = async () => {
     try {
       setLoading(true);
-      
-      const params = new URLSearchParams();
-      if (searchTerm) {
-        params.append('nom', searchTerm);
-        params.append('email', searchTerm);
-      }
-      if (filterStatus) params.append('statut', filterStatus);
-      
-      const queryString = params.toString();
-      const baseUrl = 'https://backend-foot-omega.vercel.app/api/reservation';
-      const url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
-      
-      const response = await fetch(url);
+      const response = await fetch('https://backend-foot-omega.vercel.app/api/reservation');
       
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
@@ -64,7 +78,9 @@ const ReservationAdmin = () => {
       const data = await response.json();
       
       if (data.success) {
-        setReservations(data.data || []);
+        const reservationsData = data.data || [];
+        setAllReservations(reservationsData);
+        setReservations(reservationsData);
       } else {
         addToast('Erreur lors du chargement des réservations', 'error');
       }
@@ -78,9 +94,136 @@ const ReservationAdmin = () => {
 
   useEffect(() => {
     fetchReservations();
-  }, [searchTerm, filterStatus]);
+  }, []);
 
-  // Gérer les changements de formulaire
+  // Mémoization des données dérivées
+  const uniqueSurfaces = useMemo(() => {
+    return [...new Set(allReservations.map(r => r.surface).filter(Boolean))];
+  }, [allReservations]);
+
+  // Fonction de filtrage optimisée
+  const filterReservations = useCallback(() => {
+    let filtered = [...allReservations];
+
+    // Filtre de recherche texte (nom, email, téléphone)
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(reservation => 
+        reservation.nomclient?.toLowerCase().includes(term) ||
+        reservation.prenom?.toLowerCase().includes(term) ||
+        reservation.email?.toLowerCase().includes(term) ||
+        reservation.telephone?.includes(term)
+      );
+    }
+
+    // Filtre par statut
+    if (filterStatus) {
+      filtered = filtered.filter(reservation => reservation.statut === filterStatus);
+    }
+
+    // Filtre par date spécifique
+    if (filterDate) {
+      filtered = filtered.filter(reservation => reservation.datereservation === filterDate);
+    }
+
+    // Filtre par plage de dates
+    if (filterDateRange.start && filterDateRange.end) {
+      filtered = filtered.filter(reservation => {
+        const resDate = new Date(reservation.datereservation);
+        const startDate = new Date(filterDateRange.start);
+        const endDate = new Date(filterDateRange.end);
+        return resDate >= startDate && resDate <= endDate;
+      });
+    }
+
+    // Filtre par plage de prix
+    if (filterPriceRange.min || filterPriceRange.max) {
+      filtered = filtered.filter(reservation => {
+        const price = parseFloat(reservation.tarif) || 0;
+        const min = filterPriceRange.min ? parseFloat(filterPriceRange.min) : 0;
+        const max = filterPriceRange.max ? parseFloat(filterPriceRange.max) : Infinity;
+        return price >= min && price <= max;
+      });
+    }
+
+    // Filtre par surface
+    if (filterSurface) {
+      filtered = filtered.filter(reservation => reservation.surface === filterSurface);
+    }
+
+    // Tri des résultats
+    filtered.sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (sortBy) {
+        case 'date':
+          aValue = new Date(a.datereservation);
+          bValue = new Date(b.datereservation);
+          break;
+        case 'prix':
+          aValue = parseFloat(a.tarif) || 0;
+          bValue = parseFloat(b.tarif) || 0;
+          break;
+        case 'nom':
+          aValue = `${a.prenom} ${a.nomclient}`.toLowerCase();
+          bValue = `${b.prenom} ${b.nomclient}`.toLowerCase();
+          break;
+        default:
+          aValue = new Date(a.datereservation);
+          bValue = new Date(b.datereservation);
+      }
+
+      if (sortOrder === 'asc') {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+
+    return filtered;
+  }, [
+    allReservations, 
+    searchTerm, 
+    filterStatus, 
+    filterDate, 
+    filterDateRange, 
+    filterPriceRange, 
+    filterSurface, 
+    sortBy, 
+    sortOrder
+  ]);
+
+  // Application des filtres avec debounce
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const filtered = filterReservations();
+      setReservations(filtered);
+    }, 150);
+
+    return () => clearTimeout(timeoutId);
+  }, [filterReservations]);
+
+  // Réinitialiser tous les filtres
+  const resetFilters = () => {
+    setSearchTerm('');
+    setFilterStatus('');
+    setFilterDate('');
+    setFilterDateRange({ start: '', end: '' });
+    setFilterPriceRange({ min: '', max: '' });
+    setFilterSurface('');
+    setSortBy('date');
+    setSortOrder('desc');
+  };
+
+  // Fonction pour envoyer un message WhatsApp
+  const sendWhatsAppMessage = (reservation) => {
+    const phoneNumber = reservation.telephone.replace(/\D/g, '');
+    const message = `Bonjour ${reservation.prenom} ${reservation.nomclient},\n\nVotre réservation a été confirmée!\n\n📅 Date: ${formatDate(reservation.datereservation)}\n⏰ Heure: ${reservation.heurereservation} - ${reservation.heurefin}\n🏟️ Type: ${reservation.typeterrain}\n💵 Prix: ${reservation.tarif} Dh\n\nMerci pour votre confiance!`;
+    
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -89,14 +232,11 @@ const ReservationAdmin = () => {
     }));
   };
 
-  // Ouvrir modal pour création
   const openCreateModal = () => {
     setFormData({
       datereservation: '',
       heurereservation: '',
       statut: 'en attente',
-      idclient: '',
-      numeroterrain: '',
       nomclient: '',
       prenom: '',
       email: '',
@@ -104,51 +244,44 @@ const ReservationAdmin = () => {
       typeterrain: '',
       tarif: '',
       surface: '',
-      heurefin: '',
-      nomterrain: ''
+      heurefin: ''
     });
     setModalMode('create');
     setShowModal(true);
   };
 
-  // Ouvrir modal pour édition
   const openEditModal = (reservation) => {
     setFormData({
       datereservation: reservation.datereservation || '',
       heurereservation: reservation.heurereservation || '',
       heurefin: reservation.heurefin || '',
       statut: reservation.statut || 'en attente',
-      idclient: reservation.idclient || '',
-      numeroterrain: reservation.numeroterrain || '',
       nomclient: reservation.nomclient || '',
       prenom: reservation.prenom || '',
       email: reservation.email || '',
       telephone: reservation.telephone || '',
       typeterrain: reservation.typeterrain || '',
       tarif: reservation.tarif || '',
-      surface: reservation.surface || '',
-      nomterrain: reservation.nomterrain || ''
+      surface: reservation.surface || ''
     });
     setEditingReservation(reservation);
     setModalMode('edit');
     setShowModal(true);
   };
 
-  // Fermer modal
   const closeModal = () => {
     setShowModal(false);
     setEditingReservation(null);
   };
 
-  // Mettre à jour le statut du créneau
-  const updateCreneauStatus = async (numeroterrain, datereservation, heurereservation, newStatus) => {
+  const updateCreneauStatus = async (nomterrain, datereservation, heurereservation, newStatus) => {
     try {
       const creneauxResponse = await fetch('https://backend-foot-omega.vercel.app/api/gestioncreneaux/');
       const creneauxData = await creneauxResponse.json();
       
       if (creneauxData.success) {
         const creneau = creneauxData.data.find(c => 
-          c.numeroterrain == numeroterrain && 
+          c.nomterrain === nomterrain && 
           c.datecreneaux === datereservation && 
           c.heure === heurereservation
         );
@@ -176,7 +309,6 @@ const ReservationAdmin = () => {
     }
   };
 
-  // Soumettre le formulaire (création ou modification)
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -203,10 +335,9 @@ const ReservationAdmin = () => {
           ? 'Réservation créée avec succès' 
           : 'Réservation modifiée avec succès';
         
-        // Si la réservation est confirmée, mettre à jour le statut du créneau
         if (formData.statut === 'confirmée') {
           const creneauUpdated = await updateCreneauStatus(
-            formData.numeroterrain,
+            formData.typeterrain,
             formData.datereservation,
             formData.heurereservation,
             'réservé'
@@ -214,14 +345,6 @@ const ReservationAdmin = () => {
           if (creneauUpdated) {
             message += ' - Créneau marqué comme réservé';
           }
-        }
-        
-        // Afficher le message d'email si envoyé
-        if (data.emailSent) {
-          message += ' - Email de confirmation envoyé au client';
-        }
-        if (data.emailError) {
-          message += ` - Erreur email: ${data.emailError}`;
         }
         
         addToast(message, 'success');
@@ -236,7 +359,6 @@ const ReservationAdmin = () => {
     }
   };
 
-  // Supprimer une réservation
   const handleDelete = async (id) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette réservation ?')) {
       return;
@@ -256,7 +378,7 @@ const ReservationAdmin = () => {
       if (data.success) {
         if (reservation && reservation.statut === 'confirmée') {
           await updateCreneauStatus(
-            reservation.numeroterrain,
+            reservation.typeterrain,
             reservation.datereservation,
             reservation.heurereservation,
             'disponible'
@@ -274,7 +396,6 @@ const ReservationAdmin = () => {
     }
   };
 
-  // Changer le statut (avec notification d'envoi d'email)
   const handleStatusChange = async (id, newStatus) => {
     try {
       const reservation = reservations.find(r => r.id === id);
@@ -297,7 +418,7 @@ const ReservationAdmin = () => {
         if (reservation) {
           if (newStatus === 'confirmée') {
             const creneauUpdated = await updateCreneauStatus(
-              reservation.numeroterrain,
+              reservation.typeterrain,
               reservation.datereservation,
               reservation.heurereservation,
               'réservé'
@@ -305,9 +426,14 @@ const ReservationAdmin = () => {
             if (creneauUpdated) {
               message += ' - Créneau marqué comme réservé';
             }
+            
+            // Envoyer message WhatsApp
+            sendWhatsAppMessage(reservation);
+            message += ' - Message WhatsApp envoyé';
+            
           } else if (newStatus === 'annulée' && reservation.statut === 'confirmée') {
             const creneauUpdated = await updateCreneauStatus(
-              reservation.numeroterrain,
+              reservation.typeterrain,
               reservation.datereservation,
               reservation.heurereservation,
               'disponible'
@@ -316,13 +442,6 @@ const ReservationAdmin = () => {
               message += ' - Créneau remis disponible';
             }
           }
-        }
-        
-        if (newStatus === 'confirmée' && data.emailSent) {
-          message += ' - Email de confirmation envoyé au client';
-        }
-        if (data.emailError) {
-          message += ` - Erreur email: ${data.emailError}`;
         }
         
         addToast(message, 'success');
@@ -336,7 +455,6 @@ const ReservationAdmin = () => {
     }
   };
 
-  // Formater la date
   const formatDate = (dateString) => {
     if (!dateString) return '—';
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -345,9 +463,9 @@ const ReservationAdmin = () => {
 
   if (loading) {
     return (
-      <div className="reservation-admin-container">
-        <div className="reservation-admin-loading">
-          <div className="reservation-admin-loading-spinner"></div>
+      <div className="rd-container">
+        <div className="rd-loading">
+          <div className="rd-spinner"></div>
           <p>Chargement des réservations...</p>
         </div>
       </div>
@@ -355,151 +473,406 @@ const ReservationAdmin = () => {
   }
 
   return (
-    <div className="reservation-admin-container">
-      <header className="reservation-admin-header">
-        <h1>Administration des Réservations</h1>
-        <p>Gérez toutes les réservations de terrains de football</p>
+    <div className="rd-container">
+      <header className="rd-header">
+        <div className="rd-header-content">
+          <h1 className="rd-title">Gestion des Réservations</h1>
+          <p className="rd-subtitle">Administrez et suivez toutes vos réservations</p>
+        </div>
       </header>
 
-      <div className="reservation-admin-controls">
-        <div className="reservation-admin-search-filters">
-          <div className="reservation-admin-search-box">
+      {/* Panneau de filtres avancés */}
+      <div className="rd-filters-panel">
+        <div className="rd-filters-main">
+          <div className="rd-search-wrapper">
+            <Search className="rd-search-icon" size={20} />
             <input
               type="text"
-              placeholder="Rechercher par nom ou email..."
+              placeholder="Rechercher par nom, email, téléphone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              className="rd-search-input"
             />
           </div>
           
-          <select 
-            value={filterStatus} 
-            onChange={(e) => setFilterStatus(e.target.value)}
+          <div className="rd-filter-group">
+            <select 
+              value={filterStatus} 
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="rd-filter-select"
+            >
+              <option value="">Tous les statuts</option>
+              <option value="en attente">En attente</option>
+              <option value="confirmée">Confirmée</option>
+              <option value="annulée">Annulée</option>
+              <option value="terminée">Terminée</option>
+            </select>
+          </div>
+
+          <div className="rd-filter-group">
+            <select 
+              value={sortBy} 
+              onChange={(e) => setSortBy(e.target.value)}
+              className="rd-filter-select"
+            >
+              <option value="date">Trier par date</option>
+              <option value="prix">Trier par prix</option>
+              <option value="nom">Trier par nom</option>
+            </select>
+          </div>
+
+          <div className="rd-filter-group">
+            <select 
+              value={sortOrder} 
+              onChange={(e) => setSortOrder(e.target.value)}
+              className="rd-filter-select"
+            >
+              <option value="desc">Décroissant</option>
+              <option value="asc">Croissant</option>
+            </select>
+          </div>
+
+          <button 
+            className="rd-btn rd-btn-secondary rd-btn-filter"
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
           >
-            <option value="">Tous les statuts</option>
-            <option value="en attente">En attente</option>
-            <option value="confirmée">Confirmée</option>
-            <option value="annulée">Annulée</option>
-            <option value="terminée">Terminée</option>
-          </select>
+            <Filter size={16} />
+            {showAdvancedFilters ? 'Masquer' : 'Afficher'} Filtres
+          </button>
+
+          {(searchTerm || filterStatus || filterDate || filterDateRange.start || filterPriceRange.min || filterSurface) && (
+            <button 
+              className="rd-btn rd-btn-danger"
+              onClick={resetFilters}
+            >
+              <X size={16} />
+              Réinitialiser
+            </button>
+          )}
         </div>
-        
-        <button className="reservation-admin-btn reservation-admin-btn-primary" onClick={openCreateModal}>
-          + Nouvelle Réservation
-        </button>
+
+        {/* Filtres avancés */}
+        {showAdvancedFilters && (
+          <div className="rd-advanced-filters">
+            <div className="rd-filter-group">
+              <label className="rd-filter-label">
+                <Calendar size={16} />
+                Date spécifique
+              </label>
+              <input
+                type="date"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+                className="rd-filter-input"
+              />
+            </div>
+
+            <div className="rd-filter-group">
+              <label className="rd-filter-label">
+                <Calendar size={16} />
+                Plage de dates
+              </label>
+              <div className="rd-date-range">
+                <input
+                  type="date"
+                  placeholder="Début"
+                  value={filterDateRange.start}
+                  onChange={(e) => setFilterDateRange(prev => ({ ...prev, start: e.target.value }))}
+                  className="rd-filter-input"
+                />
+                <span className="rd-range-separator">à</span>
+                <input
+                  type="date"
+                  placeholder="Fin"
+                  value={filterDateRange.end}
+                  onChange={(e) => setFilterDateRange(prev => ({ ...prev, end: e.target.value }))}
+                  className="rd-filter-input"
+                />
+              </div>
+            </div>
+
+            <div className="rd-filter-group">
+              <label className="rd-filter-label">
+                <DollarSign size={16} />
+                Plage de prix (Dh)
+              </label>
+              <div className="rd-price-range">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  value={filterPriceRange.min}
+                  onChange={(e) => setFilterPriceRange(prev => ({ ...prev, min: e.target.value }))}
+                  className="rd-filter-input"
+                />
+                <span className="rd-range-separator">à</span>
+                <input
+                  type="number"
+                  placeholder="Max"
+                  value={filterPriceRange.max}
+                  onChange={(e) => setFilterPriceRange(prev => ({ ...prev, max: e.target.value }))}
+                  className="rd-filter-input"
+                />
+              </div>
+            </div>
+
+            <div className="rd-filter-group">
+              <label className="rd-filter-label">
+                <Ruler size={16} />
+                Surface
+              </label>
+              <select 
+                value={filterSurface} 
+                onChange={(e) => setFilterSurface(e.target.value)}
+                className="rd-filter-select"
+              >
+                <option value="">Toutes les surfaces</option>
+                {uniqueSurfaces.map(surface => (
+                  <option key={surface} value={surface}>{surface}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="reservation-admin-grid">
+      <div className="rd-controls-panel">
+        <button className="rd-btn rd-btn-primary" onClick={openCreateModal}>
+          <Plus size={20} />
+          Nouvelle Réservation
+        </button>
+        
+        <div className="rd-results-count">
+          {reservations.length} réservation{reservations.length > 1 ? 's' : ''} trouvée{reservations.length > 1 ? 's' : ''}
+        </div>
+      </div>
+
+      <div className="rd-grid-layout">
         {reservations.length > 0 ? (
           reservations.map(reservation => (
-            <div key={reservation.id} className="reservation-admin-card">
-              <div className="reservation-admin-card-header">
-                <h3>{reservation.nomterrain} - Terrain {reservation.numeroterrain}</h3>
-                <span className={`reservation-admin-status-badge ${reservation.statut}`}>
+            <div key={reservation.id} className="rd-card">
+              <div className="rd-card-header">
+                <div className="rd-card-title-section">
+                  <h3 className="rd-card-title">
+                    <MapPin size={18} className="rd-card-title-icon" />
+                    {reservation.typeterrain || 'Terrain Football'}
+                  </h3>
+                  <div className="rd-card-subtitle">
+                    Réservation #{reservation.id}
+                  </div>
+                </div>
+                <span className={`rd-status rd-status-${reservation.statut.replace(' ', '-')}`}>
                   {reservation.statut}
                 </span>
               </div>
               
-              <div className="reservation-admin-card-body">
-                <div className="reservation-admin-details">
-                  <p><strong>Date:</strong> <span>{formatDate(reservation.datereservation)}</span></p>
-                  <p><strong>Heure:</strong> <span>{reservation.heurereservation} - {reservation.heurefin}</span></p>
-                  <p><strong>Client:</strong> <span>{reservation.prenom} {reservation.nomclient}</span></p>
-                  <p><strong>Email:</strong> <span>{reservation.email}</span></p>
-                  <p><strong>Téléphone:</strong> <span>{reservation.telephone}</span></p>
-                  <p><strong>Type:</strong> <span>{reservation.typeterrain || 'Non spécifié'}</span></p>
-                  <p><strong>Surface:</strong> <span>{reservation.surface}</span></p>
-                  <p><strong>Tarif:</strong> <span>{reservation.tarif} Dh</span></p>
+              <div className="rd-card-content">
+                <div className="rd-info-grid">
+                  <div className="rd-info-item">
+                    <div className="rd-info-icon-wrapper">
+                      <Calendar size={16} className="rd-info-icon" />
+                    </div>
+                    <div className="rd-info-content">
+                      <span className="rd-info-label">Date</span>
+                      <span className="rd-info-value">{formatDate(reservation.datereservation)}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="rd-info-item">
+                    <div className="rd-info-icon-wrapper">
+                      <Clock size={16} className="rd-info-icon" />
+                    </div>
+                    <div className="rd-info-content">
+                      <span className="rd-info-label">Heure</span>
+                      <span className="rd-info-value">{reservation.heurereservation} - {reservation.heurefin}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="rd-info-item">
+                    <div className="rd-info-icon-wrapper">
+                      <User size={16} className="rd-info-icon" />
+                    </div>
+                    <div className="rd-info-content">
+                      <span className="rd-info-label">Client</span>
+                      <span className="rd-info-value">{reservation.prenom} {reservation.nomclient}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="rd-info-item">
+                    <div className="rd-info-icon-wrapper">
+                      <div className="rd-contact-icons">
+                        <Mail size={14} />
+                        <Phone size={14} />
+                      </div>
+                    </div>
+                    <div className="rd-info-content">
+                      <span className="rd-info-label">Contact</span>
+                      <span className="rd-info-value">
+                        <div>{reservation.email}</div>
+                        <div>{reservation.telephone}</div>
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="rd-info-item">
+                    <div className="rd-info-icon-wrapper">
+                      <Ruler size={16} className="rd-info-icon" />
+                    </div>
+                    <div className="rd-info-content">
+                      <span className="rd-info-label">Surface</span>
+                      <span className="rd-info-value">{reservation.surface}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="rd-info-item rd-info-highlight">
+                    <div className="rd-info-icon-wrapper">
+                      <DollarSign size={16} className="rd-info-icon" />
+                    </div>
+                    <div className="rd-info-content">
+                      <span className="rd-info-label">Tarif</span>
+                      <span className="rd-info-value">{reservation.tarif} Dh</span>
+                    </div>
+                  </div>
                 </div>
                 
-                <div className="reservation-admin-card-actions">
-                  <select 
-                    value={reservation.statut} 
-                    onChange={(e) => handleStatusChange(reservation.id, e.target.value)}
-                    className="reservation-admin-status-select"
-                  >
-                    <option value="en attente">En attente</option>
-                    <option value="confirmée">Confirmée</option>
-                    <option value="annulée">Annulée</option>
-                    <option value="terminée">Terminée</option>
-                  </select>
+                <div className="rd-actions-panel">
+                  <div className="rd-status-control">
+                    <label className="rd-status-label">Statut:</label>
+                    <select 
+                      value={reservation.statut} 
+                      onChange={(e) => handleStatusChange(reservation.id, e.target.value)}
+                      className="rd-status-select"
+                    >
+                      <option value="en attente">En attente</option>
+                      <option value="confirmée">Confirmée</option>
+                      <option value="annulée">Annulée</option>
+                      <option value="terminée">Terminée</option>
+                    </select>
+                  </div>
                   
-                  <div className="reservation-admin-action-buttons">
+                  <div className="rd-action-buttons">
                     <button 
-                      className="reservation-admin-btn reservation-admin-btn-secondary"
+                      className="rd-btn rd-btn-secondary rd-btn-sm rd-btn-edit"
                       onClick={() => openEditModal(reservation)}
                     >
+                      <Edit size={16} />
                       Modifier
                     </button>
                     
                     <button 
-                      className="reservation-admin-btn reservation-admin-btn-danger"
+                      className="rd-btn rd-btn-danger rd-btn-sm rd-btn-delete"
                       onClick={() => handleDelete(reservation.id)}
                     >
+                      <Trash2 size={16} />
                       Supprimer
                     </button>
+
+                    {reservation.statut === 'confirmée' && (
+                      <button 
+                        className="rd-btn rd-btn-whatsapp rd-btn-sm rd-btn-whatsapp"
+                        onClick={() => sendWhatsAppMessage(reservation)}
+                        title="Envoyer un message WhatsApp"
+                      >
+                        <MessageCircle size={16} />
+                        WhatsApp
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
           ))
         ) : (
-          <div className="reservation-admin-no-results">
-            <p>Aucune réservation trouvée</p>
+          <div className="rd-empty-state">
+            <div className="rd-empty-icon">
+              <Search size={48} />
+            </div>
+            <h3 className="rd-empty-title">Aucune réservation trouvée</h3>
+            <p className="rd-empty-description">
+              Aucune réservation ne correspond à vos critères de recherche.
+              {allReservations.length > 0 && (
+                <button 
+                  className="rd-btn rd-btn-secondary rd-btn-sm"
+                  onClick={resetFilters}
+                  style={{ marginLeft: '10px' }}
+                >
+                  Réinitialiser les filtres
+                </button>
+              )}
+            </p>
           </div>
         )}
       </div>
 
-      {/* Modal de création/édition */}
+      {/* Modal */}
       {showModal && (
-        <div className="reservation-admin-modal-overlay">
-          <div className="reservation-admin-modal">
-            <div className="reservation-admin-modal-header">
-              <h2>{modalMode === 'create' ? 'Créer une réservation' : 'Modifier la réservation'}</h2>
-              <button className="reservation-admin-close-btn" onClick={closeModal}>×</button>
+        <div className="rd-modal-overlay">
+          <div className="rd-modal">
+            <div className="rd-modal-header">
+              <h2 className="rd-modal-title">
+                {modalMode === 'create' ? 'Créer une réservation' : 'Modifier la réservation'}
+              </h2>
+              <button className="rd-modal-close" onClick={closeModal}>
+                <X size={24} />
+              </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="reservation-admin-form">
-              <div className="reservation-admin-form-grid">
-                <div className="reservation-admin-form-group">
-                  <label>Date de réservation</label>
+            <form onSubmit={handleSubmit} className="rd-form">
+              <div className="rd-form-grid">
+                <div className="rd-form-group">
+                  <label className="rd-form-label">
+                    <Calendar size={18} className="rd-form-label-icon" />
+                    Date de réservation
+                  </label>
                   <input
                     type="date"
                     name="datereservation"
                     value={formData.datereservation}
                     onChange={handleInputChange}
+                    className="rd-form-input"
                     required
                   />
                 </div>
                 
-                <div className="reservation-admin-form-group">
-                  <label>Heure de début</label>
+                <div className="rd-form-group">
+                  <label className="rd-form-label">
+                    <Clock size={18} className="rd-form-label-icon" />
+                    Heure de début
+                  </label>
                   <input
                     type="time"
                     name="heurereservation"
                     value={formData.heurereservation}
                     onChange={handleInputChange}
+                    className="rd-form-input"
                     required
                   />
                 </div>
                 
-                <div className="reservation-admin-form-group">
-                  <label>Heure de fin</label>
+                <div className="rd-form-group">
+                  <label className="rd-form-label">
+                    <Clock size={18} className="rd-form-label-icon" />
+                    Heure de fin
+                  </label>
                   <input
                     type="time"
                     name="heurefin"
                     value={formData.heurefin}
                     onChange={handleInputChange}
+                    className="rd-form-input"
                     required
                   />
                 </div>
                 
-                <div className="reservation-admin-form-group">
-                  <label>Statut</label>
+                <div className="rd-form-group">
+                  <label className="rd-form-label">
+                    <Info size={18} className="rd-form-label-icon" />
+                    Statut
+                  </label>
                   <select
                     name="statut"
                     value={formData.statut}
                     onChange={handleInputChange}
+                    className="rd-form-select"
                     required
                   >
                     <option value="en attente">En attente</option>
@@ -509,122 +882,120 @@ const ReservationAdmin = () => {
                   </select>
                 </div>
                 
-                <div className="reservation-admin-form-group">
-                  <label>ID Client</label>
-                  <input
-                    type="number"
-                    name="idclient"
-                    value={formData.idclient}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                
-                <div className="reservation-admin-form-group">
-                  <label>Numéro de terrain</label>
-                  <input
-                    type="number"
-                    name="numeroterrain"
-                    value={formData.numeroterrain}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                
-                <div className="reservation-admin-form-group">
-                  <label>Nom du client</label>
+                <div className="rd-form-group">
+                  <label className="rd-form-label">
+                    <User size={18} className="rd-form-label-icon" />
+                    Nom du client
+                  </label>
                   <input
                     type="text"
                     name="nomclient"
                     value={formData.nomclient}
                     onChange={handleInputChange}
+                    className="rd-form-input"
                     required
                   />
                 </div>
                 
-                <div className="reservation-admin-form-group">
-                  <label>Prénom</label>
+                <div className="rd-form-group">
+                  <label className="rd-form-label">
+                    <User size={18} className="rd-form-label-icon" />
+                    Prénom
+                  </label>
                   <input
                     type="text"
                     name="prenom"
                     value={formData.prenom}
                     onChange={handleInputChange}
+                    className="rd-form-input"
                     required
                   />
                 </div>
                 
-                <div className="reservation-admin-form-group">
-                  <label>Email</label>
+                <div className="rd-form-group">
+                  <label className="rd-form-label">
+                    <Mail size={18} className="rd-form-label-icon" />
+                    Email
+                  </label>
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
+                    className="rd-form-input"
                     required
                   />
                 </div>
                 
-                <div className="reservation-admin-form-group">
-                  <label>Téléphone</label>
+                <div className="rd-form-group">
+                  <label className="rd-form-label">
+                    <Phone size={18} className="rd-form-label-icon" />
+                    Téléphone
+                  </label>
                   <input
                     type="tel"
                     name="telephone"
                     value={formData.telephone}
                     onChange={handleInputChange}
+                    className="rd-form-input"
                     required
                   />
                 </div>
                 
-                <div className="reservation-admin-form-group">
-                  <label>Type de terrain</label>
+                <div className="rd-form-group">
+                  <label className="rd-form-label">
+                    <MapPin size={18} className="rd-form-label-icon" />
+                    Type de terrain
+                  </label>
                   <input
                     type="text"
                     name="typeterrain"
                     value={formData.typeterrain}
                     onChange={handleInputChange}
-                    placeholder="Ex: Synthétique, Gazon naturel"
+                    className="rd-form-input"
+                    placeholder="Synthétique, Gazon naturel..."
                   />
                 </div>
                 
-                <div className="reservation-admin-form-group">
-                  <label>Tarif (Dh)</label>
+                <div className="rd-form-group">
+                  <label className="rd-form-label">
+                    <DollarSign size={18} className="rd-form-label-icon" />
+                    Tarif (Dh)
+                  </label>
                   <input
                     type="number"
                     step="0.01"
                     name="tarif"
                     value={formData.tarif}
                     onChange={handleInputChange}
+                    className="rd-form-input"
                   />
                 </div>
                 
-                <div className="reservation-admin-form-group">
-                  <label>Surface</label>
+                <div className="rd-form-group">
+                  <label className="rd-form-label">
+                    <Ruler size={18} className="rd-form-label-icon" />
+                    Surface
+                  </label>
                   <input
                     type="text"
                     name="surface"
                     value={formData.surface}
                     onChange={handleInputChange}
+                    className="rd-form-input"
                     placeholder="Ex: 100m²"
-                  />
-                </div>
-                
-                <div className="reservation-admin-form-group">
-                  <label>Nom du terrain</label>
-                  <input
-                    type="text"
-                    name="nomterrain"
-                    value={formData.nomterrain}
-                    onChange={handleInputChange}
                   />
                 </div>
               </div>
               
-              <div className="reservation-admin-form-actions">
-                <button type="button" className="reservation-admin-btn reservation-admin-btn-secondary" onClick={closeModal}>
+              <div className="rd-form-actions">
+                <button type="button" className="rd-btn rd-btn-secondary" onClick={closeModal}>
+                  <X size={16} />
                   Annuler
                 </button>
-                <button type="submit" className="reservation-admin-btn reservation-admin-btn-primary">
-                  {modalMode === 'create' ? 'Créer' : 'Modifier'}
+                <button type="submit" className="rd-btn rd-btn-primary">
+                  <CheckCircle size={16} />
+                  {modalMode === 'create' ? 'Créer la réservation' : 'Enregistrer les modifications'}
                 </button>
               </div>
             </form>
@@ -632,11 +1003,15 @@ const ReservationAdmin = () => {
         </div>
       )}
 
-      {/* Toast notifications */}
-      <div className="reservation-admin-toast-container">
+      <div className="rd-toast-container">
         {toasts.map(toast => (
-          <div key={toast.id} className={`reservation-admin-toast ${toast.type}`}>
-            {toast.message}
+          <div key={toast.id} className={`rd-toast rd-toast-${toast.type}`}>
+            <div className="rd-toast-content">
+              {toast.type === 'success' && <CheckCircle size={20} className="rd-toast-icon" />}
+              {toast.type === 'error' && <AlertCircle size={20} className="rd-toast-icon" />}
+              {toast.type === 'info' && <Info size={20} className="rd-toast-icon" />}
+              <span className="rd-toast-message">{toast.message}</span>
+            </div>
           </div>
         ))}
       </div>
@@ -644,4 +1019,4 @@ const ReservationAdmin = () => {
   );
 };
 
-export default ReservationAdmin;
+export default ReservationDashboard;
