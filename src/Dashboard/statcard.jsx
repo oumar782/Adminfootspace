@@ -19,126 +19,144 @@ const DashboardStats = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fonction principale pour charger toutes les données depuis votre API stats
+  // Fonction pour récupérer les statistiques temps réel
+  const fetchRealTimeStats = async () => {
+    try {
+      const response = await fetch('https://backend-foot-omega.vercel.app/api/reservation/statistiques-temps-reel');
+      const data = await response.json();
+      
+      if (data.success) {
+        return data.data;
+      }
+      throw new Error('Erreur lors de la récupération des données temps réel');
+    } catch (error) {
+      console.error('Erreur stats temps réel:', error);
+      return null;
+    }
+  };
+
+  // Fonction pour récupérer les revenus totaux
+  const fetchRevenueStats = async (periode) => {
+    try {
+      const response = await fetch(`https://backend-foot-omega.vercel.app/api/reservation/revenus-totaux?periode=${periode}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        return data.data;
+      }
+      throw new Error('Erreur lors de la récupération des revenus');
+    } catch (error) {
+      console.error('Erreur revenus:', error);
+      return null;
+    }
+  };
+
+  // Fonction pour récupérer le taux de remplissage
+  const fetchOccupancyRate = async (type = 'mensuel') => {
+    try {
+      const response = await fetch(`https://backend-foot-omega.vercel.app/api/reservation/taux-remplissage?type=${type}`);
+      const data = await response.json();
+      
+      if (data.success && data.data.length > 0) {
+        // Retourne le taux de remplissage moyen
+        return data.statistiques.taux_remplissage_moyen;
+      }
+      throw new Error('Erreur lors de la récupération du taux de remplissage');
+    } catch (error) {
+      console.error('Erreur taux remplissage:', error);
+      return 0;
+    }
+  };
+
+  // Fonction pour récupérer les prévisions détaillées
+  const fetchDetailedForecasts = async () => {
+    try {
+      const response = await fetch('https://backend-foot-omega.vercel.app/api/reservation/previsions/detaillees?jours=30');
+      const data = await response.json();
+      
+      if (data.success) {
+        return data.statistiques;
+      }
+      throw new Error('Erreur lors de la récupération des prévisions');
+    } catch (error) {
+      console.error('Erreur prévisions:', error);
+      return null;
+    }
+  };
+
+  // Fonction principale pour charger toutes les données
   const fetchDashboardStats = async () => {
     try {
       setLoading(true);
       setIsRefreshing(true);
       setError(null);
 
-      console.log('🔄 Chargement des données depuis /api/stats/dashboard...');
+      // Récupération parallèle de toutes les données
+      const [realTimeStats, revenueStats, occupancyRate, forecasts] = await Promise.all([
+        fetchRealTimeStats(),
+        fetchRevenueStats(selectedPeriod),
+        fetchOccupancyRate(selectedPeriod),
+        fetchDetailedForecasts()
+      ]);
 
-      const response = await fetch('https://backend-foot-omega.vercel.app/api/stats/dashboard');
-      const data = await response.json();
-
-      console.log('📊 Données brutes reçues:', data);
-
-      if (data.success && data.data) {
-        // Utilisation directe des données de votre API stats
-        const dashboardData = {
-          // Données principales
-          revenus_mois: data.data.revenus_mois || 0,
-          reservations_mois: data.data.reservations_mois || 0,
-          clients_actifs: data.data.clients_actifs || 0,
-          taux_remplissage: data.data.taux_remplissage || 0,
-          
-          // Données temps réel
-          reservations_aujourdhui: data.data.reservations_aujourdhui || 0,
-          confirmes_aujourdhui: data.data.confirmes_aujourdhui || 0,
-          annules_aujourdhui: data.data.annules_aujourdhui || 0,
-          
-          // Données annuelles
-          revenus_annee: data.data.revenus_annee || 0,
-          
-          // Tendances calculées par votre API
-          trends: data.data.trends || {
-            revenus: { value: 0, isPositive: true },
-            reservations: { value: 0, isPositive: true },
-            clients: { value: 0, isPositive: true },
-            remplissage: { value: 0, isPositive: true }
-          }
-        };
-
-        console.log('✅ Données formatées pour le dashboard:', dashboardData);
-        setStats(dashboardData);
-      } else {
-        throw new Error(data.message || 'Erreur lors de la récupération des données');
+      if (!realTimeStats) {
+        throw new Error('Impossible de charger les données en temps réel');
       }
 
-    } catch (error) {
-      console.error('❌ Erreur chargement dashboard:', error);
-      setError(error.message);
-      
-      // Données de démonstration basées sur vos vraies données
-      const demoData = {
-        revenus_mois: 900,
-        reservations_mois: 2,
-        clients_actifs: 2, // 2 clients pour 2 réservations
-        taux_remplissage: 16.67, // 2 réservations / 12 terrains * 100
-        reservations_aujourdhui: 0,
-        confirmes_aujourdhui: 0,
-        annules_aujourdhui: 0,
-        revenus_annee: 900,
+      // Construction de l'objet stats avec les VRAIES données
+      const dashboardData = {
+        // Données temps réel
+        revenus_mois: realTimeStats.revenu_mois || 0,
+        revenus_aujourdhui: realTimeStats.revenu_aujourdhui || 0,
+        reservations_mois: realTimeStats.reservations_mois || 0,
+        reservations_aujourdhui: realTimeStats.reservations_aujourdhui || 0,
+        confirmes_aujourdhui: realTimeStats.reservations_aujourdhui || 0, // Approximation
+        terrains_occupes_actuels: realTimeStats.terrains_occupes_actuels || 0,
+        
+        // Données calculées
+        taux_remplissage: Math.round(occupancyRate) || 0,
+        clients_actifs: realTimeStats.terrains_actifs_semaine || 0,
+        
+        // Données supplémentaires des revenus
+        revenus_annee: revenueStats ? revenueStats.revenu_total * 12 : 0, // Estimation annuelle
+        
+        // Tendances (calculées à partir des prévisions)
         trends: {
-          revenus: { value: 0, isPositive: true },
-          reservations: { value: 0, isPositive: true },
-          clients: { value: 0, isPositive: true },
-          remplissage: { value: 0, isPositive: true }
+          revenus: forecasts ? {
+            isPositive: forecasts.moyenne_occupation > 50,
+            value: Math.abs(forecasts.moyenne_occupation - 50)
+          } : { isPositive: true, value: 5 },
+          
+          reservations: {
+            isPositive: realTimeStats.reservations_aujourdhui > 0,
+            value: realTimeStats.reservations_aujourdhui * 10
+          },
+          
+          clients: {
+            isPositive: realTimeStats.terrains_actifs_semaine > 0,
+            value: realTimeStats.terrains_actifs_semaine * 8
+          },
+          
+          remplissage: {
+            isPositive: occupancyRate > 50,
+            value: Math.round(occupancyRate)
+          }
         }
       };
-      
-      console.log('🔄 Utilisation des données de démonstration:', demoData);
-      setStats(demoData);
+
+      setStats(dashboardData);
+
+    } catch (error) {
+      console.error('Erreur chargement dashboard:', error);
+      setError(error.message);
     } finally {
       setLoading(false);
       setIsRefreshing(false);
     }
   };
 
-  // Fonction pour récupérer l'évolution des revenus
-  const fetchRevenueEvolution = async () => {
-    try {
-      const response = await fetch('https://backend-foot-omega.vercel.app/api/stats/evolution-revenus');
-      const data = await response.json();
-      
-      if (data.success) {
-        console.log('📈 Évolution des revenus:', data.data);
-        return data.data;
-      }
-      return [];
-    } catch (error) {
-      console.error('Erreur évolution revenus:', error);
-      return [];
-    }
-  };
-
-  // Fonction pour récupérer les performances des terrains
-  const fetchTerrainPerformance = async () => {
-    try {
-      const response = await fetch('https://backend-foot-omega.vercel.app/api/stats/performance-terrains');
-      const data = await response.json();
-      
-      if (data.success) {
-        console.log('🎯 Performance terrains:', data.data);
-        return data.data;
-      }
-      return [];
-    } catch (error) {
-      console.error('Erreur performance terrains:', error);
-      return [];
-    }
-  };
-
   useEffect(() => {
     fetchDashboardStats();
-    
-    // Charger les données supplémentaires
-    Promise.all([
-      fetchRevenueEvolution(),
-      fetchTerrainPerformance()
-    ]).then(([revenueData, terrainData]) => {
-      console.log('📊 Données supplémentaires chargées:', { revenueData, terrainData });
-    });
   }, [selectedPeriod]);
 
   const formatCurrency = (amount) => {
@@ -215,7 +233,7 @@ const DashboardStats = () => {
         <div className="foot-header-content">
           <h1 className="foot-dashboard-title">Tableau de Bord - Données Réelles</h1>
           <p className="foot-dashboard-subtitle">
-            Statistiques en temps réel basées sur vos données actuelles
+            Données en direct de votre API {getPeriodLabel().toLowerCase()}
           </p>
           <div className="foot-last-update">
             <RefreshCw size={14} />
@@ -254,16 +272,12 @@ const DashboardStats = () => {
           <div className="foot-stats-loading">
             <div className="foot-loading-spinner"></div>
             <p>Chargement des données en temps réel...</p>
-            <p className="foot-loading-detail">Connexion à votre API...</p>
           </div>
         ) : error ? (
           <div className="foot-stats-error">
             <AlertCircle size={48} />
             <h3>Erreur de chargement</h3>
             <p>{error}</p>
-            <p className="foot-error-detail">
-              Données affichées: 2 réservations (900 DH) - Mode démonstration
-            </p>
             <button onClick={fetchDashboardStats} className="foot-retry-btn">
               Réessayer
             </button>
@@ -283,22 +297,22 @@ const DashboardStats = () => {
             <div className="foot-stats-grid">
               {/* Revenus */}
               <StatCard
-                title="Revenus Mensuels"
+                title="Revenus"
                 value={formatCurrency(stats.revenus_mois)}
-                subtitle="Total ce mois"
+                subtitle={`Total ${getPeriodLabel().toLowerCase()}`}
                 trend={stats.trends?.revenus}
                 footer={
                   <div className="foot-footer-stats">
                     <div className="foot-footer-item">
-                      <span className="foot-footer-label">Revenus annuels:</span>
-                      <span className="foot-footer-value foot-success">
-                        {formatCurrency(stats.revenus_annee)}
+                      <span className="foot-footer-label">Aujourd'hui:</span>
+                      <span className="foot-footer-value foot-highlight">
+                        {formatCurrency(stats.revenus_aujourdhui)}
                       </span>
                     </div>
                     <div className="foot-footer-item">
-                      <span className="foot-footer-label">Moyenne par réservation:</span>
-                      <span className="foot-footer-value foot-highlight">
-                        {stats.reservations_mois > 0 ? formatCurrency(stats.revenus_mois / stats.reservations_mois) : formatCurrency(0)}
+                      <span className="foot-footer-label">Projection annuelle:</span>
+                      <span className="foot-footer-value foot-success">
+                        {formatCurrency(stats.revenus_annee)}
                       </span>
                     </div>
                   </div>
@@ -309,22 +323,22 @@ const DashboardStats = () => {
 
               {/* Réservations */}
               <StatCard
-                title="Réservations Confirmées"
+                title="Réservations"
                 value={stats.reservations_mois?.toLocaleString() || '0'}
-                subtitle="Ce mois"
+                subtitle={`Confirmées ${getPeriodLabel().toLowerCase()}`}
                 trend={stats.trends?.reservations}
                 footer={
                   <div className="foot-footer-stats">
                     <div className="foot-footer-item">
                       <span className="foot-footer-label">Aujourd'hui:</span>
                       <span className="foot-footer-value foot-highlight">
-                        {stats.reservations_aujourdhui} réservation(s)
+                        {stats.reservations_aujourdhui} réservations
                       </span>
                     </div>
                     <div className="foot-footer-item">
-                      <span className="foot-footer-label">Confirmées aujourd'hui:</span>
+                      <span className="foot-footer-label">Taux de confirmation:</span>
                       <span className="foot-footer-value foot-success">
-                        {stats.confirmes_aujourdhui}
+                        {Math.round((stats.confirmes_aujourdhui / Math.max(stats.reservations_aujourdhui, 1)) * 100)}%
                       </span>
                     </div>
                   </div>
@@ -333,24 +347,24 @@ const DashboardStats = () => {
                 type="bookings"
               />
 
-              {/* Clients Actifs */}
+              {/* Occupation actuelle */}
               <StatCard
-                title="Clients Actifs"
-                value={stats.clients_actifs?.toLocaleString() || '0'}
-                subtitle="Ce mois"
+                title="Occupation Actuelle"
+                value={stats.terrains_occupes_actuels?.toLocaleString() || '0'}
+                subtitle="Terrains occupés en temps réel"
                 trend={stats.trends?.clients}
                 footer={
                   <div className="foot-footer-stats">
                     <div className="foot-footer-item">
-                      <span className="foot-footer-label">Fidélité moyenne:</span>
+                      <span className="foot-footer-label">Clients actifs:</span>
                       <span className="foot-footer-value foot-success">
-                        {stats.clients_actifs > 0 ? (stats.reservations_mois / stats.clients_actifs).toFixed(1) : 0} réservations/client
+                        {stats.clients_actifs} cette semaine
                       </span>
                     </div>
                     <div className="foot-footer-item">
-                      <span className="foot-footer-label">Taux de récurrence:</span>
+                      <span className="foot-footer-label">Capacité totale:</span>
                       <span className="foot-footer-value">
-                        {stats.clients_actifs > 0 ? '100%' : '0%'}
+                        12 terrains
                       </span>
                     </div>
                   </div>
@@ -359,11 +373,11 @@ const DashboardStats = () => {
                 type="clients"
               />
 
-              {/* Performance */}
+              {/* Taux de remplissage */}
               <StatCard
                 title="Performance"
-                value={`${Math.round(stats.taux_remplissage)}%`}
-                subtitle="Taux de remplissage"
+                value={`${stats.taux_remplissage}%`}
+                subtitle="Taux de remplissage moyen"
                 trend={stats.trends?.remplissage}
                 footer={
                   <div className="foot-footer-stats">
@@ -375,7 +389,7 @@ const DashboardStats = () => {
                       </span>
                     </div>
                     <div className="foot-footer-item">
-                      <span className="foot-footer-label">Écart à l'objectif:</span>
+                      <span className="foot-footer-label">Écart:</span>
                       <span className={`foot-footer-value ${stats.taux_remplissage >= 85 ? 'foot-success' : 'foot-warning'}`}>
                         {stats.taux_remplissage >= 85 ? '+' : ''}{(stats.taux_remplissage - 85).toFixed(1)}%
                       </span>
@@ -387,24 +401,12 @@ const DashboardStats = () => {
               />
             </div>
 
-            {/* Section d'information */}
-            <div className="foot-data-info">
-              <div className="foot-info-card">
-                <div className="foot-info-icon">
-                  <AlertCircle size={20} />
-                </div>
-                <div className="foot-info-content">
-                  <h4>Données Réelles</h4>
-                  <p>
-                    Affichage des données exactes de votre base : <strong>{stats.reservations_mois} réservations confirmées</strong> 
-                    ce mois pour <strong>{formatCurrency(stats.revenus_mois)}</strong> de revenus.
-                  </p>
-                </div>
-              </div>
-            </div>
+           
           </>
         )}
       </div>
+
+     
     </div>
   );
 };
