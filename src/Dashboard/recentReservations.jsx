@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './custom.css';
+import './recent.css';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -140,7 +140,7 @@ Détails de votre réservation:
 - Date: ${reservation.date}
 - Heure: ${reservation.time}
 - Durée: ${reservation.duration}
-- Montant: ${reservation.amount}€
+- Montant: ${reservation.amount} Dh
 
 Nous vous remercions pour votre confiance !
 
@@ -155,7 +155,7 @@ L'équipe du complexe sportif
 
   // Envoyer un message WhatsApp
   const sendWhatsApp = (reservation) => {
-    const message = `Bonjour ${reservation.client.name}, votre réservation pour le ${reservation.date} à ${reservation.time.split(' - ')[0]} sur le ${reservation.field} a été confirmée. Merci !`;
+    const message = `Bonjour ${reservation.client.name}, votre réservation pour le ${reservation.date} à ${reservation.time.split(' - ')[0]} sur le ${reservation.field} a été confirmée. Montant: ${reservation.amount} Dh. Merci !`;
     const whatsappLink = `https://wa.me/${reservation.client.telephone?.replace(/\s/g, '')}?text=${encodeURIComponent(message)}`;
     window.open(whatsappLink, '_blank');
     toast.info('Ouverture de WhatsApp...');
@@ -312,7 +312,7 @@ L'équipe du complexe sportif
                 </div>
                 <div class="detail-item">
                   <span class="label">Montant:</span>
-                  <span class="value">${reservation.amount}€</span>
+                  <span class="value">${reservation.amount} Dh</span>
                 </div>
                 <div class="detail-item">
                   <span class="label">Statut:</span>
@@ -367,22 +367,22 @@ L'équipe du complexe sportif
 
   if (loading) {
     return (
-      <div className="reservations-card">
-        <div className="loading">Chargement des réservations...</div>
+      <div className="reservations-management-card">
+        <div className="rm-loading-state">Chargement des réservations...</div>
       </div>
     );
   }
 
   return (
-    <div className="reservations-card">
+    <div className="reservations-management-card">
       <ToastContainer position="top-right" autoClose={3000} />
       
-      <div className="card-header">
-        <div className="header-contentsss">
+      <div className="rm-card-header">
+        <div className="rm-header-content">
           <h2>Réservations récentes</h2>
           <p>Gérez les réservations de vos terrains</p>
         </div>
-        <button className="view-all-btn" onClick={fetchReservations}>
+        <button className="rm-refresh-btn" onClick={fetchReservations}>
           Actualiser
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M23 4v6h-6M1 20v-6h6"></path>
@@ -391,65 +391,65 @@ L'équipe du complexe sportif
         </button>
       </div>
 
-      <div className="filters">
+      <div className="rm-filters-container">
         <button 
-          className={`filter-btn ${filterStatus === "all" ? "active" : ""}`}
+          className={`rm-filter-btn ${filterStatus === "all" ? "rm-active" : ""}`}
           onClick={() => setFilterStatus("all")}
         >
-          Tous <span className="count-badge">{statusCounts.all}</span>
+          Tous <span className="rm-count-badge">{statusCounts.all}</span>
         </button>
         <button 
-          className={`filter-btn ${filterStatus === "confirmé" ? "active" : ""}`}
+          className={`rm-filter-btn ${filterStatus === "confirmé" ? "rm-active" : ""}`}
           onClick={() => setFilterStatus("confirmé")}
         >
-          Confirmés <span className="count-badge">{statusCounts.confirmé}</span>
+          Confirmés <span className="rm-count-badge">{statusCounts.confirmé}</span>
         </button>
         <button 
-          className={`filter-btn ${filterStatus === "en attente" ? "active" : ""}`}
+          className={`rm-filter-btn ${filterStatus === "en attente" ? "rm-active" : ""}`}
           onClick={() => setFilterStatus("en attente")}
         >
-          En attente <span className="count-badge">{statusCounts["en attente"]}</span>
+          En attente <span className="rm-count-badge">{statusCounts["en attente"]}</span>
         </button>
         <button 
-          className={`filter-btn ${filterStatus === "annulé" ? "active" : ""}`}
+          className={`rm-filter-btn ${filterStatus === "annulé" ? "rm-active" : ""}`}
           onClick={() => setFilterStatus("annulé")}
         >
-          Annulés <span className="count-badge">{statusCounts.annulé}</span>
+          Annulés <span className="rm-count-badge">{statusCounts.annulé}</span>
         </button>
       </div>
 
-      <div className="reservations-list">
+      <div className="rm-reservations-list">
         {filteredReservations.length === 0 ? (
-          <div className="no-reservations">
+          <div className="rm-empty-state">
             Aucune réservation trouvée
           </div>
         ) : (
           filteredReservations.map((reservation) => (
             <div 
               key={reservation.id} 
-              className={`reservation-item ${expandedReservation === reservation.id ? "expanded" : ""}`}
+              className={`rm-reservation-item ${expandedReservation === reservation.id ? "rm-expanded" : ""}`}
               onClick={() => toggleExpand(reservation.id)}
             >
-              <div className="reservation-main">
-                <div className="client-info">
-                  <div className="avatar">
+              <div className="rm-reservation-main">
+                <div className="rm-client-info">
+                  <div className="rm-avatar">
                     <span>{reservation.client.initials}</span>
                   </div>
-                  <div className="client-details">
+                  <div className="rm-client-details">
                     <h3>{reservation.client.name}</h3>
                     <p>{reservation.field}</p>
                   </div>
                 </div>
 
-                <div className="reservation-details">
-                  <div className="time-info">
-                    <span className="date">{reservation.date}</span>
-                    <span className="time">{reservation.time}</span>
+                <div className="rm-reservation-details">
+                  <div className="rm-time-info">
+                    <span className="rm-date">{reservation.date}</span>
+                    <span className="rm-time">{reservation.time}</span>
                   </div>
                   <StatusBadge status={reservation.status} />
                 </div>
 
-                <div className="expand-icon">
+                <div className="rm-expand-icon">
                   <svg 
                     width="16" 
                     height="16" 
@@ -465,29 +465,29 @@ L'équipe du complexe sportif
               </div>
 
               {expandedReservation === reservation.id && (
-                <div className="reservation-expanded">
-                  <div className="expanded-details">
-                    <div className="detail-item">
-                      <span className="detail-label">Email</span>
-                      <span className="detail-value">{reservation.client.email}</span>
+                <div className="rm-reservation-expanded">
+                  <div className="rm-expanded-details">
+                    <div className="rm-detail-item">
+                      <span className="rm-detail-label">Email</span>
+                      <span className="rm-detail-value">{reservation.client.email}</span>
                     </div>
-                    <div className="detail-item">
-                      <span className="detail-label">Téléphone</span>
-                      <span className="detail-value">{reservation.client.telephone || 'Non renseigné'}</span>
+                    <div className="rm-detail-item">
+                      <span className="rm-detail-label">Téléphone</span>
+                      <span className="rm-detail-value">{reservation.client.telephone || 'Non renseigné'}</span>
                     </div>
-                    <div className="detail-item">
-                      <span className="detail-label">Durée</span>
-                      <span className="detail-value">{reservation.duration}</span>
+                    <div className="rm-detail-item">
+                      <span className="rm-detail-label">Durée</span>
+                      <span className="rm-detail-value">{reservation.duration}</span>
                     </div>
-                    <div className="detail-item">
-                      <span className="detail-label">Montant</span>
-                      <span className="detail-value">{reservation.amount}€</span>
+                    <div className="rm-detail-item">
+                      <span className="rm-detail-label">Montant</span>
+                      <span className="rm-detail-value">{reservation.amount} Dh</span>
                     </div>
                   </div>
                   
-                  <div className="action-buttons">
+                  <div className="rm-action-buttons">
                     <button 
-                      className="action-btn primary" 
+                      className="rm-action-btn rm-primary" 
                       onClick={(e) => {
                         e.stopPropagation();
                         sendEmail(reservation);
@@ -502,7 +502,7 @@ L'équipe du complexe sportif
                     
                     {reservation.client.telephone && (
                       <button 
-                        className="action-btn whatsapp"
+                        className="rm-action-btn rm-whatsapp"
                         onClick={(e) => {
                           e.stopPropagation();
                           sendWhatsApp(reservation);
@@ -516,7 +516,7 @@ L'équipe du complexe sportif
                     )}
                     
                     <button 
-                      className="action-btn pdf"
+                      className="rm-action-btn rm-pdf"
                       onClick={(e) => {
                         e.stopPropagation();
                         generatePDF(reservation);
@@ -535,7 +535,7 @@ L'équipe du complexe sportif
                     {reservation.status === "en attente" && (
                       <>
                         <button 
-                          className="action-btn success"
+                          className="rm-action-btn rm-success"
                           onClick={(e) => {
                             e.stopPropagation();
                             confirmReservation(reservation.id);
@@ -548,7 +548,7 @@ L'équipe du complexe sportif
                         </button>
                         
                         <button 
-                          className="action-btn danger"
+                          className="rm-action-btn rm-danger"
                           onClick={(e) => {
                             e.stopPropagation();
                             cancelReservation(reservation.id);
@@ -612,7 +612,7 @@ const StatusBadge = ({ status }) => {
 
   return (
     <span 
-      className="status-badge"
+      className="rm-status-badge"
       style={{ 
         backgroundColor: config.bgColor,
         color: config.color

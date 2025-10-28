@@ -41,9 +41,14 @@ const ReservationDashboard = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
+  // Options pour les combobox
+  const terrainTypes = ['Normal', 'Synthétique'];
+  const surfaceTypes = ['7X7', '9X9', '11X11'];
+
   const [formData, setFormData] = useState({
     datereservation: '',
     heurereservation: '',
+    heurefin: '',
     statut: 'en attente',
     nomclient: '',
     prenom: '',
@@ -52,7 +57,7 @@ const ReservationDashboard = () => {
     typeterrain: '',
     tarif: '',
     surface: '',
-    heurefin: ''
+    nomterrain: ''
   });
 
   const addToast = (message, type = 'info') => {
@@ -101,18 +106,23 @@ const ReservationDashboard = () => {
     return [...new Set(allReservations.map(r => r.surface).filter(Boolean))];
   }, [allReservations]);
 
+  const uniqueTerrains = useMemo(() => {
+    return [...new Set(allReservations.map(r => r.nomterrain).filter(Boolean))];
+  }, [allReservations]);
+
   // Fonction de filtrage optimisée
   const filterReservations = useCallback(() => {
     let filtered = [...allReservations];
 
-    // Filtre de recherche texte (nom, email, téléphone)
+    // Filtre de recherche texte (nom, email, téléphone, terrain)
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(reservation => 
         reservation.nomclient?.toLowerCase().includes(term) ||
         reservation.prenom?.toLowerCase().includes(term) ||
         reservation.email?.toLowerCase().includes(term) ||
-        reservation.telephone?.includes(term)
+        reservation.telephone?.includes(term) ||
+        reservation.nomterrain?.toLowerCase().includes(term)
       );
     }
 
@@ -168,6 +178,10 @@ const ReservationDashboard = () => {
           aValue = `${a.prenom} ${a.nomclient}`.toLowerCase();
           bValue = `${b.prenom} ${b.nomclient}`.toLowerCase();
           break;
+        case 'terrain':
+          aValue = a.nomterrain?.toLowerCase() || '';
+          bValue = b.nomterrain?.toLowerCase() || '';
+          break;
         default:
           aValue = new Date(a.datereservation);
           bValue = new Date(b.datereservation);
@@ -218,7 +232,7 @@ const ReservationDashboard = () => {
   // Fonction pour envoyer un message WhatsApp
   const sendWhatsAppMessage = (reservation) => {
     const phoneNumber = reservation.telephone.replace(/\D/g, '');
-    const message = `Bonjour ${reservation.prenom} ${reservation.nomclient},\n\nVotre réservation a été confirmée!\n\n📅 Date: ${formatDate(reservation.datereservation)}\n⏰ Heure: ${reservation.heurereservation} - ${reservation.heurefin}\n🏟️ Type: ${reservation.typeterrain}\n💵 Prix: ${reservation.tarif} Dh\n\nMerci pour votre confiance!`;
+    const message = `Bonjour ${reservation.prenom} ${reservation.nomclient},\n\nVotre réservation a été confirmée!\n\n📅 Date: ${formatDate(reservation.datereservation)}\n⏰ Heure: ${reservation.heurereservation} - ${reservation.heurefin}\n🏟️ Terrain: ${reservation.nomterrain}\n💵 Prix: ${reservation.tarif} Dh\n\nMerci pour votre confiance!`;
     
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -236,6 +250,7 @@ const ReservationDashboard = () => {
     setFormData({
       datereservation: '',
       heurereservation: '',
+      heurefin: '',
       statut: 'en attente',
       nomclient: '',
       prenom: '',
@@ -244,7 +259,7 @@ const ReservationDashboard = () => {
       typeterrain: '',
       tarif: '',
       surface: '',
-      heurefin: ''
+      nomterrain: ''
     });
     setModalMode('create');
     setShowModal(true);
@@ -262,7 +277,8 @@ const ReservationDashboard = () => {
       telephone: reservation.telephone || '',
       typeterrain: reservation.typeterrain || '',
       tarif: reservation.tarif || '',
-      surface: reservation.surface || ''
+      surface: reservation.surface || '',
+      nomterrain: reservation.nomterrain || ''
     });
     setEditingReservation(reservation);
     setModalMode('edit');
@@ -337,7 +353,7 @@ const ReservationDashboard = () => {
         
         if (formData.statut === 'confirmée') {
           const creneauUpdated = await updateCreneauStatus(
-            formData.typeterrain,
+            formData.nomterrain,
             formData.datereservation,
             formData.heurereservation,
             'réservé'
@@ -378,7 +394,7 @@ const ReservationDashboard = () => {
       if (data.success) {
         if (reservation && reservation.statut === 'confirmée') {
           await updateCreneauStatus(
-            reservation.typeterrain,
+            reservation.nomterrain,
             reservation.datereservation,
             reservation.heurereservation,
             'disponible'
@@ -418,7 +434,7 @@ const ReservationDashboard = () => {
         if (reservation) {
           if (newStatus === 'confirmée') {
             const creneauUpdated = await updateCreneauStatus(
-              reservation.typeterrain,
+              reservation.nomterrain,
               reservation.datereservation,
               reservation.heurereservation,
               'réservé'
@@ -433,7 +449,7 @@ const ReservationDashboard = () => {
             
           } else if (newStatus === 'annulée' && reservation.statut === 'confirmée') {
             const creneauUpdated = await updateCreneauStatus(
-              reservation.typeterrain,
+              reservation.nomterrain,
               reservation.datereservation,
               reservation.heurereservation,
               'disponible'
@@ -488,7 +504,7 @@ const ReservationDashboard = () => {
             <Search className="rd-search-icon" size={20} />
             <input
               type="text"
-              placeholder="Rechercher par nom, email, téléphone..."
+              placeholder="Rechercher par nom, email, téléphone, terrain..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="rd-search-input"
@@ -518,6 +534,7 @@ const ReservationDashboard = () => {
               <option value="date">Trier par date</option>
               <option value="prix">Trier par prix</option>
               <option value="nom">Trier par nom</option>
+              <option value="terrain">Trier par terrain</option>
             </select>
           </div>
 
@@ -654,7 +671,7 @@ const ReservationDashboard = () => {
                 <div className="rd-card-title-section">
                   <h3 className="rd-card-title">
                     <MapPin size={18} className="rd-card-title-icon" />
-                    {reservation.typeterrain || 'Terrain Football'}
+                    {reservation.nomterrain || 'Terrain Football'}
                   </h3>
                   <div className="rd-card-subtitle">
                     Réservation #{reservation.id}
@@ -720,6 +737,16 @@ const ReservationDashboard = () => {
                     <div className="rd-info-content">
                       <span className="rd-info-label">Surface</span>
                       <span className="rd-info-value">{reservation.surface}</span>
+                    </div>
+                  </div>
+
+                  <div className="rd-info-item">
+                    <div className="rd-info-icon-wrapper">
+                      <MapPin size={16} className="rd-info-icon" />
+                    </div>
+                    <div className="rd-info-content">
+                      <span className="rd-info-label">Type</span>
+                      <span className="rd-info-value">{reservation.typeterrain}</span>
                     </div>
                   </div>
                   
@@ -947,14 +974,37 @@ const ReservationDashboard = () => {
                     <MapPin size={18} className="rd-form-label-icon" />
                     Type de terrain
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="typeterrain"
                     value={formData.typeterrain}
                     onChange={handleInputChange}
-                    className="rd-form-input"
-                    placeholder="Synthétique, Gazon naturel..."
-                  />
+                    className="rd-form-select"
+                    required
+                  >
+                    <option value="">Sélectionnez un type</option>
+                    {terrainTypes.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="rd-form-group">
+                  <label className="rd-form-label">
+                    <Ruler size={18} className="rd-form-label-icon" />
+                    Surface
+                  </label>
+                  <select
+                    name="surface"
+                    value={formData.surface}
+                    onChange={handleInputChange}
+                    className="rd-form-select"
+                    required
+                  >
+                    <option value="">Sélectionnez une surface</option>
+                    {surfaceTypes.map(surface => (
+                      <option key={surface} value={surface}>{surface}</option>
+                    ))}
+                  </select>
                 </div>
                 
                 <div className="rd-form-group">
@@ -969,21 +1019,23 @@ const ReservationDashboard = () => {
                     value={formData.tarif}
                     onChange={handleInputChange}
                     className="rd-form-input"
+                    required
                   />
                 </div>
-                
+
                 <div className="rd-form-group">
                   <label className="rd-form-label">
-                    <Ruler size={18} className="rd-form-label-icon" />
-                    Surface
+                    <MapPin size={18} className="rd-form-label-icon" />
+                    Nom du terrain *
                   </label>
                   <input
                     type="text"
-                    name="surface"
-                    value={formData.surface}
+                    name="nomterrain"
+                    value={formData.nomterrain}
                     onChange={handleInputChange}
                     className="rd-form-input"
-                    placeholder="Ex: 100m²"
+                    placeholder="Ex: Terrain Principal, Stade Central..."
+                    required
                   />
                 </div>
               </div>

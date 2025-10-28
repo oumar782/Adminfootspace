@@ -8,7 +8,9 @@ import {
   Target,
   Clock,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Users,
+  MapPin
 } from 'lucide-react';
 import './custom.css';
 
@@ -221,12 +223,16 @@ const OccupationChart = () => {
       <div className="chart-header">
         <div className="header-content">
           <div className="title-section">
-            <BarChart3 size={28} className="header-icon" />
-            <h2>Tableau de Bord d'Occupation</h2>
+            <div className="header-icon-container">
+              <BarChart3 size={28} className="header-icon" />
+            </div>
+            <div className="title-text">
+              <h2>Tableau de Bord d'Occupation</h2>
+              <p className="chart-subtitle">
+                Surveillance en temps réel des réservations et de l'occupation des terrains
+              </p>
+            </div>
           </div>
-          <p className="chart-subtitle">
-            Surveillance en temps réel des réservations et de l'occupation des terrains
-          </p>
         </div>
         <div className="period-selector">
           <button 
@@ -234,21 +240,21 @@ const OccupationChart = () => {
             onClick={() => setPeriod('day')}
           >
             <Calendar size={16} />
-            Jour
+            Aujourd'hui
           </button>
           <button 
             className={`period-btn ${period === 'week' ? 'active' : ''}`}
             onClick={() => setPeriod('week')}
           >
             <Calendar size={16} />
-            Semaine
+            Cette Semaine
           </button>
           <button 
             className={`period-btn ${period === 'month' ? 'active' : ''}`}
             onClick={() => setPeriod('month')}
           >
             <BarChart3 size={16} />
-            Mois
+            Ce Mois
           </button>
         </div>
       </div>
@@ -275,11 +281,10 @@ const OccupationChart = () => {
                       onMouseEnter={() => setHoveredData(item)}
                       onMouseLeave={() => setHoveredData(null)}
                     >
-                      {/* Étiquette d'occupation toujours visible */}
                       <div className="occupation-label">
                         <span className="occupation-percent">{item.occupation}%</span>
                         <span className="occupation-details">
-                          {item.count}/{item.max} terrains
+                          {item.count}/{item.max}
                         </span>
                       </div>
                     </div>
@@ -289,19 +294,25 @@ const OccupationChart = () => {
               </div>
               
               {hoveredData && (
-                <div 
-                  className="chart-tooltip" 
-                  style={{ 
-                    left: `calc(${(data.indexOf(hoveredData) / data.length) * 100}% - 60px)`,
-                    bottom: 'calc(100% + 10px)'
-                  }}
-                >
+                <div className="chart-tooltip">
                   <div className="tooltip-content">
-                    <span className="tooltip-title">{hoveredData.time}</span>
-                    <span className="tooltip-metric">{hoveredData.occupation}% d'occupation</span>
-                    <span className="tooltip-details">
-                      {hoveredData.count} réservation{hoveredData.count > 1 ? 's' : ''} sur {hoveredData.max}
-                    </span>
+                    <div className="tooltip-header">
+                      <span className="tooltip-title">{hoveredData.time}</span>
+                      <div className="tooltip-indicator">
+                        <div className="indicator-dot"></div>
+                        {hoveredData.occupation}% d'occupation
+                      </div>
+                    </div>
+                    <div className="tooltip-details">
+                      <div className="detail-item">
+                        <Users size={14} />
+                        <span>{hoveredData.count} réservation{hoveredData.count > 1 ? 's' : ''}</span>
+                      </div>
+                      <div className="detail-item">
+                        <MapPin size={14} />
+                        <span>{hoveredData.max} terrains max</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -309,8 +320,8 @@ const OccupationChart = () => {
 
             <div className="chart-stats">
               <div className="stat-item">
-                <div className="stat-icon">
-                  <TrendingUp size={24} />
+                <div className="stat-icon average">
+                  <TrendingUp size={20} />
                 </div>
                 <div className="stat-content">
                   <div className="stat-labels">Occupation moyenne</div>
@@ -325,8 +336,8 @@ const OccupationChart = () => {
               </div>
               
               <div className="stat-item">
-                <div className="stat-icon">
-                  <Flame size={24} />
+                <div className="stat-icon peak">
+                  <Flame size={20} />
                 </div>
                 <div className="stat-content">
                   <div className="stat-labels">Pic d'occupation</div>
@@ -341,15 +352,15 @@ const OccupationChart = () => {
               </div>
 
               <div className="stat-item">
-                <div className="stat-icon">
-                  <Zap size={24} />
+                <div className="stat-icon period">
+                  <Zap size={20} />
                 </div>
                 <div className="stat-content">
-                  <div className="stat-labels">Période actuelle</div>
+                  <div className="stat-labels">Période analysée</div>
                   <div className="stat-values">
                     {period === 'day' ? 'Aujourd\'hui' : 
                      period === 'week' ? 'Cette semaine' : 
-                     'Ce mois'}
+                     'Ce mois-ci'}
                   </div>
                   <div className="stat-period">
                     {data.length} créneau{data.length > 1 ? 'x' : ''} analysé{data.length > 1 ? 's' : ''}
@@ -366,7 +377,7 @@ const OccupationChart = () => {
                 </span>
                 <span className="data-badge">
                   <Clock size={14} />
-                  Données mises à jour à {new Date().toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}
+                  Mis à jour à {new Date().toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}
                 </span>
               </div>
               <button onClick={fetchReservations} className="refresh-btn">

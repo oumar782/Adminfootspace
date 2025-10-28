@@ -178,53 +178,53 @@ const DashboardStats = () => {
     }
   };
 
-  const StatCard = ({ 
-    title, 
-    value, 
-    subtitle, 
-    trend, 
-    footer, 
-    icon: Icon,
-    type = 'default'
-  }) => (
-    <div className={`foot-stat-card foot-stat-${type}`}>
-      <div className="foot-card-glow"></div>
-      <div className="foot-card-content">
-        <div className="foot-card-header">
-          <div className="foot-card-icon">
-            <Icon size={24} />
-          </div>
-          <div className="foot-header-text">
-            <span className="foot-card-title">{title}</span>
-            <span className="foot-card-subtitle">{subtitle}</span>
-          </div>
+// Modifications dans le composant DashboardStats
+const StatCard = ({ 
+  title, 
+  value, 
+  subtitle, 
+  trend, 
+  footer, 
+  icon: Icon,
+  type = 'default'
+}) => (
+  <div className={`foot-stat-card foot-stat-${type}`}>
+    <div className="foot-card-content">
+      <div className="foot-card-header">
+        <div className="foot-card-icon">
+          <Icon size={28} />
         </div>
+        <div className="foot-header-text">
+          <span className="foot-card-title">{title}</span>
+          <span className="foot-card-subtitle">{subtitle}</span>
+        </div>
+      </div>
+      
+      <div className="foot-card-main">
+        <div className="foot-main-value">{value}</div>
         
-        <div className="foot-card-main">
-          <div className="foot-main-value">{value}</div>
-          
-          {trend && (
-            <div className={`foot-trend ${trend.isPositive ? 'foot-positive' : 'foot-negative'}`}>
-              <div className="foot-trend-icon">
-                {trend.isPositive ? 
-                  <TrendingUp size={18} /> : 
-                  <TrendingDown size={18} />
-                }
-              </div>
-              <span className="foot-trend-value">{trend.value}%</span>
-              <span className="foot-trend-label">vs période précédente</span>
+        {trend && (
+          <div className={`foot-trend ${trend.isPositive ? 'foot-positive' : 'foot-negative'}`}>
+            <div className="foot-trend-icon">
+              {trend.isPositive ? 
+                <TrendingUp size={20} /> : 
+                <TrendingDown size={20} />
+              }
             </div>
-          )}
-        </div>
-
-        {footer && (
-          <div className="foot-card-footer">
-            {footer}
+            <span className="foot-trend-value">{trend.value}%</span>
+            <span className="foot-trend-label">vs période précédente</span>
           </div>
         )}
       </div>
+
+      {footer && (
+        <div className="foot-card-footer">
+          {footer}
+        </div>
+      )}
     </div>
-  );
+  </div>
+);
 
   return (
     <div className="foot-dashboard-stats">

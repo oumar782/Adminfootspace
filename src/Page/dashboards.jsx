@@ -73,9 +73,8 @@ const Dashboard = () => {
         <div className="chart-main">
           <OccupationChart />
         </div>
-        <div className="chart-sidebar">
+       
           <PrevisionForecast />
-        </div>
       </div>
 
       <div className="content-grid">
