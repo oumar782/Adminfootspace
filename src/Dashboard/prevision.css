@@ -1764,3 +1764,171 @@
 .prevision-distribution-card:nth-child(3) {
   animation-delay: 0.7s;
 }
+/* Styles pour la carte flottante */
+.prevision-floating-card {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  z-index: 1000;
+  min-width: 280px;
+  border: 1px solid #e2e8f0;
+  animation: prevision-fade-in 0.3s ease-out;
+}
+
+.prevision-floating-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.prevision-floating-card-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.prevision-floating-card-close {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.prevision-floating-card-close:hover {
+  background: #f1f5f9;
+  color: #ef4444;
+}
+
+.prevision-floating-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prevision-floating-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+  padding: 6px 0;
+}
+
+.prevision-show-floating-card-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #035c15;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  z-index: 999;
+  box-shadow: 0 4px 12px rgba(3, 92, 21, 0.3);
+  transition: all 0.3s;
+}
+
+.prevision-show-floating-card-btn:hover {
+  background: #067a1f;
+  transform: scale(1.05);
+}
+
+/* Styles pour les boutons PDF */
+.prevision-pdf-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  transition: all 0.3s;
+}
+
+.prevision-pdf-button:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+.prevision-pdf-button-small {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #f1f5f9;
+  color: #64748b;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.prevision-pdf-button-small:hover {
+  background: #e2e8f0;
+  color: #035c15;
+}
+
+/* Amélioration de la visibilité */
+.prevision-chart-column:hover .prevision-column-fill {
+  filter: brightness(1.1);
+  transform: scale(1.02);
+}
+
+.prevision-stat-card:hover {
+  transform: translateY(-4px) scale(1.02);
+}
+
+.prevision-tooltip {
+  z-index: 10000 !important;
+}
+
+/* Animation pour l'apparition de la carte flottante */
+@keyframes prevision-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive pour la carte flottante */
+@media (max-width: 768px) {
+  .prevision-floating-card {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin: 0 20px 20px 20px;
+    width: calc(100% - 40px);
+  }
+  
+  .prevision-show-floating-card-btn {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin: 0 20px 20px 20px;
+  }
+}

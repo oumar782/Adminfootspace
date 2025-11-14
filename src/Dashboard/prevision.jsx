@@ -18,7 +18,11 @@ import {
   Zap,
   Activity,
   Maximize2,
-  Minimize2
+  Minimize2,
+  FileText,
+  Download,
+  X,
+  Eye
 } from 'lucide-react';
 import './prevision.css';
 
@@ -32,6 +36,8 @@ const PrevisionForecast = () => {
   const [showAllStats, setShowAllStats] = useState(false);
   const [showScrollHint, setShowScrollHint] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [showFloatingCard, setShowFloatingCard] = useState(true);
+  const [floatingCardData, setFloatingCardData] = useState(null);
   const chartScrollRef = useRef(null);
   const cardRef = useRef(null);
   const contentRef = useRef(null);
@@ -108,6 +114,20 @@ const PrevisionForecast = () => {
         
         setForecastData(formattedData);
         setStatistiques(result.statistiques);
+
+        // Données pour la carte flottante
+        if (formattedData.length > 0) {
+          const totalRevenue = formattedData.reduce((sum, item) => sum + (item.revenu_attendu || 0), 0);
+          const totalReservations = formattedData.reduce((sum, item) => sum + (item.nb_reservations || 0), 0);
+          const averagePrevision = Math.round(formattedData.reduce((sum, item) => sum + item.prevision, 0) / formattedData.length);
+          
+          setFloatingCardData({
+            averagePrevision,
+            totalRevenue,
+            totalReservations,
+            periode
+          });
+        }
         
         console.log('✅ Données formatées avec pourcentages RÉELS:', formattedData);
       } else {
@@ -148,13 +168,264 @@ const PrevisionForecast = () => {
       });
       
       setForecastData(demoData);
+      
+      // Données de démonstration pour la carte flottante
+      const totalRevenue = demoData.reduce((sum, item) => sum + (item.revenu_attendu || 0), 0);
+      const totalReservations = demoData.reduce((sum, item) => sum + (item.nb_reservations || 0), 0);
+      const averagePrevision = Math.round(demoData.reduce((sum, item) => sum + item.prevision, 0) / demoData.length);
+      
+      setFloatingCardData({
+        averagePrevision,
+        totalRevenue,
+        totalReservations,
+        periode
+      });
+      
       console.log('🔄 Données de démonstration chargées:', demoData);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Déterminer le niveau d'occupation basé sur le pourcentage RÉEL
+  // Génération du rapport PDF
+  const generatePDFReport = () => {
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Rapport Prévisions Occupation - ${new Date().toLocaleDateString('fr-FR')}</title>
+        <style>
+          body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            color: #333;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+          }
+          .header { 
+            text-align: center; 
+            border-bottom: 3px solid #035c15; 
+            padding-bottom: 20px; 
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #035c15 0%, #067a1f 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+          }
+          .header h1 { 
+            color: white; 
+            margin: 0;
+            font-size: 28px;
+          }
+          .section { 
+            margin-bottom: 30px; 
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          }
+          .section-title { 
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            padding: 15px;
+            border-left: 4px solid #035c15;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #035c15;
+          }
+          .kpi-grid { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 15px; 
+            margin-bottom: 20px; 
+          }
+          .kpi-card { 
+            border: 1px solid #e2e8f0; 
+            padding: 20px; 
+            border-radius: 8px;
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+          }
+          .kpi-value { 
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #035c15;
+            margin-bottom: 5px;
+          }
+          .kpi-label { 
+            font-size: 14px; 
+            color: #64748b; 
+            font-weight: 600;
+          }
+          .table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 10px; 
+          }
+          .table th, .table td { 
+            border: 1px solid #e2e8f0; 
+            padding: 12px; 
+            text-align: left; 
+          }
+          .table th { 
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            font-weight: bold;
+            color: #035c15;
+          }
+          .risk-high { background: #fef2f2; color: #dc2626; font-weight: bold; }
+          .risk-medium { background: #fffbeb; color: #d97706; font-weight: bold; }
+          .risk-low { background: #f0fdf4; color: #059669; font-weight: bold; }
+          .occupation-bar {
+            background: #e2e8f0;
+            height: 8px;
+            border-radius: 4px;
+            margin: 5px 0;
+          }
+          .occupation-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: #035c15;
+          }
+          .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+          }
+          .summary-card {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1px solid #bbf7d0;
+          }
+          .summary-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #035c15;
+          }
+          .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            border-top: 2px solid #e2e8f0;
+            color: #64748b;
+            font-size: 12px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>📊 RAPPORT PRÉVISIONS OCCUPATION - TERRAINS DE FOOT</h1>
+          <p>Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
+          <p>Période d'analyse: ${periode} jours • Données calculées en temps réel</p>
+        </div>
+
+        ${forecastData.length > 0 ? `
+        <div class="section">
+          <div class="section-title"><h2>📈 STATISTIQUES GLOBALES RÉELLES</h2></div>
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-value">${averagePrevision}%</div>
+              <div class="kpi-label">Occupation moyenne RÉELLE</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-value">${totalRevenue.toLocaleString()} DH</div>
+              <div class="kpi-label">Revenu total prévu</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-value">${totalReservations}</div>
+              <div class="kpi-label">Réservations totales</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-value">${joursEleves}</div>
+              <div class="kpi-label">Jours à forte occupation</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title"><h2>📅 PRÉVISIONS DÉTAILLÉES PAR JOUR</h2></div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Jour</th>
+                <th>Occupation</th>
+                <th>Réservations</th>
+                <th>Revenu</th>
+                <th>Terrains</th>
+                <th>Niveau</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${dataWithTrends.map(item => `
+                <tr>
+                  <td><strong>${item.date}</strong></td>
+                  <td>${item.day}</td>
+                  <td>
+                    <div>${item.prevision}%</div>
+                    <div class="occupation-bar">
+                      <div class="occupation-fill" style="width: ${item.prevision}%"></div>
+                    </div>
+                  </td>
+                  <td>${item.nb_reservations}</td>
+                  <td>${item.revenu_attendu} DH</td>
+                  <td>${item.nb_terrains}</td>
+                  <td class="risk-${item.niveau_occupation.toLowerCase().includes('élev') ? 'high' : item.niveau_occupation.toLowerCase().includes('moyen') ? 'medium' : 'low'}">
+                    ${item.niveau_occupation}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <div class="section-title"><h2>📊 RÉPARTITION DES NIVEAUX D'OCCUPATION</h2></div>
+          <div class="summary-grid">
+            <div class="summary-card">
+              <div class="summary-value">${joursFaibles}</div>
+              <div class="kpi-label">Jours à faible occupation</div>
+              <div>${Math.round((joursFaibles / dataWithTrends.length) * 100)}%</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value">${joursMoyens}</div>
+              <div class="kpi-label">Jours à occupation moyenne</div>
+              <div>${Math.round((joursMoyens / dataWithTrends.length) * 100)}%</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value">${joursEleves}</div>
+              <div class="kpi-label">Jours à forte occupation</div>
+              <div>${Math.round((joursEleves / dataWithTrends.length) * 100)}%</div>
+            </div>
+          </div>
+        </div>
+        ` : '<div class="section"><p>Aucune donnée disponible pour générer le rapport.</p></div>'}
+
+        <div class="section">
+          <div class="section-title"><h2>📋 SYNTHÈSE DU RAPPORT</h2></div>
+          <p><strong>Date de génération:</strong> ${new Date().toLocaleString('fr-FR')}</p>
+          <p><strong>Période analysée:</strong> ${periode} jours</p>
+          <p><strong>Total réservations analysées:</strong> ${totalReservations}</p>
+          <p><strong>Revenu total prévu:</strong> ${totalRevenue.toLocaleString()} DH</p>
+          <p><strong>Occupation moyenne:</strong> ${averagePrevision}%</p>
+          <p><strong>Fiabilité des données:</strong> Calculées en temps réel basé sur les réservations confirmées</p>
+        </div>
+
+        <div class="footer">
+          <p>Rapport généré automatiquement par le Tableau de Bord Prévisions • Terrains de Foot</p>
+          <p>Les pourcentages sont calculés selon: (réservations / (terrains × 8)) × 100</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
+  // Reste du code existant...
   const getNiveauOccupation = (pourcentage) => {
     if (pourcentage >= 80) return 'Élevée';
     if (pourcentage >= 60) return 'Moyenne+';
@@ -360,6 +631,50 @@ const PrevisionForecast = () => {
       ref={cardRef}
       className={`prevision-card ${isFullScreen ? 'prevision-card-fullscreen' : ''}`}
     >
+      
+      {/* Carte flottante résumé */}
+      {showFloatingCard && floatingCardData && (
+        <div className="prevision-floating-card">
+          <div className="prevision-floating-card-header">
+            <h3>Résumé Rapide</h3>
+            <button 
+              className="prevision-floating-card-close"
+              onClick={() => setShowFloatingCard(false)}
+            >
+              <X size={16} />
+            </button>
+          </div>
+          <div className="prevision-floating-card-content">
+            <div className="prevision-floating-stat">
+              <Activity size={16} color="#035c15" />
+              <span>{floatingCardData.averagePrevision}% occupation moyenne</span>
+            </div>
+            <div className="prevision-floating-stat">
+              <DollarSign size={16} color="#059669" />
+              <span>{floatingCardData.totalRevenue.toLocaleString()} DH prévus</span>
+            </div>
+            <div className="prevision-floating-stat">
+              <Users size={16} color="#3b82f6" />
+              <span>{floatingCardData.totalReservations} réservations</span>
+            </div>
+            <div className="prevision-floating-stat">
+              <Calendar size={16} color="#f59e0b" />
+              <span>{floatingCardData.periode} jours analysés</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bouton pour afficher/masquer la carte flottante */}
+      {!showFloatingCard && (
+        <button 
+          className="prevision-show-floating-card-btn"
+          onClick={() => setShowFloatingCard(true)}
+        >
+          <Eye size={16} />
+        </button>
+      )}
+
       {/* En-tête */}
       <div className="prevision-header">
         <div className="prevision-header-main">
@@ -387,6 +702,15 @@ const PrevisionForecast = () => {
           </div>
           
           <div className="prevision-header-buttons">
+            <button 
+              className="prevision-pdf-button"
+              onClick={generatePDFReport}
+              title="Générer rapport PDF"
+            >
+              <FileText size={18} />
+              PDF
+            </button>
+            
             <button 
               className="prevision-action-btn"
               onClick={toggleFullScreen}
@@ -873,6 +1197,13 @@ const PrevisionForecast = () => {
                 Erreur de chargement des données
               </span>
             )}
+            <button 
+              className="prevision-pdf-button-small"
+              onClick={generatePDFReport}
+            >
+              <Download size={14} />
+              Télécharger PDF
+            </button>
             <span className="prevision-data-count">
               {dataWithTrends.length} jours analysés • {totalReservations} réservations réelles
             </span>

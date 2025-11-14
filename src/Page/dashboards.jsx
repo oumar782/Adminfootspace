@@ -3,6 +3,7 @@ import StatCard from "../Dashboard/statcard";
 import RecentReservations from "../Dashboard/recentReservations";
 import OccupationChart from "../Dashboard/occupation";
 import PrevisionForecast from "../Dashboard/prevision";
+import Annulation from "../Dashboard/Annulation";
 
 // Icônes (gardées car utilisées)
 const TrendingUpIcon = () => (
@@ -69,14 +70,30 @@ const Dashboard = () => {
         />
       </div>
 
-      <div className="charts-grid">
-        <div className="chart-main">
-          <OccupationChart />
+    
+      <div className="content-grid">
+        <div className="content-main">
+        <OccupationChart />
         </div>
-       
-          <PrevisionForecast />
+        <div className="content-sidebar">
+        </div>
       </div>
-
+    
+      <div className="content-grid">
+        <div className="content-main">
+          <PrevisionForecast />
+        </div>
+        <div className="content-sidebar">
+        </div>
+      </div>
+   
+      <div className="content-grid">
+        <div className="content-main">
+          <Annulation />
+        </div>
+        <div className="content-sidebar">
+        </div>
+      </div>
       <div className="content-grid">
         <div className="content-main">
           <RecentReservations />
