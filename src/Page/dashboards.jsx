@@ -4,6 +4,9 @@ import RecentReservations from "../Dashboard/recentReservations";
 import OccupationChart from "../Dashboard/occupation";
 import PrevisionForecast from "../Dashboard/prevision";
 import Annulation from "../Dashboard/Annulation";
+import AnalyseMensuelle from "../Dashboard/Annalyse-financiere";
+
+
 
 // Icônes (gardées car utilisées)
 const TrendingUpIcon = () => (
@@ -29,7 +32,15 @@ const Dashboard = () => {
   // 🔥 SUPPRIMÉ : statsData (données en dur non venant de la BDD)
 
   return (
+    
     <div className="dashboard-container">
+      <div className="content-grid">
+        <div className="content-main">
+        <AnalyseMensuelle />
+        </div>
+        <div className="content-sidebar">
+        </div>
+      </div>
       {showWelcome && (
         <div className="welcome-banner">
           <div className="welcome-content">
@@ -56,6 +67,7 @@ const Dashboard = () => {
         </div>
        
       </div>
+      
 
       {/* ✅ SEULE CARTE : Revenus (tu peux changer le titre/valeur plus tard) */}
       <div className="stats-grid">
@@ -79,6 +91,7 @@ const Dashboard = () => {
         </div>
       </div>
     
+      
       <div className="content-grid">
         <div className="content-main">
           <PrevisionForecast />

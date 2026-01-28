@@ -232,12 +232,12 @@ const GestionClients = () => {
       <div className="clients-table-wrapper">
         {/* Header */}
         <div className="clients-header-section">
-          <h1>Gestion des Clients</h1>
+          <h1>Gestion des Abonnements</h1>
           <button 
             className="clients-add-btn clients-primary-btn"
             onClick={() => setShowAddClientModal(true)}
           >
-            <FaPlus /> Ajouter Client
+            <FaPlus /> Ajouter un abonnement
           </button>
         </div>
 

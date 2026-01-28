@@ -10,7 +10,7 @@ import User from "./Page/user";
 import Contact from "./Page/contact";
 import Connexion from "./Page/connexion";
 import Gestionnaire from "./Page/Gestionnaire";
-
+import './App.css'
 const App = () => {
   return (
     <BrowserRouter>

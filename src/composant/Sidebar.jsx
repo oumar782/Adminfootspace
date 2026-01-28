@@ -528,7 +528,7 @@ const sidebarItems = [
     path: "/dashboard",
   },
   {
-    title: "Clients",
+    title: "Abonnements",
     icon: UsersIconLuxe,
     path: "/client",
   },
