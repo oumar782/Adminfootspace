@@ -36,7 +36,7 @@ const FootballAnalyticsDashboard = () => {
     loadAllData();
     const interval = setInterval(() => {
       loadAllData();
-    }, 300000);
+    }, 300000); // Rafraîchissement automatique toutes les 5 minutes
     
     return () => clearInterval(interval);
   }, []);
@@ -94,47 +94,48 @@ const FootballAnalyticsDashboard = () => {
   if (loading) {
     return (
       <div className="fa-dashboard-loader">
-        <div className="fa-dashboard-loader-spinner">
-          <div className="fa-dashboard-loader-dot"></div>
-          <div className="fa-dashboard-loader-dot"></div>
-          <div className="fa-dashboard-loader-dot"></div>
+        <div className="fa-loader-spinner">
+          <div className="fa-loader-dot"></div>
+          <div className="fa-loader-dot"></div>
+          <div className="fa-loader-dot"></div>
         </div>
-        <p className="fa-dashboard-loader-text">Chargement des données analytiques...</p>
+        <p className="fa-loader-text">Chargement des données analytiques...</p>
       </div>
     );
   }
 
   return (
-    <div className="fa-dashboard-container" ref={containerRef}>
-      <header className="fa-dashboard-header">
-        <div className="fa-dashboard-header-content">
-          <div className="fa-dashboard-logo-section">
-            <div className="fa-dashboard-logo-icon">
+    <div className="fa-dashboard" ref={containerRef}>
+      {/* Header Premium avec effet glassmorphism */}
+      <header className="fa-header">
+        <div className="fa-header-content">
+          <div className="fa-logo-section">
+            <div className="fa-logo-icon">
               <Activity size={32} strokeWidth={2.5} />
-              <div className="fa-dashboard-logo-pulse"></div>
+              <div className="fa-logo-pulse"></div>
             </div>
-            <div className="fa-dashboard-logo-text">
+            <div className="fa-logo-text">
               <h1>Football Analytics Pro</h1>
-              <p className="fa-dashboard-subtitle">Tableau de Bord Investisseur Premium</p>
+              <p className="fa-subtitle">Tableau de Bord Investisseur Premium</p>
             </div>
           </div>
-          <div className="fa-dashboard-header-actions">
+          <div className="fa-header-actions">
             <button 
-              className="fa-dashboard-btn-refresh" 
+              className="fa-btn-refresh" 
               onClick={loadAllData}
               title="Actualiser les données"
             >
               <RefreshCw size={18} />
-              <span className="fa-dashboard-refresh-text">Actualiser</span>
+              <span>Actualiser</span>
               {lastUpdate && (
-                <span className="fa-dashboard-last-update">
+                <span className="fa-last-update">
                   Dernière mise à jour : {lastUpdate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                 </span>
               )}
             </button>
-            <div className="fa-dashboard-header-time">
+            <div className="fa-header-time">
               <Calendar size={18} />
-              <span className="fa-dashboard-time-text">
+              <span className="fa-time-text">
                 {new Date().toLocaleDateString('fr-FR', { 
                   weekday: 'long', 
                   year: 'numeric', 
@@ -144,7 +145,7 @@ const FootballAnalyticsDashboard = () => {
               </span>
             </div>
             <button 
-              className="fa-dashboard-btn-mobile-menu" 
+              className="fa-btn-mobile-menu" 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Menu mobile"
             >
@@ -154,37 +155,38 @@ const FootballAnalyticsDashboard = () => {
         </div>
       </header>
 
-      <nav className={`fa-dashboard-nav ${mobileMenuOpen ? 'fa-dashboard-mobile-open' : ''}`}>
-        <div className="fa-dashboard-nav-track">
+      {/* Navigation Tabs avec indicateur actif */}
+      <nav className={`fa-nav ${mobileMenuOpen ? 'fa-mobile-open' : ''}`}>
+        <div className="fa-nav-track">
           <div 
-            className="fa-dashboard-nav-indicator" 
+            className="fa-nav-indicator" 
             style={{
               left: `${['overview', 'performance', 'clients', 'terrains'].indexOf(activeTab) * 25}%`
             }}
           />
           <button 
-            className={`fa-dashboard-nav-tab ${activeTab === 'overview' ? 'fa-dashboard-nav-tab-active' : ''}`}
+            className={`fa-nav-tab ${activeTab === 'overview' ? 'fa-nav-tab-active' : ''}`}
             onClick={() => { setActiveTab('overview'); setMobileMenuOpen(false); }}
           >
             <BarChart3 size={20} />
             <span>Vue d'ensemble</span>
           </button>
           <button 
-            className={`fa-dashboard-nav-tab ${activeTab === 'performance' ? 'fa-dashboard-nav-tab-active' : ''}`}
+            className={`fa-nav-tab ${activeTab === 'performance' ? 'fa-nav-tab-active' : ''}`}
             onClick={() => { setActiveTab('performance'); setMobileMenuOpen(false); }}
           >
             <TrendingUp size={20} />
             <span>Performance</span>
           </button>
           <button 
-            className={`fa-dashboard-nav-tab ${activeTab === 'clients' ? 'fa-dashboard-nav-tab-active' : ''}`}
+            className={`fa-nav-tab ${activeTab === 'clients' ? 'fa-nav-tab-active' : ''}`}
             onClick={() => { setActiveTab('clients'); setMobileMenuOpen(false); }}
           >
             <Users size={20} />
             <span>Clients</span>
           </button>
           <button 
-            className={`fa-dashboard-nav-tab ${activeTab === 'terrains' ? 'fa-dashboard-nav-tab-active' : ''}`}
+            className={`fa-nav-tab ${activeTab === 'terrains' ? 'fa-nav-tab-active' : ''}`}
             onClick={() => { setActiveTab('terrains'); setMobileMenuOpen(false); }}
           >
             <Target size={20} />
@@ -193,46 +195,52 @@ const FootballAnalyticsDashboard = () => {
         </div>
       </nav>
 
-      <main className="fa-dashboard-main">
-        <div className="fa-dashboard-tab-content">
-          {activeTab === 'overview' && (
-            <OverviewTab 
-              data={data} 
-              formatCurrency={formatCurrency} 
-              formatNumber={formatNumber}
-              colors={CHART_COLORS}
-            />
-          )}
-          {activeTab === 'performance' && (
-            <PerformanceTab 
-              data={data} 
-              formatCurrency={formatCurrency} 
-              formatNumber={formatNumber}
-              colors={CHART_COLORS}
-            />
-          )}
-          {activeTab === 'clients' && (
-            <ClientsTab 
-              data={data} 
-              formatCurrency={formatCurrency} 
-              formatNumber={formatNumber}
-              colors={CHART_COLORS}
-            />
-          )}
-          {activeTab === 'terrains' && (
-            <TerrainsTab 
-              data={data} 
-              formatCurrency={formatCurrency} 
-              formatNumber={formatNumber}
-              colors={CHART_COLORS}
-            />
-          )}
+      {/* Main Content avec animations */}
+      <main className="fa-main">
+        <div className="fa-content-wrapper">
+          <div className="fa-tab-content">
+            {activeTab === 'overview' && (
+              <OverviewTab 
+                data={data} 
+                formatCurrency={formatCurrency} 
+                formatNumber={formatNumber}
+                colors={CHART_COLORS}
+              />
+            )}
+            {activeTab === 'performance' && (
+              <PerformanceTab 
+                data={data} 
+                formatCurrency={formatCurrency} 
+                formatNumber={formatNumber}
+                colors={CHART_COLORS}
+              />
+            )}
+            {activeTab === 'clients' && (
+              <ClientsTab 
+                data={data} 
+                formatCurrency={formatCurrency} 
+                formatNumber={formatNumber}
+                colors={CHART_COLORS}
+              />
+            )}
+            {activeTab === 'terrains' && (
+              <TerrainsTab 
+                data={data} 
+                formatCurrency={formatCurrency} 
+                formatNumber={formatNumber}
+                colors={CHART_COLORS}
+              />
+            )}
+          </div>
         </div>
       </main>
     </div>
   );
 };
 
+// ============================================
+// OVERVIEW TAB
+// ============================================
 const OverviewTab = ({ data, formatCurrency, formatNumber, colors }) => {
   const kpi = data.executif?.kpi_principaux || {};
   const croissance = data.executif?.croissance || {};
@@ -240,7 +248,8 @@ const OverviewTab = ({ data, formatCurrency, formatNumber, colors }) => {
 
   return (
     <>
-      <div className="fa-dashboard-kpi-grid">
+      {/* KPI Cards avec animation staggered */}
+      <div className="fa-kpi-grid">
         <KPICard
           title="Chiffre d'Affaires"
           value={formatCurrency(kpi.ca_30j)}
@@ -276,28 +285,29 @@ const OverviewTab = ({ data, formatCurrency, formatNumber, colors }) => {
         />
       </div>
 
-      <div className="fa-dashboard-insight-section">
-        <div className="fa-dashboard-insight-card fa-dashboard-status-card">
-          <div className="fa-dashboard-card-header">
+      {/* Tendance & Statut */}
+      <div className="fa-insight-section">
+        <div className="fa-insight-card fa-status-card">
+          <div className="fa-card-header">
             <h3><Activity size={20} /> Statut de Croissance</h3>
           </div>
-          <div className="fa-dashboard-status-content">
-            <div className={`fa-dashboard-status-badge fa-dashboard-${croissance.tendance?.toLowerCase().replace(' ', '-')}`}>
-              <div className="fa-dashboard-status-badge-pulse"></div>
+          <div className="fa-status-content">
+            <div className={`fa-status-badge fa-${croissance.tendance?.toLowerCase().replace(' ', '-')}`}>
+              <div className="fa-status-badge-pulse"></div>
               {croissance.tendance || 'STABLE'}
             </div>
-            <div className="fa-dashboard-status-details">
-              <div className="fa-dashboard-status-item">
-                <span className="fa-dashboard-label">Mois en cours</span>
-                <span className="fa-dashboard-value">{formatCurrency(croissance.mois_courant)}</span>
+            <div className="fa-status-details">
+              <div className="fa-status-item">
+                <span className="fa-label">Mois en cours</span>
+                <span className="fa-value">{formatCurrency(croissance.mois_courant)}</span>
               </div>
-              <div className="fa-dashboard-status-item">
-                <span className="fa-dashboard-label">Mois précédent</span>
-                <span className="fa-dashboard-value">{formatCurrency(croissance.mois_precedent)}</span>
+              <div className="fa-status-item">
+                <span className="fa-label">Mois précédent</span>
+                <span className="fa-value">{formatCurrency(croissance.mois_precedent)}</span>
               </div>
-              <div className="fa-dashboard-status-item">
-                <span className="fa-dashboard-label">Évolution</span>
-                <span className={`fa-dashboard-value ${croissance.evolution_percentage >= 0 ? 'fa-dashboard-positive' : 'fa-dashboard-negative'}`}>
+              <div className="fa-status-item">
+                <span className="fa-label">Évolution</span>
+                <span className={`fa-value ${croissance.evolution_percentage >= 0 ? 'fa-positive' : 'fa-negative'}`}>
                   {croissance.evolution_percentage >= 0 ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
                   {Math.abs(croissance.evolution_percentage || 0).toFixed(2)}%
                 </span>
@@ -306,21 +316,21 @@ const OverviewTab = ({ data, formatCurrency, formatNumber, colors }) => {
           </div>
         </div>
 
-        <div className="fa-dashboard-insight-card">
-          <div className="fa-dashboard-card-header">
+        <div className="fa-insight-card">
+          <div className="fa-card-header">
             <h3><Trophy size={20} /> Top 5 Terrains</h3>
           </div>
-          <div className="fa-dashboard-top-list">
+          <div className="fa-top-list">
             {data.executif?.top_terrains?.slice(0, 5).map((terrain, idx) => (
-              <div key={idx} className="fa-dashboard-top-item">
-                <span className="fa-dashboard-rank">{idx + 1}</span>
-                <div className="fa-dashboard-top-item-content">
-                  <span className="fa-dashboard-name">{terrain.terrain}</span>
-                  <span className="fa-dashboard-metric">{formatCurrency(terrain.ca)}</span>
+              <div key={idx} className="fa-top-item">
+                <span className="fa-rank">{idx + 1}</span>
+                <div className="fa-top-item-content">
+                  <span className="fa-name">{terrain.terrain}</span>
+                  <span className="fa-metric">{formatCurrency(terrain.ca)}</span>
                 </div>
-                <div className="fa-dashboard-progress">
+                <div className="fa-progress">
                   <div 
-                    className="fa-dashboard-progress-fill" 
+                    className="fa-progress-fill" 
                     style={{ 
                       width: `${(terrain.ca / (data.executif?.top_terrains?.[0]?.ca || 1)) * 100}%` 
                     }}
@@ -332,20 +342,21 @@ const OverviewTab = ({ data, formatCurrency, formatNumber, colors }) => {
         </div>
       </div>
 
+      {/* Tendances Journalières */}
       {tendances.journaliere && (
-        <div className="fa-dashboard-chart-card">
-          <div className="fa-dashboard-card-header">
+        <div className="fa-chart-card">
+          <div className="fa-card-header">
             <h3><Activity size={20} /> Tendances Journalières</h3>
-            <span className={`fa-dashboard-trend-badge fa-dashboard-${tendances.journaliere.interpretation?.toLowerCase()}`}>
+            <span className={`fa-trend-badge fa-${tendances.journaliere.interpretation?.toLowerCase()}`}>
               {tendances.journaliere.evolution >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
               {tendances.journaliere.interpretation}
             </span>
           </div>
-          <div className="fa-dashboard-chart-container">
+          <div className="fa-chart-container">
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={tendances.journaliere.donnees}>
                 <defs>
-                  <linearGradient id="fa-dashboard-colorCA" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient id="fa-colorCA" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#00C853" stopOpacity={0.8}/>
                     <stop offset="95%" stopColor="#00C853" stopOpacity={0}/>
                   </linearGradient>
@@ -372,7 +383,7 @@ const OverviewTab = ({ data, formatCurrency, formatNumber, colors }) => {
                   stroke="#00C853" 
                   strokeWidth={3}
                   fillOpacity={1} 
-                  fill="url(#fa-dashboard-colorCA)" 
+                  fill="url(#fa-colorCA)" 
                   name="Chiffre d'Affaires"
                   dot={{ stroke: '#00C853', strokeWidth: 2, r: 4 }}
                 />
@@ -382,13 +393,14 @@ const OverviewTab = ({ data, formatCurrency, formatNumber, colors }) => {
         </div>
       )}
 
+      {/* Evolution Mensuelle */}
       {data.mensuelle && (
-        <div className="fa-dashboard-chart-card">
-          <div className="fa-dashboard-card-header">
+        <div className="fa-chart-card">
+          <div className="fa-card-header">
             <h3><BarChart3 size={20} /> Évolution Mensuelle</h3>
-            <span className="fa-dashboard-trend-badge">{data.mensuelle.resume?.tendance}</span>
+            <span className="fa-trend-badge">{data.mensuelle.resume?.tendance}</span>
           </div>
-          <div className="fa-dashboard-chart-container">
+          <div className="fa-chart-container">
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={data.mensuelle.donnees}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 200, 83, 0.1)" />
@@ -426,6 +438,9 @@ const OverviewTab = ({ data, formatCurrency, formatNumber, colors }) => {
   );
 };
 
+// ============================================
+// PERFORMANCE TAB
+// ============================================
 const PerformanceTab = ({ data, formatCurrency, formatNumber, colors }) => {
   const hebdo = data.hebdomadaire?.comparaison || {};
   const creneaux = data.creneaux?.creneaux || [];
@@ -433,12 +448,13 @@ const PerformanceTab = ({ data, formatCurrency, formatNumber, colors }) => {
 
   return (
     <>
-      <div className="fa-dashboard-comparison-grid">
-        <div className="fa-dashboard-comparison-card">
-          <div className="fa-dashboard-comparison-header">
+      {/* Comparaison Hebdomadaire */}
+      <div className="fa-comparison-grid">
+        <div className="fa-comparison-card">
+          <div className="fa-comparison-header">
             <h3><Calendar size={20} /> Semaine Courante vs Précédente</h3>
           </div>
-          <div className="fa-dashboard-comparison-metrics">
+          <div className="fa-comparison-metrics">
             <ComparisonMetric
               label="Réservations"
               current={hebdo.reservations?.courant}
@@ -464,13 +480,14 @@ const PerformanceTab = ({ data, formatCurrency, formatNumber, colors }) => {
         </div>
       </div>
 
+      {/* Analyse des Créneaux */}
       {creneaux.length > 0 && (
-        <div className="fa-dashboard-chart-card">
-          <div className="fa-dashboard-card-header">
+        <div className="fa-chart-card">
+          <div className="fa-card-header">
             <h3><Clock size={20} /> Performance par Créneau Horaire</h3>
-            <span className="fa-dashboard-info-badge"><Calendar size={14} /> 30 derniers jours</span>
+            <span className="fa-info-badge"><Calendar size={14} /> 30 derniers jours</span>
           </div>
-          <div className="fa-dashboard-chart-container">
+          <div className="fa-chart-container">
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={creneaux}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 200, 83, 0.1)" />
@@ -512,15 +529,16 @@ const PerformanceTab = ({ data, formatCurrency, formatNumber, colors }) => {
         </div>
       )}
 
+      {/* Tendances Hebdomadaires */}
       {tendances.hebdomadaire && (
-        <div className="fa-dashboard-chart-card">
-          <div className="fa-dashboard-card-header">
+        <div className="fa-chart-card">
+          <div className="fa-card-header">
             <h3><TrendingUp size={20} /> Tendances Hebdomadaires</h3>
-            <span className={`fa-dashboard-trend-badge fa-dashboard-${tendances.hebdomadaire.interpretation?.toLowerCase()}`}>
+            <span className={`fa-trend-badge fa-${tendances.hebdomadaire.interpretation?.toLowerCase()}`}>
               {tendances.hebdomadaire.interpretation}
             </span>
           </div>
-          <div className="fa-dashboard-chart-container">
+          <div className="fa-chart-container">
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={tendances.hebdomadaire.donnees}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 200, 83, 0.1)" />
@@ -565,7 +583,8 @@ const PerformanceTab = ({ data, formatCurrency, formatNumber, colors }) => {
         </div>
       )}
 
-      <div className="fa-dashboard-metrics-grid">
+      {/* Métriques Détaillées */}
+      <div className="fa-metrics-grid">
         {data.creneaux?.analyse && (
           <>
             <MetricCard
@@ -589,6 +608,9 @@ const PerformanceTab = ({ data, formatCurrency, formatNumber, colors }) => {
   );
 };
 
+// ============================================
+// CLIENTS TAB
+// ============================================
 const ClientsTab = ({ data, formatCurrency, formatNumber, colors }) => {
   const portefeuille = data.portefeuille?.data || {};
   const cohortes = data.cohortes?.data || {};
@@ -603,7 +625,8 @@ const ClientsTab = ({ data, formatCurrency, formatNumber, colors }) => {
 
   return (
     <>
-      <div className="fa-dashboard-kpi-grid">
+      {/* Indicateurs Clients */}
+      <div className="fa-kpi-grid">
         <KPICard
           title="Clients Totaux"
           value={formatNumber(portefeuille.indicateurs?.nombre_clients_total)}
@@ -630,13 +653,14 @@ const ClientsTab = ({ data, formatCurrency, formatNumber, colors }) => {
         />
       </div>
 
+      {/* Distribution par Catégorie */}
       {distributionData.length > 0 && (
-        <div className="fa-dashboard-chart-row">
-          <div className="fa-dashboard-chart-card fa-dashboard-chart-card-half">
-            <div className="fa-dashboard-card-header">
+        <div className="fa-chart-row">
+          <div className="fa-chart-card fa-chart-card-half">
+            <div className="fa-card-header">
               <h3><PieChartIcon size={20} /> Distribution Clients par Catégorie</h3>
             </div>
-            <div className="fa-dashboard-chart-container">
+            <div className="fa-chart-container">
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -672,11 +696,11 @@ const ClientsTab = ({ data, formatCurrency, formatNumber, colors }) => {
             </div>
           </div>
 
-          <div className="fa-dashboard-chart-card fa-dashboard-chart-card-half">
-            <div className="fa-dashboard-card-header">
+          <div className="fa-chart-card fa-chart-card-half">
+            <div className="fa-card-header">
               <h3><DollarSign size={20} /> Part du CA par Catégorie</h3>
             </div>
-            <div className="fa-dashboard-chart-container">
+            <div className="fa-chart-container">
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={distributionData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 200, 83, 0.1)" />
@@ -703,12 +727,13 @@ const ClientsTab = ({ data, formatCurrency, formatNumber, colors }) => {
         </div>
       )}
 
+      {/* Analyse de Rétention */}
       {cohortes.cohortes && cohortes.cohortes.length > 0 && (
-        <div className="fa-dashboard-chart-card">
-          <div className="fa-dashboard-card-header">
+        <div className="fa-chart-card">
+          <div className="fa-card-header">
             <h3><Activity size={20} /> Analyse de Rétention par Cohorte</h3>
           </div>
-          <div className="fa-dashboard-retention-table">
+          <div className="fa-retention-table">
             <table>
               <thead>
                 <tr>
@@ -725,21 +750,21 @@ const ClientsTab = ({ data, formatCurrency, formatNumber, colors }) => {
                     <td>{new Date(cohorte.cohorte_mois).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })}</td>
                     <td><strong>{cohorte.taille}</strong></td>
                     <td>
-                      <div className="fa-dashboard-retention-cell">
-                        <span className="fa-dashboard-retention-value">{cohorte.retention.mois_1}%</span>
-                        <div className="fa-dashboard-retention-bar" style={{ width: `${cohorte.retention.mois_1}%` }}></div>
+                      <div className="fa-retention-cell">
+                        <span className="fa-retention-value">{cohorte.retention.mois_1}%</span>
+                        <div className="fa-retention-bar" style={{ width: `${cohorte.retention.mois_1}%` }}></div>
                       </div>
                     </td>
                     <td>
-                      <div className="fa-dashboard-retention-cell">
-                        <span className="fa-dashboard-retention-value">{cohorte.retention.mois_2}%</span>
-                        <div className="fa-dashboard-retention-bar" style={{ width: `${cohorte.retention.mois_2}%` }}></div>
+                      <div className="fa-retention-cell">
+                        <span className="fa-retention-value">{cohorte.retention.mois_2}%</span>
+                        <div className="fa-retention-bar" style={{ width: `${cohorte.retention.mois_2}%` }}></div>
                       </div>
                     </td>
                     <td>
-                      <div className="fa-dashboard-retention-cell">
-                        <span className="fa-dashboard-retention-value">{cohorte.retention.mois_3}%</span>
-                        <div className="fa-dashboard-retention-bar" style={{ width: `${cohorte.retention.mois_3}%` }}></div>
+                      <div className="fa-retention-cell">
+                        <span className="fa-retention-value">{cohorte.retention.mois_3}%</span>
+                        <div className="fa-retention-bar" style={{ width: `${cohorte.retention.mois_3}%` }}></div>
                       </div>
                     </td>
                   </tr>
@@ -748,41 +773,42 @@ const ClientsTab = ({ data, formatCurrency, formatNumber, colors }) => {
             </table>
           </div>
           {cohortes.indicateurs && (
-            <div className="fa-dashboard-retention-summary">
-              <div className="fa-dashboard-summary-item">
-                <CheckCircle size={18} className="fa-dashboard-summary-icon" />
-                <span className="fa-dashboard-label">Rétention Moyenne Mois 1:</span>
-                <span className="fa-dashboard-value">{cohortes.indicateurs.retention_moyenne_mois1}%</span>
+            <div className="fa-retention-summary">
+              <div className="fa-summary-item">
+                <CheckCircle size={18} className="fa-summary-icon" />
+                <span className="fa-label">Rétention Moyenne Mois 1:</span>
+                <span className="fa-value">{cohortes.indicateurs.retention_moyenne_mois1}%</span>
               </div>
-              <div className="fa-dashboard-summary-item">
-                <CheckCircle size={18} className="fa-dashboard-summary-icon" />
-                <span className="fa-dashboard-label">Rétention Moyenne Mois 3:</span>
-                <span className="fa-dashboard-value">{cohortes.indicateurs.retention_moyenne_mois3}%</span>
+              <div className="fa-summary-item">
+                <CheckCircle size={18} className="fa-summary-icon" />
+                <span className="fa-label">Rétention Moyenne Mois 3:</span>
+                <span className="fa-value">{cohortes.indicateurs.retention_moyenne_mois3}%</span>
               </div>
             </div>
           )}
         </div>
       )}
 
+      {/* Top Clients */}
       {portefeuille.clients_detailles && portefeuille.clients_detailles.length > 0 && (
-        <div className="fa-dashboard-chart-card">
-          <div className="fa-dashboard-card-header">
+        <div className="fa-chart-card">
+          <div className="fa-card-header">
             <h3><Star size={20} /> Top 10 Clients</h3>
           </div>
-          <div className="fa-dashboard-top-clients-list">
+          <div className="fa-top-clients-list">
             {portefeuille.clients_detailles.slice(0, 10).map((client, idx) => (
-              <div key={idx} className="fa-dashboard-client-item">
-                <div className="fa-dashboard-client-rank">{idx + 1}</div>
-                <div className="fa-dashboard-client-info">
-                  <div className="fa-dashboard-client-email">{client.email}</div>
-                  <div className="fa-dashboard-client-meta">
-                    <span className={`fa-dashboard-client-badge fa-dashboard-${client.categorie.toLowerCase()}`}>
+              <div key={idx} className="fa-client-item">
+                <div className="fa-client-rank">{idx + 1}</div>
+                <div className="fa-client-info">
+                  <div className="fa-client-email">{client.email}</div>
+                  <div className="fa-client-meta">
+                    <span className={`fa-client-badge fa-${client.categorie.toLowerCase()}`}>
                       {client.categorie}
                     </span>
                     <span>{client.nb_reservations} réservations</span>
                   </div>
                 </div>
-                <div className="fa-dashboard-client-ca">{formatCurrency(client.ca_total)}</div>
+                <div className="fa-client-ca">{formatCurrency(client.ca_total)}</div>
               </div>
             ))}
           </div>
@@ -792,13 +818,17 @@ const ClientsTab = ({ data, formatCurrency, formatNumber, colors }) => {
   );
 };
 
+// ============================================
+// TERRAINS TAB
+// ============================================
 const TerrainsTab = ({ data, formatCurrency, formatNumber, colors }) => {
   const terrains = data.terrains?.data || [];
   const resume = data.terrains?.resume || {};
 
   return (
     <>
-      <div className="fa-dashboard-kpi-grid">
+      {/* Résumé Global */}
+      <div className="fa-kpi-grid">
         <KPICard
           title="Terrains Actifs"
           value={formatNumber(resume.total_terrains)}
@@ -827,13 +857,14 @@ const TerrainsTab = ({ data, formatCurrency, formatNumber, colors }) => {
         />
       </div>
 
+      {/* Performance des Terrains */}
       {terrains.length > 0 && (
         <>
-          <div className="fa-dashboard-chart-card">
-            <div className="fa-dashboard-card-header">
+          <div className="fa-chart-card">
+            <div className="fa-card-header">
               <h3><DollarSign size={20} /> Chiffre d'Affaires par Terrain</h3>
             </div>
-            <div className="fa-dashboard-chart-container">
+            <div className="fa-chart-container">
               <ResponsiveContainer width="100%" height={400}>
                 <BarChart data={terrains.slice(0, 10)} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 200, 83, 0.1)" />
@@ -866,11 +897,11 @@ const TerrainsTab = ({ data, formatCurrency, formatNumber, colors }) => {
             </div>
           </div>
 
-          <div className="fa-dashboard-chart-card">
-            <div className="fa-dashboard-card-header">
+          <div className="fa-chart-card">
+            <div className="fa-card-header">
               <h3><Activity size={20} /> Taux d'Occupation par Terrain</h3>
             </div>
-            <div className="fa-dashboard-chart-container">
+            <div className="fa-chart-container">
               <ResponsiveContainer width="100%" height={350}>
                 <BarChart data={terrains.slice(0, 10)}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 200, 83, 0.1)" />
@@ -895,12 +926,13 @@ const TerrainsTab = ({ data, formatCurrency, formatNumber, colors }) => {
             </div>
           </div>
 
-          <div className="fa-dashboard-chart-card">
-            <div className="fa-dashboard-card-header">
+          {/* Tableau Détaillé */}
+          <div className="fa-chart-card">
+            <div className="fa-card-header">
               <h3><BarChart3 size={20} /> Détails des Terrains</h3>
             </div>
-            <div className="fa-dashboard-table-container">
-              <table className="fa-dashboard-data-table">
+            <div className="fa-table-container">
+              <table className="fa-data-table">
                 <thead>
                   <tr>
                     <th>Terrain</th>
@@ -918,7 +950,7 @@ const TerrainsTab = ({ data, formatCurrency, formatNumber, colors }) => {
                     <tr key={idx}>
                       <td><strong>{terrain.nomterrain}</strong></td>
                       <td>
-                        <span className="fa-dashboard-type-badge">{terrain.typeterrain}</span>
+                        <span className="fa-type-badge">{terrain.typeterrain}</span>
                       </td>
                       <td>{formatNumber(terrain.nombre_reservations)}</td>
                       <td>{formatCurrency(terrain.chiffre_affaires)}</td>
@@ -926,11 +958,11 @@ const TerrainsTab = ({ data, formatCurrency, formatNumber, colors }) => {
                       <td>{terrain.heures_utilisees.toFixed(1)}h</td>
                       <td>{formatCurrency(terrain.revenu_par_heure)}</td>
                       <td>
-                        <div className="fa-dashboard-progress-cell">
+                        <div className="fa-progress-cell">
                           <span>{terrain.taux_occupation.toFixed(1)}%</span>
-                          <div className="fa-dashboard-progress-bar">
+                          <div className="fa-progress-bar">
                             <div 
-                              className="fa-dashboard-progress-fill" 
+                              className="fa-progress-fill" 
                               style={{ 
                                 width: `${Math.min(terrain.taux_occupation, 100)}%`,
                                 backgroundColor: terrain.taux_occupation > 70 ? '#00C853' : 
@@ -952,18 +984,21 @@ const TerrainsTab = ({ data, formatCurrency, formatNumber, colors }) => {
   );
 };
 
+// ============================================
+// COMPOSANTS UTILITAIRES
+// ============================================
 const KPICard = ({ title, value, subtitle, trend, icon, color, delay = 0 }) => (
   <div 
-    className={`fa-dashboard-kpi-card fa-dashboard-${color}`}
+    className={`fa-kpi-card fa-${color}`}
     style={{ animationDelay: `${delay}ms` }}
   >
-    <div className="fa-dashboard-kpi-icon">{icon}</div>
-    <div className="fa-dashboard-kpi-content">
-      <div className="fa-dashboard-kpi-title">{title}</div>
-      <div className="fa-dashboard-kpi-value">{value}</div>
-      {subtitle && <div className="fa-dashboard-kpi-subtitle">{subtitle}</div>}
+    <div className="fa-kpi-icon">{icon}</div>
+    <div className="fa-kpi-content">
+      <div className="fa-kpi-title">{title}</div>
+      <div className="fa-kpi-value">{value}</div>
+      {subtitle && <div className="fa-kpi-subtitle">{subtitle}</div>}
       {trend !== undefined && (
-        <div className={`fa-dashboard-kpi-trend ${trend >= 0 ? 'fa-dashboard-positive' : 'fa-dashboard-negative'}`}>
+        <div className={`fa-kpi-trend ${trend >= 0 ? 'fa-positive' : 'fa-negative'}`}>
           {trend >= 0 ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
           {Math.abs(trend).toFixed(2)}%
         </div>
@@ -973,23 +1008,23 @@ const KPICard = ({ title, value, subtitle, trend, icon, color, delay = 0 }) => (
 );
 
 const ComparisonMetric = ({ label, current, previous, evolution, formatter }) => (
-  <div className="fa-dashboard-comparison-metric">
-    <div className="fa-dashboard-metric-label">{label}</div>
-    <div className="fa-dashboard-metric-values">
-      <div className="fa-dashboard-metric-current">
-        <span className="fa-dashboard-label">Actuel</span>
-        <span className="fa-dashboard-value">{formatter(current)}</span>
+  <div className="fa-comparison-metric">
+    <div className="fa-metric-label">{label}</div>
+    <div className="fa-metric-values">
+      <div className="fa-metric-current">
+        <span className="fa-label">Actuel</span>
+        <span className="fa-value">{formatter(current)}</span>
       </div>
-      <div className="fa-dashboard-metric-arrow">
+      <div className="fa-metric-arrow">
         {evolution >= 0 ? '→' : '↓'}
       </div>
-      <div className="fa-dashboard-metric-previous">
-        <span className="fa-dashboard-label">Précédent</span>
-        <span className="fa-dashboard-value">{formatter(previous)}</span>
+      <div className="fa-metric-previous">
+        <span className="fa-label">Précédent</span>
+        <span className="fa-value">{formatter(previous)}</span>
       </div>
     </div>
     {evolution !== undefined && (
-      <div className={`fa-dashboard-metric-evolution ${evolution >= 0 ? 'fa-dashboard-positive' : 'fa-dashboard-negative'}`}>
+      <div className={`fa-metric-evolution ${evolution >= 0 ? 'fa-positive' : 'fa-negative'}`}>
         {evolution >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
         {Math.abs(evolution).toFixed(2)}%
       </div>
@@ -998,12 +1033,12 @@ const ComparisonMetric = ({ label, current, previous, evolution, formatter }) =>
 );
 
 const MetricCard = ({ icon, title, value, subtitle, color }) => (
-  <div className={`fa-dashboard-metric-card fa-dashboard-${color}`}>
-    <div className="fa-dashboard-metric-icon">{icon}</div>
-    <div className="fa-dashboard-metric-info">
-      <div className="fa-dashboard-metric-title">{title}</div>
-      <div className="fa-dashboard-metric-value">{value}</div>
-      {subtitle && <div className="fa-dashboard-metric-subtitle">{subtitle}</div>}
+  <div className={`fa-metric-card fa-${color}`}>
+    <div className="fa-metric-icon">{icon}</div>
+    <div className="fa-metric-info">
+      <div className="fa-metric-title">{title}</div>
+      <div className="fa-metric-value">{value}</div>
+      {subtitle && <div className="fa-metric-subtitle">{subtitle}</div>}
     </div>
   </div>
 );

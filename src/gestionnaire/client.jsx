@@ -1,1886 +1,1422 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { 
-  FaPlus, FaEye, FaEdit, FaTrash, FaSearch, FaChevronLeft, 
-  FaChevronRight, FaTimes, FaCalendar, FaMoneyBillWave, 
-  FaCreditCard, FaUserCircle, FaClock, FaChartBar, FaPrint, 
-  FaUpload, FaCamera, FaQrcode, FaIdCard, FaDownload, FaFilePdf 
-} from 'react-icons/fa';
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Plus,
+  Eye,
+  Pencil,
+  Trash2,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  User,
+  Mail,
+  Phone,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  XCircle,
+  Users,
+  UserPlus,
+  Filter,
+  ArrowUpDown,
+  RefreshCw,
+  Calendar,
+  Printer,
+  Tag,
+  DollarSign,
+  CreditCard,
+  Hash,
+  Award,
+  Star,
+  Crown,
+  Sparkles,
+  LayoutGrid,
+  List,
+  Download,
+  FileText,
+  Bell,
+  HelpCircle,
+  MoreVertical,
+  Settings,
+  Info,
+  AlertTriangle
+} from 'lucide-react';
 import './client.css';
 
-const GestionClients = () => {
-  // State principal
-  const [clientsList, setClientsList] = useState([]);
-  const [allClients, setAllClients] = useState([]);
+const GestionAbonnes = () => {
+  // ===== ÉTATS =====
+  const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentClientsPage, setCurrentClientsPage] = useState(1);
-  const [totalClientsPages, setTotalClientsPages] = useState(1);
-  const [searchClientsTerm, setSearchClientsTerm] = useState('');
-  const [clientsFilter, setClientsFilter] = useState('all');
-  const [clientsSort, setClientsSort] = useState('nom-asc');
-
-  // Modals et états associés
-  const [showAddClientModal, setShowAddClientModal] = useState(false);
-  const [showViewClientModal, setShowViewClientModal] = useState(false);
-  const [showEditClientModal, setShowEditClientModal] = useState(false);
-  const [showDeleteClientModal, setShowDeleteClientModal] = useState(false);
-  const [showAbonnementModal, setShowAbonnementModal] = useState(false);
-  const [showPhotoModal, setShowPhotoModal] = useState(false);
-  const [showStatistiquesModal, setShowStatistiquesModal] = useState(false);
-  const [showCarteModal, setShowCarteModal] = useState(false);
-  const [selectedClientData, setSelectedClientData] = useState(null);
-  const [statistiques, setStatistiques] = useState(null);
-  const [carteClientData, setCarteClientData] = useState(null);
-
-  // Upload photo
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [photoPreview, setPhotoPreview] = useState(null);
-  const [photoFile, setPhotoFile] = useState(null);
-  const fileInputRef = useRef(null);
-
-  // Formulaires
-  const [newClientData, setNewClientData] = useState({
-    nom: '',
-    prenom: '',
-    email: '',
-    telephone: '',
-    statut: 'actif',
-    type_abonnement: '',
-    date_debut: '',
-    date_fin: '',
-    prix_total: '',
-    mode_paiement: '',
-    photo_abonne: '',
-    heure_reservation: ''
-  });
-
-  const [editClientData, setEditClientData] = useState({
-    idclient: '',
-    nom: '',
-    prenom: '',
-    email: '',
-    telephone: '',
-    statut: 'actif',
-    type_abonnement: '',
-    date_debut: '',
-    date_fin: '',
-    prix_total: '',
-    mode_paiement: '',
-    photo_abonne: '',
-    heure_reservation: ''
-  });
-
-  const [abonnementData, setAbonnementData] = useState({
-    type_abonnement: '',
-    date_debut: '',
-    date_fin: '',
-    prix_total: '',
-    mode_paiement: ''
-  });
-
-  // Toast
-  const [clientToast, setClientToast] = useState(null);
-
-  // Références
-  const carteRef = useRef(null);
-
-  // Constantes
-  const CLIENTS_PER_PAGE = 10;
-  const API_URL = 'https://backend-foot-omega.vercel.app/api/clients'; // Changé pour localhost pour l'upload
-
-  // Types d'abonnement valides
-  const TYPES_ABONNEMENT = ['mensuel', 'trimestriel', 'semestriel', 'annuel', 'ponctuel'];
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [viewMode, setViewMode] = useState('grid');
+  const [sortConfig, setSortConfig] = useState({ field: 'nom', direction: 'asc' });
   
-  // Modes de paiement
-  const MODES_PAIEMENT = ['Carte bancaire', 'Espèces', 'Virement', 'Chèque', 'Mobile Money'];
+  const [modalState, setModalState] = useState({ 
+    add: false, 
+    view: false, 
+    edit: false, 
+    delete: false 
+  });
+  
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [notification, setNotification] = useState(null);
 
-  // Récupérer tous les clients depuis l'API
-  const fetchAllClientsData = async () => {
+  // Formulaire avec heure_fin
+  const [formData, setFormData] = useState({
+    nom: '',
+    prenom: '',
+    email: '',
+    telephone: '',
+    statut: 'actif',
+    type_abonnement: '',
+    prix_total: '',
+    date_debut: '',
+    date_fin: '',
+    mode_paiement: '',
+    heure_reservation: '',
+    heure_fin: ''
+  });
+
+  const ITEMS_PER_PAGE = 12;
+  const API_URL = 'https://backend-foot-omega.vercel.app/api/clients';
+
+  // ===== CHARGEMENT DES DONNÉES =====
+  const fetchData = async () => {
     setIsLoading(true);
     try {
       const response = await fetch(API_URL);
-      const data = await response.json();
+      const result = await response.json();
       
-      if (data.success) {
-        setAllClients(data.data || []);
+      if (result.success) {
+        setData(result.data || []);
+        setFilteredData(result.data || []);
+        showNotification('Données chargées avec succès', 'success');
       } else {
-        showClientToast(data.message || 'Erreur lors du chargement', 'error');
+        showNotification(result.message || 'Erreur de chargement', 'error');
       }
-    } catch (error) {
-      console.error('Erreur:', error);
-      showClientToast('Erreur de connexion au serveur', 'error');
+    } catch (err) {
+      console.error('Erreur fetch:', err);
+      showNotification('Erreur de connexion au serveur', 'error');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Récupérer les statistiques
-  const fetchStatistiques = async () => {
-    try {
-      const response = await fetch(`${API_URL}/statistiques/totales`);
-      const data = await response.json();
-      
-      if (data.success) {
-        setStatistiques(data.data);
-      }
-    } catch (error) {
-      console.error('Erreur lors du chargement des statistiques:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchAllClientsData();
-    fetchStatistiques();
+  useEffect(() => { 
+    fetchData(); 
   }, []);
 
-  // Filtrer, rechercher et trier les clients
-  const filteredAndSortedClients = useMemo(() => {
-    let result = [...allClients];
+  // ===== FILTRES ET TRI =====
+  useEffect(() => {
+    let result = [...data];
     
-    // Appliquer le filtre de statut
-    if (clientsFilter !== 'all') {
-      if (clientsFilter === 'abonnement_actif') {
-        const today = new Date().toISOString().split('T')[0];
-        result = result.filter(client => 
-          client.type_abonnement && 
-          client.date_debut && 
-          client.date_fin &&
-          client.date_debut <= today && 
-          client.date_fin >= today &&
-          client.statut === 'actif'
-        );
-      } else if (clientsFilter === 'abonnement_expire') {
-        const today = new Date().toISOString().split('T')[0];
-        result = result.filter(client => 
-          client.type_abonnement && 
-          client.date_fin && 
-          client.date_fin < today &&
-          client.statut === 'actif'
-        );
-      } else {
-        result = result.filter(client => client.statut === clientsFilter);
-      }
+    // Filtre par statut
+    if (statusFilter !== 'all') {
+      result = result.filter(item => item.statut === statusFilter);
     }
     
-    // Appliquer la recherche
-    if (searchClientsTerm) {
-      const searchTerm = searchClientsTerm.toLowerCase().trim();
-      result = result.filter(client => 
-        client.nom.toLowerCase().includes(searchTerm) ||
-        client.prenom.toLowerCase().includes(searchTerm) ||
-        client.email.toLowerCase().includes(searchTerm) ||
-        client.telephone.includes(searchTerm) ||
-        client.idclient.toString().includes(searchTerm) ||
-        (client.type_abonnement && client.type_abonnement.toLowerCase().includes(searchTerm)) ||
-        (client.mode_paiement && client.mode_paiement.toLowerCase().includes(searchTerm))
+    // Recherche textuelle
+    if (searchTerm) {
+      const query = searchTerm.toLowerCase().trim();
+      result = result.filter(item => 
+        item.nom?.toLowerCase().includes(query) ||
+        item.prenom?.toLowerCase().includes(query) ||
+        item.email?.toLowerCase().includes(query) ||
+        item.telephone?.includes(query) ||
+        (item.type_abonnement && item.type_abonnement.toLowerCase().includes(query)) ||
+        item.idclient?.toString().includes(query) ||
+        (item.heure_reservation && item.heure_reservation.includes(query)) ||
+        (item.heure_fin && item.heure_fin.includes(query))
       );
     }
     
-    // Appliquer le tri
-    switch(clientsSort) {
-      case 'nom-asc':
-        result.sort((a, b) => a.nom.localeCompare(b.nom));
-        break;
-      case 'nom-desc':
-        result.sort((a, b) => b.nom.localeCompare(a.nom));
-        break;
-      case 'date_creation-desc':
-        result.sort((a, b) => new Date(b.date_creation) - new Date(a.date_creation));
-        break;
-      case 'date_fin-asc':
-        result.sort((a, b) => new Date(a.date_fin || 0) - new Date(b.date_fin || 0));
-        break;
-    }
-    
-    return result;
-  }, [allClients, clientsFilter, searchClientsTerm, clientsSort]);
-
-  // Pagination des résultats filtrés
-  const paginatedClients = useMemo(() => {
-    const startIndex = (currentClientsPage - 1) * CLIENTS_PER_PAGE;
-    return filteredAndSortedClients.slice(startIndex, startIndex + CLIENTS_PER_PAGE);
-  }, [filteredAndSortedClients, currentClientsPage]);
-
-  // Mettre à jour la pagination
-  useEffect(() => {
-    const totalPages = Math.ceil(filteredAndSortedClients.length / CLIENTS_PER_PAGE);
-    setTotalClientsPages(totalPages || 1);
-    
-    if (currentClientsPage > totalPages && totalPages > 0) {
-      setCurrentClientsPage(1);
-    }
-  }, [filteredAndSortedClients, currentClientsPage]);
-
-  // Fonction pour convertir une image en base64
-  const convertImageToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
+    // Tri
+    result.sort((a, b) => {
+      let aValue = a[sortConfig.field];
+      let bValue = b[sortConfig.field];
+      
+      if (sortConfig.field === 'prix_total') {
+        aValue = Number(aValue) || 0;
+        bValue = Number(bValue) || 0;
+      } else if (sortConfig.field === 'heure_reservation' || sortConfig.field === 'heure_fin') {
+        aValue = aValue || '00:00';
+        bValue = bValue || '00:00';
+      } else if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+      
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
     });
+    
+    setFilteredData(result);
+    setCurrentPage(1);
+  }, [data, statusFilter, searchTerm, sortConfig]);
+
+  // ===== PAGINATION =====
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredData, currentPage]);
+
+  useEffect(() => {
+    setTotalPages(Math.ceil(filteredData.length / ITEMS_PER_PAGE) || 1);
+  }, [filteredData]);
+
+  // ===== NOTIFICATIONS =====
+  const showNotification = (message, type = 'info') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
   };
 
-  // Gestion des actions CRUD
-  const handleAddNewClient = async () => {
-    let photoBase64 = null;
+  // ===== GESTION FORMULAIRE =====
+  const resetForm = () => {
+    setFormData({
+      nom: '', prenom: '', email: '', telephone: '', statut: 'actif',
+      type_abonnement: '', prix_total: '', date_debut: '', date_fin: '',
+      mode_paiement: '', heure_reservation: '', heure_fin: ''
+    });
+    setSelectedItem(null);
+  };
+
+  // ===== MODALES =====
+  const openModal = (type, item = null) => {
+    if (item) {
+      setSelectedItem(item);
+      setFormData({
+        nom: item.nom || '',
+        prenom: item.prenom || '',
+        email: item.email || '',
+        telephone: item.telephone || '',
+        statut: item.statut || 'actif',
+        type_abonnement: item.type_abonnement || '',
+        prix_total: item.prix_total || '',
+        date_debut: item.date_debut || '',
+        date_fin: item.date_fin || '',
+        mode_paiement: item.mode_paiement || '',
+        heure_reservation: item.heure_reservation || '',
+        heure_fin: item.heure_fin || ''
+      });
+    }
+    setModalState({ ...modalState, [type]: true });
+  };
+
+  const closeModal = (type) => {
+    setModalState({ ...modalState, [type]: false });
+    resetForm();
+  };
+
+  // ===== VALIDATION DES HEURES =====
+  const validateHeures = (debut, fin) => {
+    if (!debut || !fin) return true;
     
-    // Si une photo a été sélectionnée, la convertir en base64
-    if (photoFile) {
-      try {
-        photoBase64 = await convertImageToBase64(photoFile);
-      } catch (error) {
-        console.error('Erreur de conversion:', error);
-        showClientToast('Erreur lors de la conversion de l\'image', 'error');
-        return;
-      }
+    // Convertir en objets Date pour la comparaison
+    const debutDate = new Date(`1970-01-01T${debut}`);
+    const finDate = new Date(`1970-01-01T${fin}`);
+    
+    if (debutDate >= finDate) {
+      showNotification("L'heure de fin doit être postérieure à l'heure de début", 'error');
+      return false;
+    }
+    
+    return true;
+  };
+
+  // ===== PRÉPARATION DES DONNÉES POUR L'API =====
+  const prepareDataForApi = () => {
+    const dataToSend = {
+      nom: formData.nom,
+      prenom: formData.prenom,
+      email: formData.email,
+      telephone: formData.telephone,
+      statut: formData.statut || 'actif',
+      type_abonnement: formData.type_abonnement || null,
+      prix_total: formData.prix_total ? parseFloat(formData.prix_total) : null,
+      date_debut: formData.date_debut || null,
+      date_fin: formData.date_fin || null,
+      mode_paiement: formData.mode_paiement || null,
+      heure_reservation: formData.heure_reservation || null,
+      heure_fin: formData.heure_fin || null
+    };
+
+    // Log pour debug
+    console.log('Données envoyées à l\'API:', dataToSend);
+    
+    return dataToSend;
+  };
+
+  // ===== CRUD =====
+  const handleAdd = async () => {
+    if (!formData.nom || !formData.prenom || !formData.email || !formData.telephone) {
+      showNotification('Nom, prénom, email et téléphone sont obligatoires', 'error');
+      return;
     }
 
-    const clientData = {
-      ...newClientData,
-      photo_base64: photoBase64
-    };
+    // Validation des heures
+    if (!validateHeures(formData.heure_reservation, formData.heure_fin)) {
+      return;
+    }
+
+    const dataToSend = prepareDataForApi();
 
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(clientData)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSend)
       });
       
-      const data = await response.json();
+      const result = await response.json();
       
-      if (data.success) {
-        setNewClientData({
-          nom: '',
-          prenom: '',
-          email: '',
-          telephone: '',
-          statut: 'actif',
-          type_abonnement: '',
-          date_debut: '',
-          date_fin: '',
-          prix_total: '',
-          mode_paiement: '',
-          photo_abonne: '',
-          heure_reservation: ''
-        });
-        setPhotoPreview(null);
-        setPhotoFile(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-        setShowAddClientModal(false);
-        showClientToast('Client ajouté avec succès', 'success');
-        fetchAllClientsData();
-        fetchStatistiques();
+      if (result.success) {
+        showNotification('Abonné ajouté avec succès', 'success');
+        closeModal('add');
+        fetchData();
       } else {
-        showClientToast(data.message || 'Erreur lors de l\'ajout', 'error');
+        showNotification(result.message || 'Erreur lors de l\'ajout', 'error');
       }
-    } catch (error) {
-      console.error('Erreur:', error);
-      showClientToast('Erreur lors de l\'ajout du client', 'error');
+    } catch (err) {
+      console.error('Erreur ajout:', err);
+      showNotification('Erreur de connexion au serveur', 'error');
     }
   };
 
-  const handleEditCurrentClient = async () => {
+  const handleEdit = async () => {
+    if (!selectedItem || !selectedItem.idclient) {
+      showNotification('Erreur: ID client manquant', 'error');
+      return;
+    }
+
+    if (!formData.nom || !formData.prenom || !formData.email || !formData.telephone) {
+      showNotification('Nom, prénom, email et téléphone sont obligatoires', 'error');
+      return;
+    }
+
+    // Validation des heures
+    if (!validateHeures(formData.heure_reservation, formData.heure_fin)) {
+      return;
+    }
+
+    const dataToSend = prepareDataForApi();
+
     try {
-      const response = await fetch(`${API_URL}/${editClientData.idclient}`, {
+      const response = await fetch(`${API_URL}/${selectedItem.idclient}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(editClientData)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSend)
       });
       
-      const data = await response.json();
+      const result = await response.json();
       
-      if (data.success) {
-        setShowEditClientModal(false);
-        showClientToast('Client modifié avec succès', 'success');
-        fetchAllClientsData();
-        fetchStatistiques();
+      if (result.success) {
+        showNotification('Abonné modifié avec succès', 'success');
+        closeModal('edit');
+        fetchData();
       } else {
-        showClientToast(data.message || 'Erreur lors de la modification', 'error');
+        showNotification(result.message || 'Erreur lors de la modification', 'error');
       }
-    } catch (error) {
-      console.error('Erreur:', error);
-      showClientToast('Erreur lors de la modification du client', 'error');
+    } catch (err) {
+      console.error('Erreur modification:', err);
+      showNotification('Erreur de connexion au serveur', 'error');
     }
   };
 
-  const handleDeleteSelectedClient = async () => {
-    try {
-      const response = await fetch(`${API_URL}/${selectedClientData.idclient}`, {
-        method: 'DELETE'
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setShowDeleteClientModal(false);
-        showClientToast('Client supprimé avec succès', 'success');
-        fetchAllClientsData();
-        fetchStatistiques();
-      } else {
-        showClientToast(data.message || 'Erreur lors de la suppression', 'error');
-      }
-    } catch (error) {
-      console.error('Erreur:', error);
-      showClientToast('Erreur lors de la suppression du client', 'error');
-    }
-  };
-
-  const handleUpdateAbonnement = async () => {
-    try {
-      const response = await fetch(`${API_URL}/${selectedClientData.idclient}/abonnement`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(abonnementData)
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setShowAbonnementModal(false);
-        setAbonnementData({
-          type_abonnement: '',
-          date_debut: '',
-          date_fin: '',
-          prix_total: '',
-          mode_paiement: ''
-        });
-        showClientToast('Abonnement mis à jour avec succès', 'success');
-        fetchAllClientsData();
-        fetchStatistiques();
-      } else {
-        showClientToast(data.message || 'Erreur lors de la mise à jour', 'error');
-      }
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour de l\'abonnement:', error);
-      showClientToast('Erreur lors de la mise à jour de l\'abonnement', 'error');
-    }
-  };
-
-  const handlePhotoUpload = async () => {
-    if (!photoFile || !selectedClientData) {
-      showClientToast('Veuillez sélectionner une photo', 'error');
+  const handleDelete = async () => {
+    if (!selectedItem || !selectedItem.idclient) {
+      showNotification('Erreur: ID client manquant', 'error');
       return;
     }
 
     try {
-      const photoBase64 = await convertImageToBase64(photoFile);
-      
-      const response = await fetch(`${API_URL}/${selectedClientData.idclient}/photo-base64`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ photo_base64: photoBase64 })
+      const response = await fetch(`${API_URL}/${selectedItem.idclient}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
       });
       
-      const data = await response.json();
+      const result = await response.json();
       
-      if (data.success) {
-        setShowPhotoModal(false);
-        setPhotoPreview(null);
-        setPhotoFile(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-        showClientToast('Photo uploadée avec succès', 'success');
-        fetchAllClientsData();
+      if (result.success) {
+        showNotification('Abonné supprimé avec succès', 'success');
+        closeModal('delete');
+        fetchData();
       } else {
-        showClientToast(data.message || 'Erreur lors de l\'upload', 'error');
+        showNotification(result.message || 'Erreur lors de la suppression', 'error');
       }
-    } catch (error) {
-      console.error('Erreur lors de l\'upload:', error);
-      showClientToast('Erreur lors de l\'upload de la photo', 'error');
+    } catch (err) {
+      console.error('Erreur suppression:', err);
+      showNotification('Erreur de connexion au serveur', 'error');
     }
   };
 
-  // Gestion de la sélection de fichier
-  const handleFileSelect = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      // Vérifier la taille (5MB max)
-      if (file.size > 5 * 1024 * 1024) {
-        showClientToast('La taille de l\'image ne doit pas dépasser 5MB', 'error');
-        return;
-      }
-      
-      // Vérifier le type de fichier
-      if (!file.type.match('image.*')) {
-        showClientToast('Veuillez sélectionner une image valide (JPG, PNG, GIF)', 'error');
-        return;
-      }
-
-      setPhotoFile(file);
-      
-      // Créer un preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPhotoPreview(e.target.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // Gestion de l'impression de la carte
-  const handlePrintCarte = () => {
-    if (!carteRef.current || !carteClientData) return;
-
+  // ===== IMPRESSION PDF =====
+  const handlePrint = () => {
+    if (!selectedItem) return;
+    
+    const statusClass = selectedItem.statut === 'actif' ? 'actif' : 
+                        selectedItem.statut === 'inactif' ? 'inactif' : 
+                        selectedItem.statut === 'en attente' ? 'en-attente' : 'expire';
+    
+    const statusText = selectedItem.statut === 'actif' ? 'Actif' : 
+                       selectedItem.statut === 'inactif' ? 'Inactif' : 
+                       selectedItem.statut === 'en attente' ? 'En attente' : 'Expiré';
+    
+    const heureReservation = selectedItem.heure_reservation || '-';
+    const heureFin = selectedItem.heure_fin || '-';
+    
     const printWindow = window.open('', '_blank');
-    const carteHTML = `
-      <!DOCTYPE html>
+    printWindow.document.write(`
       <html>
-      <head>
-        <title>Carte d'abonnement - ${carteClientData.nom} ${carteClientData.prenom}</title>
-        <style>
-          @media print {
-            @page { margin: 0; size: 85mm 54mm; }
-            body { margin: 0; padding: 0; }
-          }
-          
-          body {
-            font-family: Arial, sans-serif;
-            width: 85mm;
-            height: 54mm;
-            margin: 0;
-            padding: 5mm;
-            background: linear-gradient(135deg, #0a6e0e 0%, #034307 100%);
-            color: white;
-            position: relative;
-            overflow: hidden;
-            box-sizing: border-box;
-          }
-          
-          .carte-container {
-            position: relative;
-            z-index: 2;
-          }
-          
-          .carte-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 3mm;
-          }
-          
-          .carte-logo {
-            font-size: 4mm;
-            font-weight: bold;
-            text-transform: uppercase;
-          }
-          
-          .carte-type {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 1mm 3mm;
-            border-radius: 20mm;
-            font-size: 3mm;
-            font-weight: bold;
-          }
-          
-          .carte-body {
-            display: grid;
-            grid-template-columns: 35mm 40mm;
-            gap: 3mm;
-          }
-          
-          .carte-photo {
-            width: 35mm;
-            height: 40mm;
-            border-radius: 3mm;
-            overflow: hidden;
-            border: 1mm solid white;
-          }
-          
-          .carte-photo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-          
-          .carte-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2mm;
-          }
-          
-          .carte-name {
-            font-size: 5mm;
-            font-weight: bold;
-            margin: 0;
-          }
-          
-          .carte-id {
-            font-size: 3mm;
-            opacity: 0.8;
-          }
-          
-          .carte-details {
-            font-size: 3mm;
-            margin-top: 2mm;
-          }
-          
-          .carte-details div {
-            margin-bottom: 1mm;
-          }
-          
-          .carte-footer {
-            position: absolute;
-            bottom: 3mm;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 2.5mm;
-            opacity: 0.9;
-          }
-          
-          .carte-qr {
-            position: absolute;
-            bottom: 3mm;
-            right: 3mm;
-            width: 15mm;
-            height: 15mm;
-            background: white;
-            border-radius: 2mm;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2mm;
-            color: #333;
-            text-align: center;
-            padding: 1mm;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="carte-container">
-          <div class="carte-header">
-            <div class="carte-logo">FOOT CLUB</div>
-            <div class="carte-type">${getAbonnementLabel(carteClientData.type_abonnement)}</div>
-          </div>
-          
-          <div class="carte-body">
-            <div class="carte-photo">
-              ${carteClientData.photo_abonne ? 
-                `<img src="${carteClientData.photo_abonne}" alt="Photo">` : 
-                `<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: rgba(255,255,255,0.1);">
-                  ${getClientInitials(carteClientData)}
-                </div>`
-              }
+        <head>
+          <title>Fiche Abonné - ${selectedItem.nom} ${selectedItem.prenom}</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+              font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+              background: linear-gradient(135deg, #f6f9fc 0%, #e9f2f9 100%);
+              min-height: 100vh;
+              padding: 40px 20px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            .print-card {
+              max-width: 800px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 32px;
+              box-shadow: 0 30px 60px rgba(0, 40, 20, 0.3);
+              overflow: hidden;
+              position: relative;
+            }
+            .print-card::before {
+              content: '';
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              height: 8px;
+              background: linear-gradient(90deg, #015502, #023a03, #015502);
+            }
+            .print-header {
+              background: linear-gradient(135deg, #015502 0%, #023a03 100%);
+              color: white;
+              padding: 40px;
+              position: relative;
+              overflow: hidden;
+            }
+            .print-header::after {
+              content: '';
+              position: absolute;
+              top: -50%;
+              right: -50%;
+              width: 200%;
+              height: 200%;
+              background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+              animation: rotate 20s linear infinite;
+            }
+            @keyframes rotate {
+              from { transform: rotate(0deg); }
+              to { transform: rotate(360deg); }
+            }
+            .print-header h1 {
+              font-size: 36px;
+              font-weight: 800;
+              margin-bottom: 10px;
+              letter-spacing: -1px;
+              position: relative;
+              z-index: 1;
+            }
+            .print-subtitle {
+              font-size: 16px;
+              opacity: 0.9;
+              position: relative;
+              z-index: 1;
+            }
+            .print-id {
+              position: absolute;
+              top: 30px;
+              right: 40px;
+              background: rgba(255,255,255,0.2);
+              backdrop-filter: blur(10px);
+              padding: 12px 24px;
+              border-radius: 50px;
+              font-size: 18px;
+              font-weight: 600;
+              border: 1px solid rgba(255,255,255,0.3);
+              z-index: 1;
+            }
+            .print-content {
+              padding: 40px;
+            }
+            .print-profile {
+              display: flex;
+              align-items: center;
+              gap: 40px;
+              margin-bottom: 40px;
+              padding: 30px;
+              background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+              border-radius: 24px;
+            }
+            .print-avatar {
+              width: 120px;
+              height: 120px;
+              background: linear-gradient(135deg, #015502, #023a03);
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 48px;
+              font-weight: 700;
+              color: white;
+              border: 6px solid white;
+              box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            }
+            .print-profile-info h2 {
+              font-size: 32px;
+              font-weight: 700;
+              margin-bottom: 15px;
+              color: #1e293b;
+            }
+            .print-status {
+              display: inline-block;
+              padding: 10px 24px;
+              border-radius: 50px;
+              font-weight: 600;
+              font-size: 15px;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            }
+            .print-status.actif {
+              background: rgba(16, 185, 129, 0.15);
+              color: #059669;
+              border: 1px solid rgba(16, 185, 129, 0.3);
+            }
+            .print-status.inactif {
+              background: rgba(239, 68, 68, 0.15);
+              color: #dc2626;
+              border: 1px solid rgba(239, 68, 68, 0.3);
+            }
+            .print-status.en-attente {
+              background: rgba(245, 158, 11, 0.15);
+              color: #d97706;
+              border: 1px solid rgba(245, 158, 11, 0.3);
+            }
+            .print-status.expire {
+              background: rgba(100, 116, 139, 0.15);
+              color: #475569;
+              border: 1px solid rgba(100, 116, 139, 0.3);
+            }
+            .print-grid {
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+              gap: 24px;
+            }
+            .print-info-card {
+              background: white;
+              border-radius: 20px;
+              padding: 24px;
+              box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+              border: 1px solid #e2e8f0;
+            }
+            .print-info-card h3 {
+              font-size: 18px;
+              color: #015502;
+              margin-bottom: 20px;
+              padding-bottom: 15px;
+              border-bottom: 2px solid #e2e8f0;
+              display: flex;
+              align-items: center;
+              gap: 10px;
+            }
+            .print-info-row {
+              display: flex;
+              margin-bottom: 15px;
+              padding-bottom: 15px;
+              border-bottom: 1px dashed #e2e8f0;
+            }
+            .print-info-row:last-child {
+              border-bottom: none;
+              margin-bottom: 0;
+              padding-bottom: 0;
+            }
+            .print-label {
+              width: 130px;
+              font-size: 14px;
+              font-weight: 600;
+              color: #64748b;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+            .print-value {
+              flex: 1;
+              font-size: 16px;
+              font-weight: 500;
+              color: #1e293b;
+            }
+            .print-value.price {
+              color: #015502;
+              font-weight: 700;
+              font-size: 18px;
+            }
+            .print-footer {
+              text-align: center;
+              padding: 25px 40px;
+              background: #f8fafc;
+              border-top: 2px solid #e2e8f0;
+              font-size: 14px;
+              color: #94a3b8;
+            }
+            .heure-row {
+              display: flex;
+              gap: 20px;
+              margin-top: 15px;
+              padding-top: 15px;
+              border-top: 1px dashed #e2e8f0;
+            }
+            .heure-item {
+              flex: 1;
+              text-align: center;
+              background: #f8fafc;
+              padding: 10px;
+              border-radius: 12px;
+            }
+            .heure-item .label {
+              font-size: 12px;
+              color: #64748b;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              margin-bottom: 5px;
+            }
+            .heure-item .value {
+              font-size: 18px;
+              font-weight: 700;
+              color: #015502;
+            }
+            @media print {
+              body { background: white; padding: 0; }
+              .print-card { box-shadow: none; border: 1px solid #ddd; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="print-card">
+            <div class="print-header">
+              <h1>FICHE ABONNÉ</h1>
+              <div class="print-subtitle">Document officiel d'abonnement</div>
+              <div class="print-id">#${selectedItem.idclient}</div>
             </div>
             
-            <div class="carte-info">
-              <h1 class="carte-name">${carteClientData.nom} ${carteClientData.prenom}</h1>
-              <div class="carte-id">ID: ${carteClientData.idclient}</div>
-              
-              <div class="carte-details">
-                <div>Validité: ${formatDate(carteClientData.date_debut)} - ${formatDate(carteClientData.date_fin)}</div>
-                <div>Type: ${getAbonnementLabel(carteClientData.type_abonnement)}</div>
-                <div>Statut: ${getStatusLabel(carteClientData.statut)}</div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="carte-footer">
-            Carte d'abonné • Émise le ${new Date().toLocaleDateString('fr-FR')}
-          </div>
-          
-          <div class="carte-qr">
-            ${carteClientData.idclient}<br/>
-            ${carteClientData.nom.substring(0, 3)}${carteClientData.prenom.substring(0, 3)}
-          </div>
-        </div>
-        
-        <script>
-          window.onload = function() {
-            window.print();
-            setTimeout(function() {
-              window.close();
-            }, 1000);
-          }
-        </script>
-      </body>
-      </html>
-    `;
-
-    printWindow.document.write(carteHTML);
-    printWindow.document.close();
-    showClientToast('Carte générée avec succès', 'success');
-  };
-
-  // Utilitaires
-  const showClientToast = (message, type = 'info') => {
-    setClientToast({ message, type });
-    setTimeout(() => setClientToast(null), 3000);
-  };
-
-  const getClientFullName = (client) => {
-    return `${client.nom} ${client.prenom}`;
-  };
-
-  const getClientInitials = (client) => {
-    if (!client.nom || !client.prenom) return "CL";
-    return `${client.nom[0]}${client.prenom[0]}`.toUpperCase();
-  };
-
-  const getStatusLabel = (statut) => {
-    switch(statut) {
-      case 'actif': return 'Actif';
-      case 'inactif': return 'Inactif';
-      case 'en attente': return 'En attente';
-      default: return statut;
-    }
-  };
-
-  const getAbonnementLabel = (type) => {
-    if (!type) return 'Aucun';
-    switch(type) {
-      case 'mensuel': return 'Mensuel';
-      case 'trimestriel': return 'Trimestriel';
-      case 'semestriel': return 'Semestriel';
-      case 'annuel': return 'Annuel';
-      case 'ponctuel': return 'Ponctuel';
-      default: return type;
-    }
-  };
-
-  const getAbonnementColor = (type) => {
-    switch(type) {
-      case 'mensuel': return 'abonnement-mensuel';
-      case 'trimestriel': return 'abonnement-trimestriel';
-      case 'semestriel': return 'abonnement-semestriel';
-      case 'annuel': return 'abonnement-annuel';
-      case 'ponctuel': return 'abonnement-ponctuel';
-      default: return 'abonnement-none';
-    }
-  };
-
-  const calculateDaysRemaining = (dateFin) => {
-    if (!dateFin) return null;
-    const today = new Date();
-    const finDate = new Date(dateFin);
-    const diffTime = finDate - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Non défini';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR');
-  };
-
-  const formatCurrency = (amount) => {
-    if (!amount) return '0,00 DH';
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'MAD'
-    }).format(amount).replace('MAD', 'DH');
-  };
-
-  const formatTime = (timeString) => {
-    if (!timeString) return 'Non défini';
-    return timeString.substring(0, 5);
-  };
-
-  // Rendu de l'avatar
-  const renderAvatar = (client) => {
-    if (client.photo_abonne) {
-      return (
-        <img 
-          src={client.photo_abonne} 
-          alt={getClientFullName(client)} 
-          className="gestion-clients-avatar-img"
-          onError={(e) => {
-            e.target.style.display = 'none';
-            e.target.parentElement.innerHTML = `<div class="gestion-clients-avatar-text">${getClientInitials(client)}</div>`;
-          }}
-        />
-      );
-    }
-    return <div className="gestion-clients-avatar-text">{getClientInitials(client)}</div>;
-  };
-
-  // Calculer les abonnements actifs et expirés
-  const abonnementsActifsCount = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
-    return allClients.filter(client => 
-      client.type_abonnement && 
-      client.date_debut && 
-      client.date_fin &&
-      client.date_debut <= today && 
-      client.date_fin >= today &&
-      client.statut === 'actif'
-    ).length;
-  }, [allClients]);
-
-  const abonnementsExpiresCount = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
-    return allClients.filter(client => 
-      client.type_abonnement && 
-      client.date_fin && 
-      client.date_fin < today &&
-      client.statut === 'actif'
-    ).length;
-  }, [allClients]);
-
-  // Rendu de la carte d'abonnement
-  const renderCarteAbonnement = () => {
-    if (!carteClientData) return null;
-
-    return (
-      <div className="carte-abonnement-container" ref={carteRef}>
-        <div className="carte-header">
-          <div className="carte-logo">FOOT CLUB PREMIUM</div>
-          <div className="carte-type">{getAbonnementLabel(carteClientData.type_abonnement)}</div>
-        </div>
-        
-        <div className="carte-body">
-          <div className="carte-info">
-            <div className="carte-info-item">
-              <div className="carte-label">Nom complet</div>
-              <div className="carte-value">{getClientFullName(carteClientData)}</div>
-            </div>
-            
-            <div className="carte-info-item">
-              <div className="carte-label">Numéro d'adhérent</div>
-              <div className="carte-id">{carteClientData.idclient}</div>
-            </div>
-            
-            <div className="carte-info-item">
-              <div className="carte-label">Type d'abonnement</div>
-              <div className="carte-value">{getAbonnementLabel(carteClientData.type_abonnement)}</div>
-            </div>
-            
-            <div className="carte-info-item">
-              <div className="carte-label">Validité</div>
-              <div className="carte-value">
-                {formatDate(carteClientData.date_debut)} - {formatDate(carteClientData.date_fin)}
-              </div>
-            </div>
-          </div>
-          
-          <div className="carte-client-photo">
-            <div className="carte-photo-container">
-              {carteClientData.photo_abonne ? (
-                <img 
-                  src={carteClientData.photo_abonne} 
-                  alt={getClientFullName(carteClientData)} 
-                  className="carte-photo-img"
-                />
-              ) : (
-                <div className="carte-no-photo">
-                  <FaUserCircle />
-                  <p>Pas de photo</p>
+            <div class="print-content">
+              <div class="print-profile">
+                <div class="print-avatar">
+                  ${selectedItem.nom?.[0]}${selectedItem.prenom?.[0]}
                 </div>
-              )}
+                <div class="print-profile-info">
+                  <h2>${selectedItem.nom} ${selectedItem.prenom}</h2>
+                  <span class="print-status ${statusClass}">${statusText}</span>
+                </div>
+              </div>
+
+              <div class="print-grid">
+                <div class="print-info-card">
+                  <h3>📧 Coordonnées</h3>
+                  <div class="print-info-row">
+                    <span class="print-label">Email</span>
+                    <span class="print-value">${selectedItem.email || '-'}</span>
+                  </div>
+                  <div class="print-info-row">
+                    <span class="print-label">Téléphone</span>
+                    <span class="print-value">${selectedItem.telephone || '-'}</span>
+                  </div>
+                </div>
+
+                <div class="print-info-card">
+                  <h3>📦 Abonnement</h3>
+                  <div class="print-info-row">
+                    <span class="print-label">Type</span>
+                    <span class="print-value">${selectedItem.type_abonnement || '-'}</span>
+                  </div>
+                  <div class="print-info-row">
+                    <span class="print-label">Prix</span>
+                    <span class="print-value price">${selectedItem.prix_total ? selectedItem.prix_total + ' DH' : '-'}</span>
+                  </div>
+                </div>
+
+                <div class="print-info-card">
+                  <h3>📅 Période</h3>
+                  <div class="print-info-row">
+                    <span class="print-label">Début</span>
+                    <span class="print-value">${selectedItem.date_debut ? new Date(selectedItem.date_debut).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-'}</span>
+                  </div>
+                  <div class="print-info-row">
+                    <span class="print-label">Fin</span>
+                    <span class="print-value">${selectedItem.date_fin ? new Date(selectedItem.date_fin).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-'}</span>
+                  </div>
+                </div>
+
+                <div class="print-info-card">
+                  <h3>💰 Paiement</h3>
+                  <div class="print-info-row">
+                    <span class="print-label">Mode</span>
+                    <span class="print-value">${selectedItem.mode_paiement || '-'}</span>
+                  </div>
+                </div>
+              </div>
+
+              ${heureReservation !== '-' || heureFin !== '-' ? `
+              <div class="print-info-card" style="margin-top: 24px;">
+                <h3>⏰ Horaires de réservation</h3>
+                <div class="heure-row">
+                  <div class="heure-item">
+                    <div class="label">Début</div>
+                    <div class="value">${heureReservation}</div>
+                  </div>
+                  <div class="heure-item">
+                    <div class="label">Fin</div>
+                    <div class="value">${heureFin}</div>
+                  </div>
+                </div>
+              </div>
+              ` : ''}
+            </div>
+
+            <div class="print-footer">
+              <p>Document généré le ${new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+              <p style="margin-top: 5px; font-size: 12px;">Ce document fait office de justificatif d'abonnement</p>
             </div>
           </div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
+  // ===== UTILITAIRES =====
+  const getStatusBadge = (statut) => {
+    switch(statut) {
+      case 'actif': 
+        return { icon: <CheckCircle size={14} />, text: 'Actif', class: 'ga2-badge-active' };
+      case 'inactif': 
+        return { icon: <XCircle size={14} />, text: 'Inactif', class: 'ga2-badge-inactive' };
+      case 'en attente': 
+        return { icon: <Clock size={14} />, text: 'En attente', class: 'ga2-badge-pending' };
+      case 'expire':
+        return { icon: <AlertCircle size={14} />, text: 'Expiré', class: 'ga2-badge-expired' };
+      default: 
+        return { icon: <HelpCircle size={14} />, text: statut, class: '' };
+    }
+  };
+
+  const getInitials = (nom, prenom) => {
+    return nom && prenom ? `${nom[0]}${prenom[0]}`.toUpperCase() : '?';
+  };
+
+  const formatDate = (date) => {
+    if (!date) return '-';
+    return new Date(date).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  const formatHeure = (heure) => {
+    if (!heure) return '-';
+    return heure.length > 5 ? heure.substring(0, 5) : heure;
+  };
+
+  const getTypeIcon = (type) => {
+    if (!type) return <Tag size={12} />;
+    const t = type.toLowerCase();
+    if (t.includes('vip')) return <Crown size={12} />;
+    if (t.includes('premium')) return <Star size={12} />;
+    if (t.includes('essai')) return <Sparkles size={12} />;
+    return <Tag size={12} />;
+  };
+
+  const handleSort = (field) => {
+    setSortConfig({
+      field,
+      direction: sortConfig.field === field && sortConfig.direction === 'asc' ? 'desc' : 'asc'
+    });
+  };
+
+  const getHeuresResume = (debut, fin) => {
+    if (!debut && !fin) return null;
+    if (debut && !fin) return formatHeure(debut);
+    if (!debut && fin) return `→ ${formatHeure(fin)}`;
+    return `${formatHeure(debut)} - ${formatHeure(fin)}`;
+  };
+
+  // ===== RENDU =====
+  return (
+    <div className="ga2-root">
+      {/* En-tête */}
+      <div className="ga2-header">
+        <div className="ga2-header-left">
+          <div className="ga2-header-icon">
+            <Users size={32} />
+          </div>
+          <div className="ga2-header-title">
+            <h1>Gestion des Abonnés</h1>
+            <p>
+              <span className="ga2-count">{filteredData.length}</span> abonné{filteredData.length !== 1 ? 's' : ''}
+              <span className="ga2-separator">•</span>
+              <span className="ga2-active-count">{data.filter(d => d.statut === 'actif').length}</span> actifs
+            </p>
+          </div>
         </div>
-        
-        <div className="carte-footer">
-          <div className="carte-qr-code">
-            <FaQrcode />
-            <div>ID: {carteClientData.idclient}</div>
-          </div>
-          <div className="carte-validite">
-            Carte d'abonné • Foot Club
-          </div>
-          <div className="carte-dates">
-            <span>Émise le: {new Date().toLocaleDateString('fr-FR')}</span>
-          </div>
+        <div className="ga2-header-actions">
+          <button className="ga2-btn ga2-btn-outline" onClick={fetchData}>
+            <RefreshCw size={16} />
+            Actualiser
+          </button>
+          <button className="ga2-btn ga2-btn-primary" onClick={() => openModal('add')}>
+            <UserPlus size={16} />
+            Nouvel abonné
+          </button>
         </div>
       </div>
-    );
-  };
 
-  return (
-    <div className="gestion-clients-container">
-      <div className="gestion-clients-wrapper">
-        {/* Header */}
-        <div className="gestion-clients-header">
-          <h1>Gestion des Clients & Abonnements</h1>
-          <div className="gestion-clients-header-actions">
-            <button 
-              className="gestion-clients-stats-btn gestion-clients-secondary-btn"
-              onClick={() => setShowStatistiquesModal(true)}
-            >
-              <FaChartBar /> Statistiques
+      {/* Barre de filtres */}
+      <div className="ga2-filters">
+        <div className="ga2-search-box">
+          <Search size={18} className="ga2-search-icon" />
+          <input
+            type="text"
+            className="ga2-search-input"
+            placeholder="Rechercher par nom, email, téléphone, abonnement, horaire..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button className="ga2-search-clear" onClick={() => setSearchTerm('')}>
+              <X size={14} />
             </button>
-            <button 
-              className="gestion-clients-add-btn gestion-clients-primary-btn"
-              onClick={() => setShowAddClientModal(true)}
-            >
-              <FaPlus /> Nouveau Client
+          )}
+        </div>
+        
+        <div className="ga2-filter-group">
+          <Filter size={18} className="ga2-filter-icon" />
+          <select 
+            className="ga2-filter-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">Tous les statuts</option>
+            <option value="actif">Actifs</option>
+            <option value="inactif">Inactifs</option>
+            <option value="en attente">En attente</option>
+            <option value="expire">Expirés</option>
+          </select>
+        </div>
+
+        <div className="ga2-view-toggle">
+          <button
+            className={`ga2-toggle-btn ${viewMode === 'grid' ? 'ga2-active' : ''}`}
+            onClick={() => setViewMode('grid')}
+          >
+            <LayoutGrid size={18} />
+          </button>
+          <button
+            className={`ga2-toggle-btn ${viewMode === 'table' ? 'ga2-active' : ''}`}
+            onClick={() => setViewMode('table')}
+          >
+            <List size={18} />
+          </button>
+        </div>
+
+        <button className="ga2-btn ga2-btn-outline">
+          <Download size={16} />
+          Exporter
+        </button>
+      </div>
+
+      {/* Contenu principal */}
+      <div className="ga2-content">
+        {isLoading ? (
+          <div className="ga2-loading">
+            <div className="ga2-spinner"></div>
+            <p>Chargement des données...</p>
+          </div>
+        ) : filteredData.length === 0 ? (
+          <div className="ga2-empty">
+            <User size={64} />
+            <h3>Aucun abonné trouvé</h3>
+            <p>Modifiez vos filtres de recherche</p>
+            <button className="ga2-btn ga2-btn-primary" onClick={() => { setSearchTerm(''); setStatusFilter('all'); }}>
+              Réinitialiser
             </button>
           </div>
-        </div>
+        ) : viewMode === 'grid' ? (
+          <div className="ga2-grid">
+            {paginatedData.map((item, index) => {
+              const status = getStatusBadge(item.statut);
+              const isNew = item.date_debut && new Date() - new Date(item.date_debut) < 30 * 24 * 60 * 60 * 1000;
+              const isExpiring = item.date_fin && new Date(item.date_fin) - new Date() < 7 * 24 * 60 * 60 * 1000 && item.statut === 'actif';
+              const heures = getHeuresResume(item.heure_reservation, item.heure_fin);
+              
+              return (
+                <div key={item.idclient} className="ga2-card" style={{ animationDelay: `${index * 0.05}s` }}>
+                  {/* Badges */}
+                  <div className="ga2-card-badges">
+                    {isNew && (
+                      <span className="ga2-badge ga2-badge-new">
+                        <Sparkles size={10} /> Nouveau
+                      </span>
+                    )}
+                    {isExpiring && (
+                      <span className="ga2-badge ga2-badge-expiring">
+                        <Clock size={10} /> Expire bientôt
+                      </span>
+                    )}
+                  </div>
 
-        {/* Cartes de statistiques rapides */}
-        <div className="gestion-clients-stats-cards">
-          <div className="gestion-clients-stat-card">
-            <div className="gestion-clients-stat-icon gestion-clients-stat-total">
-              <FaUserCircle />
-            </div>
-            <div className="gestion-clients-stat-content">
-              <h3>{allClients.length}</h3>
-              <p>Clients total</p>
-            </div>
-          </div>
-          <div className="gestion-clients-stat-card">
-            <div className="gestion-clients-stat-icon gestion-clients-stat-actif">
-              <FaCalendar />
-            </div>
-            <div className="gestion-clients-stat-content">
-              <h3>{abonnementsActifsCount}</h3>
-              <p>Abonnements actifs</p>
-            </div>
-          </div>
-          <div className="gestion-clients-stat-card">
-            <div className="gestion-clients-stat-icon gestion-clients-stat-expire">
-              <FaMoneyBillWave />
-            </div>
-            <div className="gestion-clients-stat-content">
-              <h3>{abonnementsExpiresCount}</h3>
-              <p>Abonnements expirés</p>
-            </div>
-          </div>
-          <div className="gestion-clients-stat-card">
-            <div className="gestion-clients-stat-icon gestion-clients-stat-revenu">
-              <FaCreditCard />
-            </div>
-            <div className="gestion-clients-stat-content">
-              <h3>
-                {statistiques ? formatCurrency(statistiques.revenuTotal) : '0,00 DH'}
-              </h3>
-              <p>Revenu total</p>
-            </div>
-          </div>
-        </div>
+                  {/* En-tête de la carte */}
+                  <div className="ga2-card-header">
+                    <div className="ga2-card-avatar">
+                      {getInitials(item.nom, item.prenom)}
+                    </div>
+                    <div className="ga2-card-id">#{item.idclient}</div>
+                  </div>
+                  
+                  {/* Corps de la carte */}
+                  <div className="ga2-card-body">
+                    <h3 className="ga2-card-name">{item.nom} {item.prenom}</h3>
+                    
+                    <div className="ga2-card-status">
+                      <span className={`ga2-status-badge ${status.class}`}>
+                        {status.icon} {status.text}
+                      </span>
+                    </div>
 
-        {/* Filtres et recherche */}
-        <div className="gestion-clients-toolbar">
-          <div className="gestion-clients-search">
-            <FaSearch className="gestion-clients-search-icon" />
-            <input
-              type="text"
-              className="gestion-clients-search-input"
-              placeholder="Rechercher client, email, téléphone, abonnement..."
-              value={searchClientsTerm}
-              onChange={(e) => setSearchClientsTerm(e.target.value)}
-            />
-            {searchClientsTerm && (
-              <button 
-                className="gestion-clients-clear-search"
-                onClick={() => setSearchClientsTerm('')}
-              >
-                <FaTimes />
-              </button>
-            )}
-          </div>
-          <div className="gestion-clients-filters">
-            <select 
-              className="gestion-clients-filter-select"
-              value={clientsSort}
-              onChange={(e) => setClientsSort(e.target.value)}
-            >
-              <option value="nom-asc">Nom (A-Z)</option>
-              <option value="nom-desc">Nom (Z-A)</option>
-              <option value="date_creation-desc">Plus récent</option>
-              <option value="date_fin-asc">Date fin (proche)</option>
-            </select>
-            <select 
-              className="gestion-clients-filter-select"
-              value={clientsFilter}
-              onChange={(e) => setClientsFilter(e.target.value)}
-            >
-              <option value="all">Tous les clients</option>
-              <option value="actif">Clients actifs</option>
-              <option value="inactif">Clients inactifs</option>
-              <option value="en attente">En attente</option>
-              <option value="abonnement_actif">Abonnements actifs</option>
-              <option value="abonnement_expire">Abonnements expirés</option>
-            </select>
-          </div>
-        </div>
+                    <div className="ga2-card-info">
+                      <div className="ga2-info-row">
+                        <Mail size={12} />
+                        <span>{item.email}</span>
+                      </div>
+                      <div className="ga2-info-row">
+                        <Phone size={12} />
+                        <span>{item.telephone}</span>
+                      </div>
+                      
+                      {item.type_abonnement && (
+                        <div className="ga2-info-row">
+                          {getTypeIcon(item.type_abonnement)}
+                          <span>{item.type_abonnement}</span>
+                        </div>
+                      )}
+                      
+                      {item.prix_total && (
+                        <div className="ga2-info-row ga2-price-row">
+                          <DollarSign size={12} />
+                          <span className="ga2-price">{item.prix_total} DH</span>
+                        </div>
+                      )}
+                      
+                      {item.date_debut && (
+                        <div className="ga2-info-row">
+                          <Calendar size={12} />
+                          <span>Début: {formatDate(item.date_debut)}</span>
+                        </div>
+                      )}
+                      
+                      {item.date_fin && (
+                        <div className="ga2-info-row">
+                          <Calendar size={12} />
+                          <span>Fin: {formatDate(item.date_fin)}</span>
+                        </div>
+                      )}
+                      
+                      {item.mode_paiement && (
+                        <div className="ga2-info-row">
+                          <CreditCard size={12} />
+                          <span>{item.mode_paiement}</span>
+                        </div>
+                      )}
+                      
+                      {heures && (
+                        <div className="ga2-info-row">
+                          <Clock size={12} />
+                          <span>{heures}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Pied de la carte */}
+                  <div className="ga2-card-footer">
+                    <button className="ga2-action ga2-action-view" onClick={() => openModal('view', item)}>
+                      <Eye size={14} /> Détails
+                    </button>
+                    <button className="ga2-action ga2-action-edit" onClick={() => openModal('edit', item)}>
+                      <Pencil size={14} /> Modifier
+                    </button>
+                    <button className="ga2-action ga2-action-delete" onClick={() => openModal('delete', item)}>
+                      <Trash2 size={14} /> Supprimer
+                    </button>
+                  </div>
 
-        {/* Tableau des clients */}
-        <div className="gestion-clients-table-container">
-          <table className="gestion-clients-table">
-            <thead>
-              <tr>
-                <th>Client</th>
-                <th>Contact</th>
-                <th>Abonnement</th>
-                <th>Période</th>
-                <th>Prix</th>
-                <th>Statut</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
+                  {/* Effet de brillance */}
+                  <div className="ga2-card-shine"></div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="ga2-table-wrapper">
+            <table className="ga2-table">
+              <thead>
                 <tr>
-                  <td colSpan="7" className="gestion-clients-loading">
-                    <div className="gestion-clients-spinner"></div>
-                    Chargement en cours...
-                  </td>
+                  <th onClick={() => handleSort('idclient')}>
+                    <Hash size={12} />
+                    ID {sortConfig.field === 'idclient' && <ArrowUpDown size={12} className={`ga2-sort-${sortConfig.direction}`} />}
+                  </th>
+                  <th onClick={() => handleSort('nom')}>
+                    <User size={12} />
+                    Nom {sortConfig.field === 'nom' && <ArrowUpDown size={12} className={`ga2-sort-${sortConfig.direction}`} />}
+                  </th>
+                  <th onClick={() => handleSort('prenom')}>
+                    Prénom {sortConfig.field === 'prenom' && <ArrowUpDown size={12} className={`ga2-sort-${sortConfig.direction}`} />}
+                  </th>
+                  <th>Contact</th>
+                  <th onClick={() => handleSort('type_abonnement')}>
+                    <Tag size={12} />
+                    Abonnement {sortConfig.field === 'type_abonnement' && <ArrowUpDown size={12} className={`ga2-sort-${sortConfig.direction}`} />}
+                  </th>
+                  <th onClick={() => handleSort('prix_total')}>
+                    <DollarSign size={12} />
+                    Prix {sortConfig.field === 'prix_total' && <ArrowUpDown size={12} className={`ga2-sort-${sortConfig.direction}`} />}
+                  </th>
+                  <th>
+                    <Calendar size={12} />
+                    Période
+                  </th>
+                  <th>
+                    <CreditCard size={12} />
+                    Paiement
+                  </th>
+                  <th onClick={() => handleSort('heure_reservation')}>
+                    <Clock size={12} />
+                    Horaire {sortConfig.field === 'heure_reservation' && <ArrowUpDown size={12} className={`ga2-sort-${sortConfig.direction}`} />}
+                  </th>
+                  <th>Statut</th>
+                  <th>Actions</th>
                 </tr>
-              ) : paginatedClients.length > 0 ? (
-                paginatedClients.map(client => {
-                  const daysRemaining = calculateDaysRemaining(client.date_fin);
+              </thead>
+              <tbody>
+                {paginatedData.map(item => {
+                  const status = getStatusBadge(item.statut);
+                  const heures = getHeuresResume(item.heure_reservation, item.heure_fin);
+                  
                   return (
-                    <tr key={client.idclient}>
+                    <tr key={item.idclient}>
+                      <td className="ga2-table-id">#{item.idclient}</td>
+                      <td>{item.nom}</td>
+                      <td>{item.prenom}</td>
                       <td>
-                        <div className="gestion-clients-client-info">
-                          <div className="gestion-clients-avatar-small">
-                            {renderAvatar(client)}
-                          </div>
-                          <div className="gestion-clients-client-details">
-                            <strong>{getClientFullName(client)}</strong>
-                            <small>ID: {client.idclient}</small>
-                          </div>
+                        <div className="ga2-table-contact">
+                          <div><Mail size={10} /> {item.email}</div>
+                          <div><Phone size={10} /> {item.telephone}</div>
                         </div>
                       </td>
                       <td>
-                        <div className="gestion-clients-contact-info">
-                          <div>{client.email}</div>
-                          <div>{client.telephone}</div>
-                          {client.heure_reservation && (
-                            <div className="gestion-clients-heure">
-                              <FaClock /> {formatTime(client.heure_reservation)}
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                      <td>
-                        <div className="gestion-clients-abonnement-info">
-                          <span className={`gestion-clients-abonnement-badge ${getAbonnementColor(client.type_abonnement)}`}>
-                            {getAbonnementLabel(client.type_abonnement)}
+                        {item.type_abonnement && (
+                          <span className="ga2-table-badge">
+                            {getTypeIcon(item.type_abonnement)} {item.type_abonnement}
                           </span>
-                          {client.mode_paiement && (
-                            <small>Paiement: {client.mode_paiement}</small>
-                          )}
-                        </div>
+                        )}
                       </td>
-                      <td>
-                        <div className="gestion-clients-dates-info">
-                          {client.date_debut ? (
-                            <>
-                              <div>Début: {formatDate(client.date_debut)}</div>
-                              <div>Fin: {formatDate(client.date_fin)}</div>
-                              {daysRemaining !== null && daysRemaining >= 0 && (
-                                <div className="gestion-clients-days-remaining">
-                                  {daysRemaining} jour{daysRemaining !== 1 ? 's' : ''} restant{daysRemaining !== 1 ? 's' : ''}
-                                </div>
-                              )}
-                            </>
-                          ) : (
-                            <div className="gestion-clients-no-dates">Pas d'abonnement</div>
-                          )}
-                        </div>
+                      <td className="ga2-table-price">{item.prix_total ? `${item.prix_total} DH` : '-'}</td>
+                      <td className="ga2-table-period">
+                        {item.date_debut && <div><Calendar size={10} /> {formatDate(item.date_debut)}</div>}
+                        {item.date_fin && <div><Calendar size={10} /> {formatDate(item.date_fin)}</div>}
                       </td>
+                      <td>{item.mode_paiement || '-'}</td>
                       <td>
-                        {client.prix_total ? (
-                          <div className="gestion-clients-price">
-                            {formatCurrency(client.prix_total)}
-                          </div>
-                        ) : (
-                          <div className="gestion-clients-no-price">-</div>
+                        {heures && (
+                          <span className="ga2-table-heures">
+                            <Clock size={10} /> {heures}
+                          </span>
                         )}
                       </td>
                       <td>
-                        <span className={`gestion-clients-status gestion-clients-status-${client.statut}`}>
-                          {getStatusLabel(client.statut)}
+                        <span className={`ga2-status-badge ${status.class}`}>
+                          {status.icon} {status.text}
                         </span>
-                        <div className="gestion-clients-date-creation">
-                          Créé le: {formatDate(client.date_creation)}
-                        </div>
                       </td>
-                      <td>
-                        <div className="gestion-clients-actions">
-                          <button 
-                            className="gestion-clients-action-btn gestion-clients-view-btn"
-                            onClick={() => {
-                              setSelectedClientData(client);
-                              setShowViewClientModal(true);
-                            }}
-                            title="Voir détails"
-                          >
-                            <FaEye />
-                          </button>
-                          <button 
-                            className="gestion-clients-action-btn gestion-clients-edit-btn"
-                            onClick={() => {
-                              setEditClientData({ ...client });
-                              setShowEditClientModal(true);
-                            }}
-                            title="Modifier"
-                          >
-                            <FaEdit />
-                          </button>
-                          <button 
-                            className="gestion-clients-action-btn gestion-clients-abonnement-btn"
-                            onClick={() => {
-                              setSelectedClientData(client);
-                              setAbonnementData({
-                                type_abonnement: client.type_abonnement || '',
-                                date_debut: client.date_debut || '',
-                                date_fin: client.date_fin || '',
-                                prix_total: client.prix_total || '',
-                                mode_paiement: client.mode_paiement || ''
-                              });
-                              setShowAbonnementModal(true);
-                            }}
-                            title="Gérer abonnement"
-                          >
-                            <FaCalendar />
-                          </button>
-                          <button 
-                            className="gestion-clients-action-btn gestion-clients-photo-btn"
-                            onClick={() => {
-                              setSelectedClientData(client);
-                              setPhotoPreview(client.photo_abonne || null);
-                              setPhotoFile(null);
-                              setShowPhotoModal(true);
-                            }}
-                            title="Modifier photo"
-                          >
-                            <FaCamera />
-                          </button>
-                          <button 
-                            className="gestion-clients-action-btn gestion-clients-carte-btn"
-                            onClick={() => {
-                              setCarteClientData(client);
-                              setShowCarteModal(true);
-                            }}
-                            title="Générer carte"
-                          >
-                            <FaIdCard />
-                          </button>
-                          <button 
-                            className="gestion-clients-action-btn gestion-clients-delete-btn"
-                            onClick={() => {
-                              setSelectedClientData(client);
-                              setShowDeleteClientModal(true);
-                            }}
-                            title="Supprimer"
-                          >
-                            <FaTrash />
-                          </button>
-                        </div>
+                      <td className="ga2-table-actions">
+                        <button className="ga2-icon-btn ga2-view" onClick={() => openModal('view', item)}>
+                          <Eye size={14} />
+                        </button>
+                        <button className="ga2-icon-btn ga2-edit" onClick={() => openModal('edit', item)}>
+                          <Pencil size={14} />
+                        </button>
+                        <button className="ga2-icon-btn ga2-delete" onClick={() => openModal('delete', item)}>
+                          <Trash2 size={14} />
+                        </button>
                       </td>
                     </tr>
                   );
-                })
-              ) : (
-                <tr>
-                  <td colSpan="7" className="gestion-clients-empty">
-                    <div className="gestion-clients-empty-icon">
-                      <FaSearch />
-                    </div>
-                    {searchClientsTerm || clientsFilter !== 'all' 
-                      ? 'Aucun client ne correspond à vos critères de recherche' 
-                      : 'Aucun client trouvé'}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="gestion-clients-pagination">
-          <div className="gestion-clients-pagination-info">
-            {filteredAndSortedClients.length} client{filteredAndSortedClients.length !== 1 ? 's' : ''} trouvé{filteredAndSortedClients.length !== 1 ? 's' : ''}
-            {(searchClientsTerm || clientsFilter !== 'all') && ' avec les filtres appliqués'}
+                })}
+              </tbody>
+            </table>
           </div>
-          <div className="gestion-clients-pagination-controls">
-            <button 
-              className="gestion-clients-pagination-btn"
-              onClick={() => setCurrentClientsPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentClientsPage === 1}
-            >
-              <FaChevronLeft /> Précédent
-            </button>
-            <span className="gestion-clients-pagination-numbers">
-              Page {currentClientsPage} sur {totalClientsPages}
-            </span>
-            <button 
-              className="gestion-clients-pagination-btn"
-              onClick={() => setCurrentClientsPage(prev => prev + 1)}
-              disabled={currentClientsPage === totalClientsPages || paginatedClients.length < CLIENTS_PER_PAGE}
-            >
-              Suivant <FaChevronRight />
-            </button>
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Modal Ajout Client */}
-      {showAddClientModal && (
-        <div className="gestion-clients-modal-overlay">
-          <div className="gestion-clients-modal gestion-clients-add-modal">
-            <div className="gestion-clients-modal-header">
-              <h3>Nouveau Client</h3>
-              <button className="gestion-clients-close-btn" onClick={() => setShowAddClientModal(false)}>
-                <FaTimes />
+      {/* Pagination */}
+      {filteredData.length > 0 && (
+        <div className="ga2-pagination">
+          <div className="ga2-pagination-info">
+            <FileText size={14} />
+            <span>
+              {`${(currentPage - 1) * ITEMS_PER_PAGE + 1} - ${Math.min(currentPage * ITEMS_PER_PAGE, filteredData.length)} sur ${filteredData.length}`}
+            </span>
+          </div>
+          <div className="ga2-pagination-controls">
+            <button 
+              className="ga2-pagination-btn" 
+              onClick={() => setCurrentPage(p => p - 1)} 
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft size={16} />
+              Précédent
+            </button>
+            <span className="ga2-page-numbers">{currentPage} / {totalPages}</span>
+            <button 
+              className="ga2-pagination-btn" 
+              onClick={() => setCurrentPage(p => p + 1)} 
+              disabled={currentPage === totalPages}
+            >
+              Suivant
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Ajout/Modification */}
+      {(modalState.add || modalState.edit) && (
+        <div className="ga2-modal-overlay" onClick={() => closeModal(modalState.add ? 'add' : 'edit')}>
+          <div className="ga2-modal" onClick={e => e.stopPropagation()}>
+            <div className="ga2-modal-header">
+              <h3>
+                {modalState.add ? <UserPlus size={20} /> : <Pencil size={20} />}
+                {modalState.add ? 'Nouvel abonné' : 'Modifier l\'abonné'}
+              </h3>
+              <button className="ga2-modal-close" onClick={() => closeModal(modalState.add ? 'add' : 'edit')}>
+                <X size={18} />
               </button>
             </div>
-            <div className="gestion-clients-modal-body">
-              <div className="photo-upload-section">
-                <div className="photo-upload-container">
-                  <div className="photo-preview-container">
-                    {photoPreview ? (
-                      <img src={photoPreview} alt="Preview" className="photo-preview" />
-                    ) : (
-                      <div className="photo-placeholder">
-                        <FaUserCircle />
-                        <p>Aucune photo</p>
-                      </div>
-                    )}
-                  </div>
-                  <button className="photo-upload-btn">
-                    <FaUpload /> Choisir une photo
+            
+            <div className="ga2-modal-body">
+              <form onSubmit={(e) => { e.preventDefault(); modalState.add ? handleAdd() : handleEdit(); }}>
+                <div className="ga2-form-row">
+                  <div className="ga2-form-group">
+                    <label>Nom <span className="ga2-required">*</span></label>
                     <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileSelect}
-                      className="photo-upload-input"
+                      type="text"
+                      value={formData.nom}
+                      onChange={e => setFormData({...formData, nom: e.target.value})}
+                      placeholder="Nom"
+                      required
                     />
-                  </button>
-                  {photoFile && (
-                    <p className="photo-file-name">{photoFile.name} ({(photoFile.size / 1024).toFixed(1)} KB)</p>
-                  )}
+                  </div>
+                  <div className="ga2-form-group">
+                    <label>Prénom <span className="ga2-required">*</span></label>
+                    <input
+                      type="text"
+                      value={formData.prenom}
+                      onChange={e => setFormData({...formData, prenom: e.target.value})}
+                      placeholder="Prénom"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="gestion-clients-form-row">
-                <div className="gestion-clients-form-group">
-                  <label>Nom *</label>
-                  <input
-                    type="text"
-                    value={newClientData.nom}
-                    onChange={(e) => setNewClientData({...newClientData, nom: e.target.value})}
-                    required
-                  />
+                <div className="ga2-form-row">
+                  <div className="ga2-form-group">
+                    <label>Email <span className="ga2-required">*</span></label>
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={e => setFormData({...formData, email: e.target.value})}
+                      placeholder="email@exemple.com"
+                      required
+                    />
+                  </div>
+                  <div className="ga2-form-group">
+                    <label>Téléphone <span className="ga2-required">*</span></label>
+                    <input
+                      type="tel"
+                      value={formData.telephone}
+                      onChange={e => setFormData({...formData, telephone: e.target.value})}
+                      placeholder="06 XX XX XX XX"
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="gestion-clients-form-group">
-                  <label>Prénom *</label>
-                  <input
-                    type="text"
-                    value={newClientData.prenom}
-                    onChange={(e) => setNewClientData({...newClientData, prenom: e.target.value})}
-                    required
-                  />
+
+                <div className="ga2-form-row">
+                  <div className="ga2-form-group">
+                    <label>Type d'abonnement</label>
+                    <input
+                      type="text"
+                      value={formData.type_abonnement}
+                      onChange={e => setFormData({...formData, type_abonnement: e.target.value})}
+                      placeholder="Ex: Premium, VIP..."
+                    />
+                  </div>
+                  <div className="ga2-form-group">
+                    <label>Prix (DH)</label>
+                    <input
+                      type="number"
+                      value={formData.prix_total}
+                      onChange={e => setFormData({...formData, prix_total: e.target.value})}
+                      placeholder="0"
+                      min="0"
+                      step="1"
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="gestion-clients-form-row">
-                <div className="gestion-clients-form-group">
-                  <label>Email *</label>
-                  <input
-                    type="email"
-                    value={newClientData.email}
-                    onChange={(e) => setNewClientData({...newClientData, email: e.target.value})}
-                    required
-                  />
+
+                <div className="ga2-form-row">
+                  <div className="ga2-form-group">
+                    <label>Date début</label>
+                    <input
+                      type="date"
+                      value={formData.date_debut}
+                      onChange={e => setFormData({...formData, date_debut: e.target.value})}
+                    />
+                  </div>
+                  <div className="ga2-form-group">
+                    <label>Date fin</label>
+                    <input
+                      type="date"
+                      value={formData.date_fin}
+                      onChange={e => setFormData({...formData, date_fin: e.target.value})}
+                    />
+                  </div>
                 </div>
-                <div className="gestion-clients-form-group">
-                  <label>Téléphone *</label>
-                  <input
-                    type="tel"
-                    value={newClientData.telephone}
-                    onChange={(e) => setNewClientData({...newClientData, telephone: e.target.value})}
-                    required
-                  />
+
+                <div className="ga2-form-row">
+                  <div className="ga2-form-group">
+                    <label>Mode de paiement</label>
+                    <input
+                      type="text"
+                      value={formData.mode_paiement}
+                      onChange={e => setFormData({...formData, mode_paiement: e.target.value})}
+                      placeholder="Carte, espèces..."
+                    />
+                  </div>
+                  <div className="ga2-form-group">
+                    <label>Statut</label>
+                    <select value={formData.statut} onChange={e => setFormData({...formData, statut: e.target.value})}>
+                      <option value="actif">Actif</option>
+                      <option value="inactif">Inactif</option>
+                      <option value="en attente">En attente</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
-              <div className="gestion-clients-form-row">
-                <div className="gestion-clients-form-group">
-                  <label>Type d'abonnement</label>
-                  <select
-                    value={newClientData.type_abonnement}
-                    onChange={(e) => setNewClientData({...newClientData, type_abonnement: e.target.value})}
-                  >
-                    <option value="">Sélectionner...</option>
-                    {TYPES_ABONNEMENT.map(type => (
-                      <option key={type} value={type}>{getAbonnementLabel(type)}</option>
-                    ))}
-                  </select>
+
+                <div className="ga2-form-row">
+                  <div className="ga2-form-group">
+                    <label>Heure début réservation</label>
+                    <input
+                      type="time"
+                      value={formData.heure_reservation}
+                      onChange={e => setFormData({...formData, heure_reservation: e.target.value})}
+                    />
+                  </div>
+                  <div className="ga2-form-group">
+                    <label>Heure fin réservation</label>
+                    <input
+                      type="time"
+                      value={formData.heure_fin}
+                      onChange={e => setFormData({...formData, heure_fin: e.target.value})}
+                    />
+                  </div>
                 </div>
-                <div className="gestion-clients-form-group">
-                  <label>Statut</label>
-                  <select
-                    value={newClientData.statut}
-                    onChange={(e) => setNewClientData({...newClientData, statut: e.target.value})}
-                  >
-                    <option value="actif">Actif</option>
-                    <option value="inactif">Inactif</option>
-                    <option value="en attente">En attente</option>
-                  </select>
-                </div>
-              </div>
-              <div className="gestion-clients-form-row">
-                <div className="gestion-clients-form-group">
-                  <label>Date début</label>
-                  <input
-                    type="date"
-                    value={newClientData.date_debut}
-                    onChange={(e) => setNewClientData({...newClientData, date_debut: e.target.value})}
-                  />
-                </div>
-                <div className="gestion-clients-form-group">
-                  <label>Date fin</label>
-                  <input
-                    type="date"
-                    value={newClientData.date_fin}
-                    onChange={(e) => setNewClientData({...newClientData, date_fin: e.target.value})}
-                  />
-                </div>
-              </div>
-              <div className="gestion-clients-form-row">
-                <div className="gestion-clients-form-group">
-                  <label>Prix total (DH)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={newClientData.prix_total}
-                    onChange={(e) => setNewClientData({...newClientData, prix_total: e.target.value})}
-                  />
-                </div>
-                <div className="gestion-clients-form-group">
-                  <label>Mode de paiement</label>
-                  <select
-                    value={newClientData.mode_paiement}
-                    onChange={(e) => setNewClientData({...newClientData, mode_paiement: e.target.value})}
-                  >
-                    <option value="">Sélectionner...</option>
-                    {MODES_PAIEMENT.map(mode => (
-                      <option key={mode} value={mode}>{mode}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="gestion-clients-form-row">
-                <div className="gestion-clients-form-group">
-                  <label>Heure de réservation préférée</label>
-                  <input
-                    type="time"
-                    value={newClientData.heure_reservation}
-                    onChange={(e) => setNewClientData({...newClientData, heure_reservation: e.target.value})}
-                  />
-                </div>
-              </div>
+
+                {formData.heure_reservation && formData.heure_fin && (
+                  <div className="ga2-form-info">
+                    <Info size={14} />
+                    <span>Créneau : {formData.heure_reservation} - {formData.heure_fin}</span>
+                  </div>
+                )}
+              </form>
             </div>
-            <div className="gestion-clients-modal-footer">
-              <button 
-                className="gestion-clients-secondary-btn"
-                onClick={() => setShowAddClientModal(false)}
-              >
+
+            <div className="ga2-modal-footer">
+              <button className="ga2-btn ga2-btn-secondary" onClick={() => closeModal(modalState.add ? 'add' : 'edit')}>
                 Annuler
               </button>
-              <button 
-                className="gestion-clients-primary-btn"
-                onClick={handleAddNewClient}
-                disabled={!newClientData.nom || !newClientData.prenom || !newClientData.email || !newClientData.telephone}
-              >
-                Enregistrer
+              <button className="ga2-btn ga2-btn-primary" onClick={modalState.add ? handleAdd : handleEdit}>
+                {modalState.add ? 'Ajouter' : 'Modifier'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal Visualisation Client */}
-      {showViewClientModal && selectedClientData && (
-        <div className="gestion-clients-modal-overlay">
-          <div className="gestion-clients-modal gestion-clients-view-modal">
-            <div className="gestion-clients-modal-header">
-              <h3>Détails du Client</h3>
-              <button className="gestion-clients-close-btn" onClick={() => setShowViewClientModal(false)}>
-                <FaTimes />
+      {/* Modal Visualisation */}
+      {modalState.view && selectedItem && (
+        <div className="ga2-modal-overlay" onClick={() => closeModal('view')}>
+          <div className="ga2-modal ga2-view-modal" onClick={e => e.stopPropagation()}>
+            <div className="ga2-modal-header">
+              <h3><Eye size={20} /> Détails de l'abonné</h3>
+              <button className="ga2-modal-close" onClick={() => closeModal('view')}>
+                <X size={18} />
               </button>
             </div>
-            <div className="gestion-clients-modal-body">
-              <div className="gestion-clients-detail-header">
-                <div className="gestion-clients-avatar-large">
-                  {renderAvatar(selectedClientData)}
+            
+            <div className="ga2-modal-body">
+              <div className="ga2-view-profile">
+                <div className="ga2-view-avatar">
+                  {getInitials(selectedItem.nom, selectedItem.prenom)}
                 </div>
-                <div className="gestion-clients-detail-info">
-                  <h2>{getClientFullName(selectedClientData)}</h2>
-                  <span className={`gestion-clients-status gestion-clients-status-${selectedClientData.statut}`}>
-                    {getStatusLabel(selectedClientData.statut)}
-                  </span>
-                  <div className="gestion-clients-id">ID: {selectedClientData.idclient}</div>
+                <div className="ga2-view-info">
+                  <h2>{selectedItem.nom} {selectedItem.prenom}</h2>
+                  {(() => {
+                    const status = getStatusBadge(selectedItem.statut);
+                    return <span className={`ga2-status-badge ${status.class}`}>{status.icon} {status.text}</span>;
+                  })()}
                 </div>
               </div>
-              
-              <div className="gestion-clients-detail-grid">
-                <div className="gestion-clients-detail-section">
-                  <h4>Informations personnelles</h4>
-                  <div className="gestion-clients-detail-item">
-                    <div className="gestion-clients-detail-label">Nom</div>
-                    <div className="gestion-clients-detail-value">{selectedClientData.nom}</div>
+
+              <div className="ga2-view-details">
+                <div className="ga2-view-section">
+                  <h4>📋 Informations générales</h4>
+                  <div className="ga2-view-row">
+                    <span className="ga2-view-label">ID Client</span>
+                    <span className="ga2-view-value">#{selectedItem.idclient}</span>
                   </div>
-                  <div className="gestion-clients-detail-item">
-                    <div className="gestion-clients-detail-label">Prénom</div>
-                    <div className="gestion-clients-detail-value">{selectedClientData.prenom}</div>
+                  <div className="ga2-view-row">
+                    <span className="ga2-view-label">Email</span>
+                    <span className="ga2-view-value">{selectedItem.email}</span>
                   </div>
-                  <div className="gestion-clients-detail-item">
-                    <div className="gestion-clients-detail-label">Email</div>
-                    <div className="gestion-clients-detail-value">{selectedClientData.email}</div>
-                  </div>
-                  <div className="gestion-clients-detail-item">
-                    <div className="gestion-clients-detail-label">Téléphone</div>
-                    <div className="gestion-clients-detail-value">{selectedClientData.telephone}</div>
-                  </div>
-                  <div className="gestion-clients-detail-item">
-                    <div className="gestion-clients-detail-label">Date de création</div>
-                    <div className="gestion-clients-detail-value">{formatDate(selectedClientData.date_creation)}</div>
+                  <div className="ga2-view-row">
+                    <span className="ga2-view-label">Téléphone</span>
+                    <span className="ga2-view-value">{selectedItem.telephone}</span>
                   </div>
                 </div>
 
-                <div className="gestion-clients-detail-section">
-                  <h4>Abonnement</h4>
-                  <div className="gestion-clients-detail-item">
-                    <div className="gestion-clients-detail-label">Type</div>
-                    <div className="gestion-clients-detail-value">
-                      <span className={`gestion-clients-abonnement-badge ${getAbonnementColor(selectedClientData.type_abonnement)}`}>
-                        {getAbonnementLabel(selectedClientData.type_abonnement)}
-                      </span>
-                    </div>
+                <div className="ga2-view-section">
+                  <h4>📦 Abonnement</h4>
+                  <div className="ga2-view-row">
+                    <span className="ga2-view-label">Type</span>
+                    <span className="ga2-view-value">{selectedItem.type_abonnement || '-'}</span>
                   </div>
-                  <div className="gestion-clients-detail-item">
-                    <div className="gestion-clients-detail-label">Date début</div>
-                    <div className="gestion-clients-detail-value">{formatDate(selectedClientData.date_debut)}</div>
+                  <div className="ga2-view-row">
+                    <span className="ga2-view-label">Prix</span>
+                    <span className="ga2-view-value ga2-price">{selectedItem.prix_total ? `${selectedItem.prix_total} DH` : '-'}</span>
                   </div>
-                  <div className="gestion-clients-detail-item">
-                    <div className="gestion-clients-detail-label">Date fin</div>
-                    <div className="gestion-clients-detail-value">{formatDate(selectedClientData.date_fin)}</div>
+                  <div className="ga2-view-row">
+                    <span className="ga2-view-label">Date début</span>
+                    <span className="ga2-view-value">{formatDate(selectedItem.date_debut)}</span>
                   </div>
-                  {calculateDaysRemaining(selectedClientData.date_fin) !== null && (
-                    <div className="gestion-clients-detail-item">
-                      <div className="gestion-clients-detail-label">Jours restants</div>
-                      <div className="gestion-clients-detail-value">
-                        <span className={`gestion-clients-days-badge ${calculateDaysRemaining(selectedClientData.date_fin) < 7 ? 'warning' : ''}`}>
-                          {calculateDaysRemaining(selectedClientData.date_fin)} jours
-                        </span>
+                  <div className="ga2-view-row">
+                    <span className="ga2-view-label">Date fin</span>
+                    <span className="ga2-view-value">{formatDate(selectedItem.date_fin)}</span>
+                  </div>
+                </div>
+
+                <div className="ga2-view-section">
+                  <h4>💰 Paiement</h4>
+                  <div className="ga2-view-row">
+                    <span className="ga2-view-label">Mode</span>
+                    <span className="ga2-view-value">{selectedItem.mode_paiement || '-'}</span>
+                  </div>
+                </div>
+
+                {(selectedItem.heure_reservation || selectedItem.heure_fin) && (
+                  <div className="ga2-view-section">
+                    <h4>⏰ Horaires de réservation</h4>
+                    <div className="ga2-view-heures">
+                      <div className="ga2-heure-item">
+                        <span className="ga2-heure-label">Début</span>
+                        <span className="ga2-heure-value">{formatHeure(selectedItem.heure_reservation)}</span>
+                      </div>
+                      {selectedItem.heure_reservation && selectedItem.heure_fin && (
+                        <div className="ga2-heure-separator">→</div>
+                      )}
+                      <div className="ga2-heure-item">
+                        <span className="ga2-heure-label">Fin</span>
+                        <span className="ga2-heure-value">{formatHeure(selectedItem.heure_fin)}</span>
                       </div>
                     </div>
-                  )}
-                  <div className="gestion-clients-detail-item">
-                    <div className="gestion-clients-detail-label">Prix total</div>
-                    <div className="gestion-clients-detail-value">{formatCurrency(selectedClientData.prix_total)}</div>
                   </div>
-                  <div className="gestion-clients-detail-item">
-                    <div className="gestion-clients-detail-label">Mode de paiement</div>
-                    <div className="gestion-clients-detail-value">{selectedClientData.mode_paiement || 'Non spécifié'}</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="gestion-clients-detail-section">
-                <h4>Préférences</h4>
-                <div className="gestion-clients-detail-row">
-                  <div className="gestion-clients-detail-item">
-                    <div className="gestion-clients-detail-label">Heure de réservation</div>
-                    <div className="gestion-clients-detail-value">
-                      {selectedClientData.heure_reservation ? formatTime(selectedClientData.heure_reservation) : 'Non définie'}
-                    </div>
-                  </div>
-                  <div className="gestion-clients-detail-item">
-                    <div className="gestion-clients-detail-label">Photo</div>
-                    <div className="gestion-clients-detail-value">
-                      {selectedClientData.photo_abonne ? 'Photo disponible' : 'Aucune photo'}
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
-            <div className="gestion-clients-modal-footer">
-              <button 
-                className="gestion-clients-primary-btn"
-                onClick={() => setShowViewClientModal(false)}
-              >
+
+            <div className="ga2-modal-footer">
+              <button className="ga2-btn ga2-btn-secondary" onClick={() => closeModal('view')}>
                 Fermer
               </button>
+              <button className="ga2-btn ga2-btn-primary" onClick={handlePrint}>
+                <Printer size={16} /> Imprimer
+              </button>
+              <button className="ga2-btn ga2-btn-primary" onClick={() => {
+                closeModal('view');
+                openModal('edit', selectedItem);
+              }}>
+                <Pencil size={16} /> Modifier
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal Modification Client */}
-      {showEditClientModal && (
-        <div className="gestion-clients-modal-overlay">
-          <div className="gestion-clients-modal gestion-clients-edit-modal">
-            <div className="gestion-clients-modal-header">
-              <h3>Modifier le Client</h3>
-              <button className="gestion-clients-close-btn" onClick={() => setShowEditClientModal(false)}>
-                <FaTimes />
+      {/* Modal Suppression */}
+      {modalState.delete && selectedItem && (
+        <div className="ga2-modal-overlay" onClick={() => closeModal('delete')}>
+          <div className="ga2-modal ga2-delete-modal" onClick={e => e.stopPropagation()}>
+            <div className="ga2-modal-header">
+              <h3><Trash2 size={20} /> Confirmation</h3>
+              <button className="ga2-modal-close" onClick={() => closeModal('delete')}>
+                <X size={18} />
               </button>
             </div>
-            <div className="gestion-clients-modal-body">
-              <div className="gestion-clients-form-row">
-                <div className="gestion-clients-form-group">
-                  <label>Nom *</label>
-                  <input
-                    type="text"
-                    value={editClientData.nom}
-                    onChange={(e) => setEditClientData({...editClientData, nom: e.target.value})}
-                    required
-                  />
-                </div>
-                <div className="gestion-clients-form-group">
-                  <label>Prénom *</label>
-                  <input
-                    type="text"
-                    value={editClientData.prenom}
-                    onChange={(e) => setEditClientData({...editClientData, prenom: e.target.value})}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="gestion-clients-form-row">
-                <div className="gestion-clients-form-group">
-                  <label>Email *</label>
-                  <input
-                    type="email"
-                    value={editClientData.email}
-                    onChange={(e) => setEditClientData({...editClientData, email: e.target.value})}
-                    required
-                  />
-                </div>
-                <div className="gestion-clients-form-group">
-                  <label>Téléphone *</label>
-                  <input
-                    type="tel"
-                    value={editClientData.telephone}
-                    onChange={(e) => setEditClientData({...editClientData, telephone: e.target.value})}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="gestion-clients-form-row">
-                <div className="gestion-clients-form-group">
-                  <label>Type d'abonnement</label>
-                  <select
-                    value={editClientData.type_abonnement}
-                    onChange={(e) => setEditClientData({...editClientData, type_abonnement: e.target.value})}
-                  >
-                    <option value="">Sélectionner...</option>
-                    {TYPES_ABONNEMENT.map(type => (
-                      <option key={type} value={type}>{getAbonnementLabel(type)}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="gestion-clients-form-group">
-                  <label>Statut</label>
-                  <select
-                    value={editClientData.statut}
-                    onChange={(e) => setEditClientData({...editClientData, statut: e.target.value})}
-                  >
-                    <option value="actif">Actif</option>
-                    <option value="inactif">Inactif</option>
-                    <option value="en attente">En attente</option>
-                  </select>
-                </div>
-              </div>
-              <div className="gestion-clients-form-row">
-                <div className="gestion-clients-form-group">
-                  <label>Date début</label>
-                  <input
-                    type="date"
-                    value={editClientData.date_debut}
-                    onChange={(e) => setEditClientData({...editClientData, date_debut: e.target.value})}
-                  />
-                </div>
-                <div className="gestion-clients-form-group">
-                  <label>Date fin</label>
-                  <input
-                    type="date"
-                    value={editClientData.date_fin}
-                    onChange={(e) => setEditClientData({...editClientData, date_fin: e.target.value})}
-                  />
-                </div>
-              </div>
-              <div className="gestion-clients-form-row">
-                <div className="gestion-clients-form-group">
-                  <label>Prix total (DH)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={editClientData.prix_total}
-                    onChange={(e) => setEditClientData({...editClientData, prix_total: e.target.value})}
-                  />
-                </div>
-                <div className="gestion-clients-form-group">
-                  <label>Mode de paiement</label>
-                  <select
-                    value={editClientData.mode_paiement}
-                    onChange={(e) => setEditClientData({...editClientData, mode_paiement: e.target.value})}
-                  >
-                    <option value="">Sélectionner...</option>
-                    {MODES_PAIEMENT.map(mode => (
-                      <option key={mode} value={mode}>{mode}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="gestion-clients-form-row">
-                <div className="gestion-clients-form-group">
-                  <label>Heure de réservation</label>
-                  <input
-                    type="time"
-                    value={editClientData.heure_reservation}
-                    onChange={(e) => setEditClientData({...editClientData, heure_reservation: e.target.value})}
-                  />
-                </div>
+            
+            <div className="ga2-modal-body">
+              <div className="ga2-delete-content">
+                <AlertCircle size={64} />
+                <p>
+                  Êtes-vous sûr de vouloir supprimer <strong>{selectedItem.nom} {selectedItem.prenom}</strong> ?
+                </p>
+                <p className="ga2-warning">Cette action est irréversible</p>
               </div>
             </div>
-            <div className="gestion-clients-modal-footer">
-              <button 
-                className="gestion-clients-secondary-btn"
-                onClick={() => setShowEditClientModal(false)}
-              >
+
+            <div className="ga2-modal-footer">
+              <button className="ga2-btn ga2-btn-secondary" onClick={() => closeModal('delete')}>
                 Annuler
               </button>
-              <button 
-                className="gestion-clients-primary-btn"
-                onClick={handleEditCurrentClient}
-                disabled={!editClientData.nom || !editClientData.prenom || !editClientData.email || !editClientData.telephone}
-              >
-                Enregistrer
+              <button className="ga2-btn ga2-btn-danger" onClick={handleDelete}>
+                <Trash2 size={16} /> Supprimer
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal Gestion Abonnement */}
-      {showAbonnementModal && selectedClientData && (
-        <div className="gestion-clients-modal-overlay">
-          <div className="gestion-clients-modal gestion-clients-abonnement-modal">
-            <div className="gestion-clients-modal-header">
-              <h3>Gestion de l'Abonnement</h3>
-              <button className="gestion-clients-close-btn" onClick={() => setShowAbonnementModal(false)}>
-                <FaTimes />
-              </button>
-            </div>
-            <div className="gestion-clients-modal-body">
-              <div className="gestion-clients-client-info-modal">
-                <div className="gestion-clients-avatar-small">
-                  {renderAvatar(selectedClientData)}
-                </div>
-                <div>
-                  <h4>{getClientFullName(selectedClientData)}</h4>
-                  <small>ID: {selectedClientData.idclient}</small>
-                </div>
-              </div>
-              <div className="gestion-clients-form-group">
-                <label>Type d'abonnement *</label>
-                <select
-                  value={abonnementData.type_abonnement}
-                  onChange={(e) => setAbonnementData({...abonnementData, type_abonnement: e.target.value})}
-                  required
-                >
-                  <option value="">Sélectionner...</option>
-                  {TYPES_ABONNEMENT.map(type => (
-                    <option key={type} value={type}>{getAbonnementLabel(type)}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="gestion-clients-form-row">
-                <div className="gestion-clients-form-group">
-                  <label>Date début *</label>
-                  <input
-                    type="date"
-                    value={abonnementData.date_debut}
-                    onChange={(e) => setAbonnementData({...abonnementData, date_debut: e.target.value})}
-                    required
-                  />
-                </div>
-                <div className="gestion-clients-form-group">
-                  <label>Date fin *</label>
-                  <input
-                    type="date"
-                    value={abonnementData.date_fin}
-                    onChange={(e) => setAbonnementData({...abonnementData, date_fin: e.target.value})}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="gestion-clients-form-row">
-                <div className="gestion-clients-form-group">
-                  <label>Prix total (DH) *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={abonnementData.prix_total}
-                    onChange={(e) => setAbonnementData({...abonnementData, prix_total: e.target.value})}
-                    required
-                  />
-                </div>
-                <div className="gestion-clients-form-group">
-                  <label>Mode de paiement</label>
-                  <select
-                    value={abonnementData.mode_paiement}
-                    onChange={(e) => setAbonnementData({...abonnementData, mode_paiement: e.target.value})}
-                  >
-                    <option value="">Sélectionner...</option>
-                    {MODES_PAIEMENT.map(mode => (
-                      <option key={mode} value={mode}>{mode}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div className="gestion-clients-modal-footer">
-              <button 
-                className="gestion-clients-secondary-btn"
-                onClick={() => setShowAbonnementModal(false)}
-              >
-                Annuler
-              </button>
-              <button 
-                className="gestion-clients-primary-btn"
-                onClick={handleUpdateAbonnement}
-                disabled={!abonnementData.type_abonnement || !abonnementData.date_debut || !abonnementData.date_fin || !abonnementData.prix_total}
-              >
-                Mettre à jour l'abonnement
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Photo */}
-      {showPhotoModal && selectedClientData && (
-        <div className="gestion-clients-modal-overlay">
-          <div className="gestion-clients-modal gestion-clients-photo-modal">
-            <div className="gestion-clients-modal-header">
-              <h3>Photo du Client</h3>
-              <button className="gestion-clients-close-btn" onClick={() => setShowPhotoModal(false)}>
-                <FaTimes />
-              </button>
-            </div>
-            <div className="gestion-clients-modal-body">
-              <div className="photo-upload-section">
-                <div className="photo-upload-container">
-                  <div className="photo-preview-container">
-                    {photoPreview ? (
-                      <img src={photoPreview} alt="Preview" className="photo-preview" />
-                    ) : selectedClientData.photo_abonne ? (
-                      <img src={selectedClientData.photo_abonne} alt="Current" className="photo-preview" />
-                    ) : (
-                      <div className="photo-placeholder">
-                        <FaUserCircle />
-                        <p>Aucune photo</p>
-                      </div>
-                    )}
-                  </div>
-                  <button className="photo-upload-btn">
-                    <FaUpload /> Choisir une nouvelle photo
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileSelect}
-                      className="photo-upload-input"
-                    />
-                  </button>
-                  {photoFile && (
-                    <p className="photo-file-name">{photoFile.name} ({(photoFile.size / 1024).toFixed(1)} KB)</p>
-                  )}
-                  <p className="photo-instructions">
-                    Taille max: 5MB • Formats: JPG, PNG, GIF
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="gestion-clients-modal-footer">
-              <button 
-                className="gestion-clients-secondary-btn"
-                onClick={() => setShowPhotoModal(false)}
-              >
-                Annuler
-              </button>
-              <button 
-                className="gestion-clients-primary-btn"
-                onClick={handlePhotoUpload}
-                disabled={!photoFile}
-              >
-                <FaUpload /> Mettre à jour la photo
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Carte d'Abonnement */}
-      {showCarteModal && carteClientData && (
-        <div className="gestion-clients-modal-overlay">
-          <div className="gestion-clients-modal gestion-clients-carte-modal">
-            <div className="gestion-clients-modal-header">
-              <h3>Carte d'Abonnement</h3>
-              <button className="gestion-clients-close-btn" onClick={() => setShowCarteModal(false)}>
-                <FaTimes />
-              </button>
-            </div>
-            <div className="gestion-clients-modal-body">
-              <div className="carte-abonnement-wrapper">
-                {renderCarteAbonnement()}
-              </div>
-              <div className="carte-actions">
-                <button 
-                  className="carte-print-btn"
-                  onClick={handlePrintCarte}
-                >
-                  <FaPrint /> Imprimer la carte
-                </button>
-                <button 
-                  className="gestion-clients-secondary-btn"
-                  onClick={() => setShowCarteModal(false)}
-                >
-                  Fermer
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Statistiques */}
-      {showStatistiquesModal && statistiques && (
-        <div className="gestion-clients-modal-overlay">
-          <div className="gestion-clients-modal gestion-clients-stats-modal">
-            <div className="gestion-clients-modal-header">
-              <h3>Statistiques des Clients</h3>
-              <button className="gestion-clients-close-btn" onClick={() => setShowStatistiquesModal(false)}>
-                <FaTimes />
-              </button>
-            </div>
-            <div className="gestion-clients-modal-body">
-              <div className="gestion-clients-stats-grid">
-                <div className="gestion-clients-stat-box">
-                  <h4>Total Clients</h4>
-                  <div className="gestion-clients-stat-number">{statistiques.total}</div>
-                </div>
-                <div className="gestion-clients-stat-box">
-                  <h4>Clients Actifs</h4>
-                  <div className="gestion-clients-stat-number">{statistiques.actifs}</div>
-                </div>
-                <div className="gestion-clients-stat-box">
-                  <h4>Clients Inactifs</h4>
-                  <div className="gestion-clients-stat-number">{statistiques.inactifs}</div>
-                </div>
-                <div className="gestion-clients-stat-box">
-                  <h4>Revenu Total</h4>
-                  <div className="gestion-clients-stat-number">{formatCurrency(statistiques.revenuTotal)}</div>
-                </div>
-              </div>
-
-              <div className="gestion-clients-stats-section">
-                <h4>Répartition par Statut</h4>
-                <div className="gestion-clients-stats-list">
-                  {statistiques.parStatut.map((item, index) => (
-                    <div key={index} className="gestion-clients-stat-item">
-                      <div className="gestion-clients-stat-label">
-                        {getStatusLabel(item.statut)}
-                      </div>
-                      <div className="gestion-clients-stat-value">{item.count}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="gestion-clients-stats-section">
-                <h4>Répartition par Type d'Abonnement</h4>
-                <div className="gestion-clients-stats-list">
-                  {statistiques.parAbonnement.map((item, index) => (
-                    <div key={index} className="gestion-clients-stat-item">
-                      <div className="gestion-clients-stat-label">
-                        {getAbonnementLabel(item.type_abonnement)}
-                      </div>
-                      <div className="gestion-clients-stat-value">{item.count}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="gestion-clients-modal-footer">
-              <button 
-                className="gestion-clients-primary-btn"
-                onClick={() => setShowStatistiquesModal(false)}
-              >
-                Fermer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Confirmation Suppression */}
-      {showDeleteClientModal && selectedClientData && (
-        <div className="gestion-clients-modal-overlay">
-          <div className="gestion-clients-modal gestion-clients-delete-modal">
-            <div className="gestion-clients-modal-header">
-              <h3>Confirmer la suppression</h3>
-              <button className="gestion-clients-close-btn" onClick={() => setShowDeleteClientModal(false)}>
-                <FaTimes />
-              </button>
-            </div>
-            <div className="gestion-clients-modal-body">
-              <div className="gestion-clients-warning">
-                <div className="gestion-clients-warning-icon">
-                  <FaTrash />
-                </div>
-                <p>Êtes-vous sûr de vouloir supprimer le client <strong>{getClientFullName(selectedClientData)}</strong> ?</p>
-              </div>
-              <div className="gestion-clients-delete-details">
-                <p><strong>ID:</strong> {selectedClientData.idclient}</p>
-                <p><strong>Email:</strong> {selectedClientData.email}</p>
-                <p><strong>Abonnement:</strong> {getAbonnementLabel(selectedClientData.type_abonnement)}</p>
-              </div>
-              <p className="gestion-clients-warning-text">
-                ⚠️ Cette action est irréversible. Toutes les données associées à ce client seront supprimées.
-              </p>
-            </div>
-            <div className="gestion-clients-modal-footer">
-              <button 
-                className="gestion-clients-secondary-btn"
-                onClick={() => setShowDeleteClientModal(false)}
-              >
-                Annuler
-              </button>
-              <button 
-                className="gestion-clients-danger-btn"
-                onClick={handleDeleteSelectedClient}
-              >
-                <FaTrash /> Supprimer définitivement
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Toast Notification */}
-      {clientToast && (
-        <div className={`gestion-clients-toast gestion-clients-toast-${clientToast.type}`}>
-          {clientToast.message}
+      {/* Notification */}
+      {notification && (
+        <div className={`ga2-notification ga2-notification-${notification.type}`}>
+          {notification.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+          {notification.message}
         </div>
       )}
     </div>
   );
 };
 
-export default GestionClients;
+export default GestionAbonnes;

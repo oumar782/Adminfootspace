@@ -6,8 +6,6 @@ import PrevisionForecast from "../Dashboard/prevision";
 import Annulation from "../Dashboard/Annulation";
 import AnalyseMensuelle from "../Dashboard/Annalyse-financiere";
 
-
-
 // Icônes (gardées car utilisées)
 const TrendingUpIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -29,18 +27,8 @@ const Dashboard = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // 🔥 SUPPRIMÉ : statsData (données en dur non venant de la BDD)
-
   return (
-    
     <div className="dashboard-container">
-      <div className="content-grid">
-        <div className="content-main">
-        <AnalyseMensuelle />
-        </div>
-        <div className="content-sidebar">
-        </div>
-      </div>
       {showWelcome && (
         <div className="welcome-banner">
           <div className="welcome-content">
@@ -65,15 +53,51 @@ const Dashboard = () => {
           <h2>Aperçu du tableau de bord</h2>
           <p>Surveillez les performances de votre entreprise en temps réel</p>
         </div>
-       
+        <div className="header-filters">
+          <button 
+            className={`filter-btn ${activeFilter === 'today' ? 'active' : ''}`}
+            onClick={() => setActiveFilter('today')}
+          >
+            Aujourd'hui
+          </button>
+          <button 
+            className={`filter-btn ${activeFilter === 'week' ? 'active' : ''}`}
+            onClick={() => setActiveFilter('week')}
+          >
+            Cette semaine
+          </button>
+          <button 
+            className={`filter-btn ${activeFilter === 'month' ? 'active' : ''}`}
+            onClick={() => setActiveFilter('month')}
+          >
+            Ce mois
+          </button>
+        </div>
       </div>
-      
 
-      {/* ✅ SEULE CARTE : Revenus (tu peux changer le titre/valeur plus tard) */}
+      {/* Analyse des créneaux */}
+      <div className="content-grid section-title">
+        <h3>Analyse des Créneaux</h3>
+      </div>
+     
+      {/* Analyse financière */}
+      <div className="content-grid section-title">
+        <h3>Analyse Financière</h3>
+      </div>
+      <div className="content-grid">
+        <div className="content-main">
+          <AnalyseMensuelle />
+        </div>
+        <div className="content-sidebar">
+          {/* Sidebar content for AnalyseMensuelle can go here */}
+        </div>
+      </div>
+
+      {/* ✅ SEULE CARTE : Revenus */}
       <div className="stats-grid">
         <StatCard
           title="Revenus"
-          value={isLoading ? "—" : "0 €"} // ou une valeur par défaut
+          value={isLoading ? "—" : "0 €"}
           subtitle={getPeriodLabel(activeFilter)}
           icon={<TrendingUpIcon />}
           trend={null}
@@ -82,36 +106,55 @@ const Dashboard = () => {
         />
       </div>
 
-    
+      {/* Occupation Chart */}
+      <div className="content-grid section-title">
+        <h3>Taux d'Occupation</h3>
+      </div>
       <div className="content-grid">
         <div className="content-main">
-        <OccupationChart />
+          <OccupationChart />
         </div>
         <div className="content-sidebar">
+          {/* Sidebar content for OccupationChart can go here */}
         </div>
       </div>
-    
-      
+
+      {/* Prévision */}
+      <div className="content-grid section-title">
+        <h3>Prévisions</h3>
+      </div>
       <div className="content-grid">
         <div className="content-main">
           <PrevisionForecast />
         </div>
         <div className="content-sidebar">
+          {/* Sidebar content for PrevisionForecast can go here */}
         </div>
       </div>
-   
+
+      {/* Annulation */}
+      <div className="content-grid section-title">
+        <h3>Taux d'Annulation</h3>
+      </div>
       <div className="content-grid">
         <div className="content-main">
           <Annulation />
         </div>
         <div className="content-sidebar">
+          {/* Sidebar content for Annulation can go here */}
         </div>
+      </div>
+
+      {/* Réservations récentes */}
+      <div className="content-grid section-title">
+        <h3>Réservations Récentes</h3>
       </div>
       <div className="content-grid">
         <div className="content-main">
           <RecentReservations />
         </div>
         <div className="content-sidebar">
+          {/* Sidebar content for RecentReservations can go here */}
         </div>
       </div>
 
@@ -132,16 +175,16 @@ const Dashboard = () => {
           --transition: all 0.3s ease;
         }
 
-      .dashboard-container {
-  padding: 24px;
-  max-width: 1440px;
-  margin: 0 auto;
-  margin-left: 100px;
-  margin-top: 50px;
-  overflow: hidden; /* ← DÉJÀ CORRECT PAS DE DÉFILEMENT */
-  width: calc(100% - 100px); /* ← AJOUTE CETTE LIGNE */
-  box-sizing: border-box;
-}
+        .dashboard-container {
+          padding: 24px;
+          max-width: 1440px;
+          margin: 0 auto;
+          margin-left: 100px;
+          margin-top: 50px;
+          overflow: hidden;
+          width: calc(100% - 100px);
+          box-sizing: border-box;
+        }
 
         .welcome-banner {
           background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
@@ -265,7 +308,6 @@ const Dashboard = () => {
           margin-bottom: 24px;
         }
 
-        .charts-grid,
         .content-grid {
           display: grid;
           grid-template-columns: 2fr 1fr;
@@ -273,8 +315,26 @@ const Dashboard = () => {
           margin-bottom: 24px;
         }
 
-        .chart-main, .chart-sidebar, .content-main, .content-sidebar {
+        .section-title {
+          grid-template-columns: 1fr;
+          margin-bottom: 12px;
+        }
+
+        .section-title h3 {
+          margin: 0;
+          color: var(--primary-color);
+          font-size: 1.25rem;
+          font-weight: 600;
+          padding-bottom: 8px;
+          border-bottom: 2px solid var(--border-color);
+        }
+
+        .content-main, .content-sidebar {
           min-height: 400px;
+          background: var(--card-background);
+          border-radius: 12px;
+          box-shadow: var(--shadow);
+          padding: 20px;
         }
 
         @keyframes slideInDown {
@@ -283,16 +343,40 @@ const Dashboard = () => {
         }
 
         @media (max-width: 1024px) {
-          .charts-grid, .content-grid {
+          .content-grid {
             grid-template-columns: 1fr;
+          }
+          
+          .content-sidebar {
+            display: none;
           }
         }
 
         @media (max-width: 768px) {
-          .dashboard-container { padding: 16px; }
-          .dashboard-header { flex-direction: column; align-items: flex-start; }
-          .header-filters { width: 100%; justify-content: center; }
-          .stats-grid { grid-template-columns: 1fr; }
+          .dashboard-container { 
+            padding: 16px; 
+            margin-left: 0;
+            width: 100%;
+          }
+          
+          .dashboard-header { 
+            flex-direction: column; 
+            align-items: flex-start; 
+          }
+          
+          .header-filters { 
+            width: 100%; 
+            justify-content: center; 
+          }
+          
+          .stats-grid { 
+            grid-template-columns: 1fr; 
+          }
+          
+          .welcome-content {
+            flex-direction: column;
+            text-align: center;
+          }
         }
       `}</style>
     </div>
