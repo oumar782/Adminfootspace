@@ -1,0 +1,1526 @@
+:root {
+  --pa-primary: #2563eb;
+  --pa-primary-dark: #1d4ed8;
+  --pa-primary-light: rgba(37, 99, 235, 0.1);
+  --pa-primary-bg: #eff6ff;
+  --pa-secondary: #7c3aed;
+  --pa-secondary-light: rgba(124, 58, 237, 0.1);
+  --pa-success: #10b981;
+  --pa-success-bg: #f0fdf4;
+  --pa-warning: #f59e0b;
+  --pa-warning-bg: #fffbeb;
+  --pa-danger: #ef4444;
+  --pa-danger-bg: #fef2f2;
+  --pa-info: #3b82f6;
+  --pa-info-bg: #eff6ff;
+  --pa-gray-50: #f9fafb;
+  --pa-gray-100: #f3f4f6;
+  --pa-gray-200: #e5e7eb;
+  --pa-gray-300: #d1d5db;
+  --pa-gray-400: #9ca3af;
+  --pa-gray-500: #6b7280;
+  --pa-gray-600: #4b5563;
+  --pa-gray-700: #374151;
+  --pa-gray-800: #1f2937;
+  --pa-gray-900: #111827;
+  --pa-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --pa-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --pa-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --pa-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --pa-radius: 8px;
+  --pa-radius-lg: 12px;
+  --pa-radius-xl: 16px;
+  --pa-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --pa-transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reset et base */
+* {
+  box-sizing: border-box;
+}
+
+/* Container principal */
+.pa-prevann-container {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  min-height: 100vh;
+  padding: 24px;
+  color: #1e293b;
+  transition: var(--pa-transition-slow);
+  position: relative;
+  margin-left:250px;
+}
+
+.pa-prevann-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  padding: 20px;
+  overflow: auto;
+}
+
+/* Carte flottante */
+.pa-prevann-floating-card {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: white;
+  border-radius: var(--pa-radius-xl);
+  padding: 20px;
+  box-shadow: var(--pa-shadow-xl);
+  z-index: 1000;
+  min-width: 320px;
+  border: 1px solid var(--pa-gray-200);
+  animation: pa-prevann-fade-in 0.3s ease-out;
+}
+
+.pa-prevann-floating-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--pa-warning), var(--pa-danger));
+  border-radius: var(--pa-radius-xl) var(--pa-radius-xl) 0 0;
+}
+
+.pa-prevann-floating-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.pa-prevann-floating-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--pa-gray-800);
+  margin: 0;
+  background: linear-gradient(135deg, var(--pa-warning), var(--pa-danger));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pa-prevann-floating-close {
+  background: none;
+  border: none;
+  color: var(--pa-gray-500);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--pa-radius);
+  transition: var(--pa-transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pa-prevann-floating-close:hover {
+  background: var(--pa-gray-100);
+  color: var(--pa-gray-800);
+  transform: rotate(90deg);
+}
+
+.pa-prevann-floating-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pa-prevann-floating-stat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--pa-gray-700);
+  font-weight: 600;
+  padding: 8px;
+  border-radius: var(--pa-radius);
+  transition: var(--pa-transition);
+}
+
+.pa-prevann-floating-stat:hover {
+  background: var(--pa-gray-50);
+  transform: translateX(4px);
+}
+
+.pa-prevann-show-floating-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, var(--pa-warning), var(--pa-danger));
+  color: white;
+  border: none;
+  border-radius: var(--pa-radius);
+  padding: 12px;
+  cursor: pointer;
+  z-index: 999;
+  box-shadow: var(--pa-shadow-lg);
+  transition: var(--pa-transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pa-prevann-show-floating-btn:hover {
+  transform: scale(1.1);
+  box-shadow: var(--pa-shadow-xl);
+}
+
+/* États de chargement */
+.pa-prevann-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 24px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.pa-prevann-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid var(--pa-gray-200);
+  border-top: 4px solid var(--pa-warning);
+  border-radius: 50%;
+  animation: pa-prevann-spin 1s linear infinite;
+  box-shadow: var(--pa-shadow);
+}
+
+@keyframes pa-prevann-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.pa-prevann-loading-text {
+  font-size: 18px;
+  color: var(--pa-gray-700);
+  font-weight: 600;
+  background: white;
+  padding: 16px 32px;
+  border-radius: var(--pa-radius-xl);
+  box-shadow: var(--pa-shadow);
+}
+
+/* États d'erreur */
+.pa-prevann-error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 20px;
+  padding: 32px;
+  text-align: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.pa-prevann-error-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--pa-gray-800);
+  margin: 0;
+}
+
+.pa-prevann-error-message {
+  font-size: 16px;
+  color: var(--pa-gray-600);
+  max-width: 500px;
+  line-height: 1.6;
+  background: white;
+  padding: 16px 24px;
+  border-radius: var(--pa-radius-xl);
+  border: 1px solid var(--pa-danger);
+}
+
+.pa-prevann-retry-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, var(--pa-warning), var(--pa-danger));
+  color: white;
+  border: none;
+  border-radius: var(--pa-radius-xl);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--pa-shadow-lg);
+  transition: var(--pa-transition);
+}
+
+.pa-prevann-retry-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--pa-shadow-xl);
+}
+
+/* En-tête */
+.pa-prevann-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  background: white;
+  padding: 24px 32px;
+  border-radius: var(--pa-radius-xl);
+  box-shadow: var(--pa-shadow-lg);
+  border: 1px solid var(--pa-gray-200);
+  position: relative;
+  overflow: hidden;
+}
+
+.pa-prevann-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--pa-warning), var(--pa-danger));
+}
+
+.pa-prevann-header-left {
+  flex: 1;
+}
+
+.pa-prevann-title-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.pa-prevann-title {
+  font-size: 32px;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(135deg, var(--pa-warning), var(--pa-danger));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+
+.pa-prevann-subtitle {
+  font-size: 15px;
+  color: var(--pa-gray-600);
+  margin: 8px 0 0 0;
+  font-weight: 600;
+}
+
+.pa-prevann-header-right {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Sélecteur de période */
+.pa-prevann-period-selector {
+  display: flex;
+  gap: 6px;
+  background: var(--pa-gray-100);
+  padding: 6px;
+  border-radius: var(--pa-radius-lg);
+  border: 1px solid var(--pa-gray-200);
+}
+
+.pa-prevann-period-btn {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  color: var(--pa-gray-600);
+  border-radius: var(--pa-radius);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--pa-transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.pa-prevann-period-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s;
+}
+
+.pa-prevann-period-btn:hover::before {
+  left: 100%;
+}
+
+.pa-prevann-period-btn-active {
+  background: white;
+  color: var(--pa-warning);
+  box-shadow: var(--pa-shadow);
+}
+
+.pa-prevann-period-btn:hover:not(.pa-prevann-period-btn-active) {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--pa-warning);
+}
+
+/* Boutons */
+.pa-prevann-pdf-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--pa-danger), #dc2626);
+  color: white;
+  border: none;
+  border-radius: var(--pa-radius-lg);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--pa-shadow);
+  transition: var(--pa-transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.pa-prevann-pdf-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s;
+}
+
+.pa-prevann-pdf-button:hover::before {
+  left: 100%;
+}
+
+.pa-prevann-pdf-button:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-2px);
+  box-shadow: var(--pa-shadow-lg);
+}
+
+.pa-prevann-pdf-small {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--pa-gray-100);
+  color: var(--pa-gray-700);
+  border: 1px solid var(--pa-gray-300);
+  border-radius: var(--pa-radius);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--pa-transition);
+}
+
+.pa-prevann-pdf-small:hover {
+  background: var(--pa-gray-200);
+  transform: translateY(-1px);
+  box-shadow: var(--pa-shadow);
+}
+
+.pa-prevann-icon-btn {
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--pa-gray-200);
+  background: white;
+  border-radius: var(--pa-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--pa-gray-600);
+  transition: var(--pa-transition);
+  box-shadow: var(--pa-shadow-sm);
+}
+
+.pa-prevann-icon-btn:hover {
+  background: var(--pa-gray-100);
+  color: var(--pa-warning);
+  transform: translateY(-2px);
+  box-shadow: var(--pa-shadow);
+  border-color: var(--pa-warning);
+}
+
+/* KPIs Grid */
+.pa-prevann-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.pa-prevann-kpi-card {
+  background: white;
+  border-radius: var(--pa-radius-xl);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: var(--pa-shadow-lg);
+  transition: var(--pa-transition);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--pa-gray-200);
+}
+
+.pa-prevann-kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  transition: var(--pa-transition);
+}
+
+.pa-prevann-kpi-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.pa-prevann-kpi-card:hover::after {
+  opacity: 1;
+}
+
+.pa-prevann-kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--pa-shadow-xl);
+}
+
+.pa-prevann-kpi-danger::before {
+  background: linear-gradient(180deg, var(--pa-danger), #dc2626);
+}
+
+.pa-prevann-kpi-warning::before {
+  background: linear-gradient(180deg, var(--pa-warning), #d97706);
+}
+
+.pa-prevann-kpi-info::before {
+  background: linear-gradient(180deg, var(--pa-info), #2563eb);
+}
+
+.pa-prevann-kpi-success::before {
+  background: linear-gradient(180deg, var(--pa-success), #059669);
+}
+
+.pa-prevann-kpi-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--pa-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--pa-warning), var(--pa-danger));
+  color: white;
+  flex-shrink: 0;
+  box-shadow: var(--pa-shadow);
+  position: relative;
+  z-index: 2;
+}
+
+.pa-prevann-kpi-content {
+  flex: 1;
+  position: relative;
+  z-index: 2;
+}
+
+.pa-prevann-kpi-value {
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  color: var(--pa-gray-800);
+  letter-spacing: -0.5px;
+}
+
+.pa-prevann-kpi-label {
+  font-size: 15px;
+  color: var(--pa-gray-600);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.pa-prevann-kpi-trend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--pa-gray-600);
+  font-weight: 600;
+  background: var(--pa-gray-50);
+  padding: 6px 12px;
+  border-radius: var(--pa-radius);
+  width: fit-content;
+}
+
+/* Section Graphique */
+.pa-prevann-chart-section {
+  background: white;
+  border-radius: var(--pa-radius-xl);
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: var(--pa-shadow-lg);
+  border: 1px solid var(--pa-gray-200);
+  position: relative;
+  overflow: hidden;
+}
+
+.pa-prevann-chart-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--pa-warning), var(--pa-danger));
+}
+
+.pa-prevann-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.pa-prevann-chart-title {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--pa-gray-800);
+}
+
+.pa-prevann-chart-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.pa-prevann-chart-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--pa-gray-300);
+  background: white;
+  border-radius: var(--pa-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--pa-gray-600);
+  transition: var(--pa-transition);
+}
+
+.pa-prevann-chart-btn:hover {
+  background: linear-gradient(135deg, var(--pa-warning), var(--pa-danger));
+  border-color: transparent;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--pa-shadow);
+}
+
+.pa-prevann-chart-container {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 20px 0 30px 0;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--pa-warning) var(--pa-gray-200);
+}
+
+.pa-prevann-chart-container::-webkit-scrollbar {
+  height: 12px;
+}
+
+.pa-prevann-chart-container::-webkit-scrollbar-track {
+  background: var(--pa-gray-100);
+  border-radius: 6px;
+}
+
+.pa-prevann-chart-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--pa-warning), var(--pa-danger));
+  border-radius: 6px;
+  border: 2px solid var(--pa-gray-100);
+}
+
+.pa-prevann-bar-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 90px;
+  position: relative;
+  transition: var(--pa-transition);
+}
+
+.pa-prevann-bar-wrapper:hover {
+  transform: translateY(-5px);
+}
+
+.pa-prevann-bar-container {
+  width: 70px;
+  height: 200px;
+  background: var(--pa-gray-100);
+  border-radius: var(--pa-radius-lg) var(--pa-radius-lg) 0 0;
+  display: flex;
+  align-items: flex-end;
+  position: relative;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--pa-gray-300);
+}
+
+.pa-prevann-bar {
+  width: 100%;
+  border-radius: var(--pa-radius-lg) var(--pa-radius-lg) 0 0;
+  transition: var(--pa-transition-slow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+  color: white;
+  font-weight: 800;
+  min-height: 25px;
+}
+
+.pa-prevann-bar-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 14px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.pa-prevann-bar-label {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.pa-prevann-bar-month {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--pa-gray-800);
+  margin-bottom: 4px;
+}
+
+.pa-prevann-bar-rate {
+  font-size: 12px;
+  color: var(--pa-gray-600);
+  font-weight: 700;
+  background: var(--pa-gray-100);
+  padding: 4px 8px;
+  border-radius: var(--pa-radius);
+  display: inline-block;
+}
+
+/* Tooltip */
+.pa-prevann-tooltip {
+  position: absolute;
+  top: -150px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 20px;
+  border-radius: var(--pa-radius-xl);
+  box-shadow: var(--pa-shadow-xl);
+  z-index: 10000;
+  min-width: 250px;
+  border: 1px solid var(--pa-gray-200);
+  animation: pa-prevann-tooltip-appear 0.3s ease-out;
+}
+
+.pa-prevann-tooltip::before {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 10px solid transparent;
+  border-top-color: white;
+}
+
+.pa-prevann-tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--pa-gray-200);
+  color: var(--pa-gray-800);
+  font-weight: 700;
+}
+
+.pa-prevann-tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pa-prevann-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--pa-gray-600);
+  font-weight: 600;
+}
+
+@keyframes pa-prevann-tooltip-appear {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Section Prévisions */
+.pa-prevann-previsions-section {
+  background: white;
+  border-radius: var(--pa-radius-xl);
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: var(--pa-shadow-lg);
+  border: 1px solid var(--pa-gray-200);
+  position: relative;
+  overflow: hidden;
+}
+
+.pa-prevann-previsions-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--pa-warning), var(--pa-danger));
+}
+
+.pa-prevann-section-title {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 0 24px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--pa-gray-800);
+}
+
+.pa-prevann-previsions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.pa-prevann-prevision-card {
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border-radius: var(--pa-radius-xl);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border: 1px solid #fed7aa;
+  transition: var(--pa-transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.pa-prevann-prevision-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--pa-warning), #d97706);
+}
+
+.pa-prevann-prevision-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--pa-shadow-lg);
+}
+
+.pa-prevann-prevision-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--pa-radius-lg);
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: var(--pa-shadow);
+  position: relative;
+  z-index: 2;
+}
+
+.pa-prevann-prevision-content {
+  flex: 1;
+  position: relative;
+  z-index: 2;
+}
+
+.pa-prevann-prevision-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--pa-gray-800);
+  margin-bottom: 4px;
+  letter-spacing: -0.5px;
+}
+
+.pa-prevann-prevision-label {
+  font-size: 15px;
+  color: var(--pa-gray-600);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.pa-prevann-prevision-detail {
+  font-size: 13px;
+  color: var(--pa-gray-500);
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 4px 8px;
+  border-radius: var(--pa-radius);
+  display: inline-block;
+}
+
+/* Section Risque */
+.pa-prevann-risk-section {
+  background: #fef2f2;
+  padding: 24px;
+  border-radius: var(--pa-radius-xl);
+  border: 1px solid #fecaca;
+  margin-top: 20px;
+}
+
+.pa-prevann-risk-title {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0 0 20px 0;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pa-prevann-risk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.pa-prevann-risk-card {
+  background: white;
+  padding: 20px;
+  border-radius: var(--pa-radius-lg);
+  border: 1px solid #fecaca;
+  transition: var(--pa-transition);
+}
+
+.pa-prevann-risk-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--pa-shadow);
+}
+
+.pa-prevann-risk-date {
+  margin-bottom: 15px;
+}
+
+.pa-prevann-risk-day {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--pa-gray-800);
+  margin-bottom: 4px;
+}
+
+.pa-prevann-risk-date-num {
+  font-size: 14px;
+  color: var(--pa-gray-600);
+  font-weight: 600;
+}
+
+.pa-prevann-risk-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pa-prevann-risk-stat {
+  font-size: 14px;
+  color: var(--pa-gray-700);
+  font-weight: 600;
+  padding: 6px;
+  background: #fef2f2;
+  border-radius: var(--pa-radius);
+}
+
+/* Section Journalière */
+.pa-prevann-daily-section {
+  background: white;
+  border-radius: var(--pa-radius-xl);
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: var(--pa-shadow-lg);
+  border: 1px solid var(--pa-gray-200);
+  position: relative;
+  overflow: hidden;
+}
+
+.pa-prevann-daily-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--pa-warning), var(--pa-danger));
+}
+
+.pa-prevann-daily-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.pa-prevann-daily-card {
+  background: white;
+  border-radius: var(--pa-radius-xl);
+  padding: 24px;
+  border: 1px solid var(--pa-gray-200);
+  transition: var(--pa-transition);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.pa-prevann-daily-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--pa-shadow-lg);
+  border-color: var(--pa-warning);
+}
+
+.pa-prevann-daily-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.pa-prevann-daily-date {
+  flex: 1;
+}
+
+.pa-prevann-daily-day {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--pa-gray-800);
+  margin-bottom: 4px;
+}
+
+.pa-prevann-daily-date-num {
+  font-size: 15px;
+  color: var(--pa-gray-600);
+  font-weight: 600;
+}
+
+.pa-prevann-risk-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: var(--pa-shadow-sm);
+}
+
+.pa-prevann-daily-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+  background: var(--pa-gray-50);
+  padding: 15px;
+  border-radius: var(--pa-radius-lg);
+}
+
+.pa-prevann-daily-stat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--pa-gray-700);
+  font-weight: 600;
+}
+
+.pa-prevann-daily-revenue {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: var(--pa-gray-100);
+  border-radius: var(--pa-radius-lg);
+  border: 1px solid var(--pa-gray-200);
+}
+
+.pa-prevann-revenue-section {
+  text-align: center;
+}
+
+.pa-prevann-revenue-label {
+  font-size: 12px;
+  color: var(--pa-gray-600);
+  margin-bottom: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pa-prevann-revenue-value {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--pa-gray-800);
+}
+
+.pa-prevann-revenue-danger {
+  color: var(--pa-danger);
+}
+
+.pa-prevann-revenue-success {
+  color: var(--pa-success);
+}
+
+.pa-prevann-daily-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  padding-top: 15px;
+  border-top: 1px solid var(--pa-gray-200);
+}
+
+.pa-prevann-confidence {
+  background: var(--pa-gray-100);
+  padding: 6px 12px;
+  border-radius: var(--pa-radius);
+  font-weight: 700;
+  color: var(--pa-gray-700);
+}
+
+.pa-prevann-taux-annulation {
+  font-weight: 700;
+  color: var(--pa-gray-700);
+  background: var(--pa-gray-100);
+  padding: 6px 12px;
+  border-radius: var(--pa-radius);
+}
+
+/* Section Terrains */
+.pa-prevann-terrains-section {
+  background: white;
+  border-radius: var(--pa-radius-xl);
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: var(--pa-shadow-lg);
+  border: 1px solid var(--pa-gray-200);
+  position: relative;
+  overflow: hidden;
+}
+
+.pa-prevann-terrains-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--pa-warning), var(--pa-danger));
+}
+
+.pa-prevann-terrains-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pa-prevann-terrain-card {
+  background: linear-gradient(135deg, #ffffff 0%, var(--pa-gray-50) 100%);
+  border: 1px solid var(--pa-gray-200);
+  border-radius: var(--pa-radius-xl);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  transition: var(--pa-transition);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.pa-prevann-terrain-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--pa-warning), var(--pa-danger));
+}
+
+.pa-prevann-terrain-card:hover {
+  transform: translateX(4px);
+  box-shadow: var(--pa-shadow-lg);
+  border-color: var(--pa-warning);
+}
+
+.pa-prevann-terrain-rank {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--pa-radius-lg);
+  background: linear-gradient(135deg, var(--pa-warning), var(--pa-danger));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 800;
+  flex-shrink: 0;
+  box-shadow: var(--pa-shadow);
+}
+
+.pa-prevann-terrain-info {
+  flex: 1;
+}
+
+.pa-prevann-terrain-name {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--pa-gray-800);
+  margin-bottom: 6px;
+}
+
+.pa-prevann-terrain-type {
+  font-size: 14px;
+  color: var(--pa-gray-600);
+  font-weight: 600;
+  background: var(--pa-gray-100);
+  padding: 4px 10px;
+  border-radius: var(--pa-radius);
+  display: inline-block;
+}
+
+.pa-prevann-terrain-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+  min-width: 200px;
+}
+
+.pa-prevann-terrain-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--pa-gray-700);
+  font-weight: 600;
+  background: var(--pa-gray-100);
+  padding: 6px 12px;
+  border-radius: var(--pa-radius);
+  width: 100%;
+}
+
+.pa-prevann-terrain-rate {
+  font-size: 14px;
+  color: var(--pa-gray-700);
+  font-weight: 600;
+  margin-top: 6px;
+  padding: 6px 16px;
+  background: #fef3c7;
+  border-radius: var(--pa-radius);
+  width: fit-content;
+  border: 1px solid #fde68a;
+}
+
+/* Footer */
+.pa-prevann-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 32px;
+  background: white;
+  border-radius: var(--pa-radius-xl);
+  box-shadow: var(--pa-shadow-lg);
+  margin-top: 32px;
+  border: 1px solid var(--pa-gray-200);
+  position: relative;
+  overflow: hidden;
+}
+
+.pa-prevann-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--pa-warning), var(--pa-danger));
+}
+
+.pa-prevann-footer-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--pa-gray-600);
+  font-weight: 600;
+}
+
+.pa-prevann-footer-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.pa-prevann-footer-badge {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, var(--pa-gray-100), var(--pa-gray-200));
+  border-radius: var(--pa-radius);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--pa-gray-700);
+  border: 1px solid var(--pa-gray-300);
+}
+
+/* Animations globales */
+@keyframes pa-prevann-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Media Queries */
+@media (max-width: 1200px) {
+  .pa-prevann-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .pa-prevann-daily-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .pa-prevann-bar-container {
+    width: 60px;
+    height: 180px;
+  }
+  
+  .pa-prevann-bar-wrapper {
+    min-width: 80px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pa-prevann-container {
+    padding: 16px;
+  }
+  
+  .pa-prevann-header {
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .pa-prevann-header-right {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .pa-prevann-kpi-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .pa-prevann-daily-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .pa-prevann-previsions-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .pa-prevann-risk-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .pa-prevann-terrain-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .pa-prevann-terrain-stats {
+    align-items: flex-start;
+    width: 100%;
+  }
+  
+  .pa-prevann-footer {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+  
+  .pa-prevann-footer-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .pa-prevann-floating-card {
+    left: 20px;
+    right: 20px;
+    min-width: auto;
+  }
+  
+  .pa-prevann-tooltip {
+    width: 280px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .pa-prevann-tooltip::before {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .pa-prevann-chart-section,
+  .pa-prevann-previsions-section,
+  .pa-prevann-daily-section,
+  .pa-prevann-terrains-section {
+    padding: 20px;
+  }
+  
+  .pa-prevann-title {
+    font-size: 24px;
+  }
+  
+  .pa-prevann-kpi-value {
+    font-size: 26px;
+  }
+  
+  .pa-prevann-daily-card {
+    padding: 20px;
+  }
+  
+  .pa-prevann-daily-revenue {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pa-prevann-title-section {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .pa-prevann-period-selector {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .pa-prevann-pdf-button {
+    padding: 10px 16px;
+  }
+  
+  .pa-prevann-icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .pa-prevann-bar-container {
+    width: 50px;
+    height: 160px;
+  }
+  
+  .pa-prevann-bar-wrapper {
+    min-width: 70px;
+  }
+  
+  .pa-prevann-bar-value {
+    font-size: 12px;
+  }
+  
+  .pa-prevann-chart-controls {
+    gap: 4px;
+  }
+  
+  .pa-prevann-chart-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .pa-prevann-tooltip {
+    width: 240px;
+    padding: 15px;
+  }
+  
+  .pa-prevann-footer-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .pa-prevann-footer-badge {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .pa-prevann-pdf-small {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Animation pour les cartes */
+.pa-prevann-kpi-card,
+.pa-prevann-prevision-card,
+.pa-prevann-daily-card,
+.pa-prevann-terrain-card {
+  animation: pa-prevann-card-appear 0.5s ease-out;
+}
+
+@keyframes pa-prevann-card-appear {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
