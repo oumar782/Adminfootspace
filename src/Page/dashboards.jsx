@@ -223,6 +223,7 @@ const Dashboard = () => {
           --transition: all 0.3s ease;
           --primary-rgb: 31, 68, 4;
           --secondary-rgb: 12, 163, 47;
+          --sidebar-z-index: 100; /* À ajuster selon la valeur de votre sidebar */
         }
 
         /* ── BASE ── */
@@ -247,6 +248,8 @@ const Dashboard = () => {
           width: calc(100% - 100px);
           box-sizing: border-box;
           background: var(--background);
+          position: relative;
+          isolation: isolate; /* Crée un nouveau contexte d'empilement */
         }
 
         /* ── WELCOME ── */
@@ -259,6 +262,7 @@ const Dashboard = () => {
           padding: 28px 32px;
           box-shadow: 0 8px 32px rgba(var(--primary-rgb), 0.3), 0 2px 8px rgba(0,0,0,0.1);
           animation: slideInDown 0.5s ease;
+          z-index: 1; /* Inférieur à la sidebar */
         }
         .welcome-shine {
           position: absolute; inset: 0;
@@ -267,6 +271,7 @@ const Dashboard = () => {
         }
         .welcome-orb {
           position: absolute; border-radius: 50%; pointer-events: none;
+          z-index: -1; /* Passe derrière le contenu du welcome banner */
         }
         .welcome-orb--1 {
           width: 220px; height: 220px;
@@ -279,8 +284,9 @@ const Dashboard = () => {
           background: radial-gradient(circle, rgba(255,255,255,0.05), transparent 70%);
         }
         .welcome-content {
-          position: relative; z-index: 1;
+          position: relative;
           display: flex; justify-content: space-between; align-items: center; gap: 24px;
+          z-index: 2; /* Contenu au-dessus des orbes mais sous la sidebar */
         }
         .welcome-tag {
           display: inline-block;
@@ -306,6 +312,7 @@ const Dashboard = () => {
           cursor: pointer; transition: var(--transition);
           backdrop-filter: blur(12px);
           font-family: 'Inter', sans-serif;
+          z-index: 2;
         }
         .action-btn:hover { background: rgba(255,255,255,0.22); transform: translateY(-1px); }
 
@@ -313,6 +320,8 @@ const Dashboard = () => {
         .dashboard-header {
           display: flex; justify-content: space-between; align-items: flex-end;
           margin-bottom: 24px; flex-wrap: wrap; gap: 16px;
+          position: relative;
+          z-index: 1;
         }
         .header-content { flex: 1; }
         .header-badge {
@@ -339,18 +348,23 @@ const Dashboard = () => {
           padding: 5px; border-radius: 100px;
           border: 1px solid var(--border-color);
           box-shadow: var(--shadow);
+          position: relative;
+          z-index: 1;
         }
         .filter-btn {
           padding: 8px 18px; border-radius: 100px; border: none;
           background: transparent; color: var(--text-muted);
           font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em;
           text-transform: uppercase; cursor: pointer; transition: var(--transition);
+          position: relative;
+          z-index: 1;
         }
         .filter-btn:hover { color: var(--text-color); background: var(--hover-background); }
         .filter-btn.active {
           background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
           color: white; font-weight: 700;
           box-shadow: 0 2px 10px rgba(var(--primary-rgb), 0.35);
+          z-index: 2;
         }
 
         /* ── STATS ── */
@@ -358,6 +372,8 @@ const Dashboard = () => {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
           gap: 20px; margin-bottom: 24px;
+          position: relative;
+          z-index: 1;
         }
 
         /* ── TABS ── */
@@ -368,6 +384,8 @@ const Dashboard = () => {
           border: 1px solid var(--border-color);
           box-shadow: var(--shadow);
           overflow-x: auto; scrollbar-width: none;
+          position: relative;
+          z-index: 1;
         }
         .tabs-navigation::-webkit-scrollbar { display: none; }
 
@@ -379,6 +397,7 @@ const Dashboard = () => {
           color: var(--text-muted);
           font-size: 0.58rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
           cursor: pointer; transition: var(--transition); white-space: nowrap;
+          z-index: 1;
         }
         .tab-btn:hover:not(:disabled) {
           color: var(--text-color);
@@ -389,6 +408,7 @@ const Dashboard = () => {
           color: var(--primary-color);
           border-color: rgba(var(--primary-rgb), 0.18);
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 8px rgba(var(--primary-rgb), 0.1);
+          z-index: 2;
         }
         .tab-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
@@ -407,6 +427,7 @@ const Dashboard = () => {
           position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%);
           width: 18px; height: 3px; border-radius: 100px;
           background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+          z-index: 3; /* Légèrement au-dessus du bouton actif */
         }
 
         /* ── PANEL ── */
@@ -417,6 +438,8 @@ const Dashboard = () => {
           box-shadow: var(--shadow);
           overflow: hidden;
           animation: fadeIn 0.4s ease;
+          position: relative;
+          z-index: 1;
         }
         .component-header {
           position: relative; overflow: hidden;
@@ -424,16 +447,19 @@ const Dashboard = () => {
           padding: 18px 24px;
           background: linear-gradient(135deg, var(--primary-color) 0%, rgb(18, 110, 28) 50%, var(--secondary-color) 100%);
           color: white;
+          z-index: 2;
         }
         .component-header-orb {
           position: absolute; top: -50px; right: -50px;
           width: 160px; height: 160px; border-radius: 50%;
           background: radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%);
           pointer-events: none;
+          z-index: 0; /* Derrière le contenu du header */
         }
         .component-title {
-          position: relative; z-index: 1;
+          position: relative;
           display: flex; align-items: center; gap: 14px;
+          z-index: 2;
         }
         .component-icon-wrap {
           width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0;
@@ -452,8 +478,9 @@ const Dashboard = () => {
           letter-spacing: 0.06em; text-transform: uppercase;
         }
         .component-actions {
-          position: relative; z-index: 1;
+          position: relative;
           display: flex; gap: 8px;
+          z-index: 2;
         }
         .action-icon-btn {
           width: 34px; height: 34px; border-radius: 9px;
@@ -461,15 +488,20 @@ const Dashboard = () => {
           background: rgba(255,255,255,0.12); color: white;
           cursor: pointer; transition: var(--transition);
           display: flex; align-items: center; justify-content: center;
+          position: relative;
+          z-index: 2;
         }
         .action-icon-btn:hover {
           background: rgba(255,255,255,0.24);
           transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+          z-index: 3;
         }
         .component-content {
           padding: 28px; min-height: 500px;
           animation: slideInUp 0.45s ease;
+          position: relative;
+          z-index: 1;
         }
 
         /* ── STATES ── */
