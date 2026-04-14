@@ -1,33 +1,53 @@
-/* ===== VARIABLES CSS ===== */
+/* ============================================
+   MAIN LAYOUT STYLES
+   ============================================ */
+
+/* CSS Variables */
 :root {
-  /* Palette de couleurs premium */
+  /* Color Palette - Premium Design */
   --color-ebony: #f0eded;
   --color-charcoal: #036612;
   --color-ivory: #FFFFF0;
   --color-eggshell: #F0EAD6;
   --color-champagne: #F7E7CE;
-
-  /* Couleurs d'accentuation */
+  
+  /* Semantic Colors */
   --primary-bg: var(--color-ebony);
   --secondary-bg: var(--color-charcoal);
   --primary-text: var(--color-ivory);
   --accent-color: #4CAF50;
+  --accent-hover: #45a049;
+  
+  /* Layout Variables */
+  --footer-padding-y: 1.5rem;
+  --footer-padding-x: 2rem;
+  --footer-border-radius: 20px;
+  --footer-margin: 1.5rem;
+  --footer-margin-left: 63px;
+  
+  /* Transitions */
+  --transition-base: 0.3s ease;
+  --transition-fast: 0.2s ease;
 }
 
-/* ===== FOOTER ===== */
+/* ============================================
+   FOOTER COMPONENT
+   ============================================ */
+
 .main-layout-footer {
   background: var(--secondary-bg);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  margin: 0 1.5rem;
-  border-radius: 0 0 20px 20px;
+  margin: 0 var(--footer-margin);
+  border-radius: 0 0 var(--footer-border-radius) var(--footer-border-radius);
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
   position: relative;
   z-index: 10;
-  width: 96%;
-  margin-left: 63px;
-  color: white;
+  width: calc(100% - (var(--footer-margin) * 2));
+  margin-left: var(--footer-margin-left);
+  color: var(--primary-text);
   overflow: hidden;
+  transition: var(--transition-base);
 }
 
 .main-layout-footer::before {
@@ -40,14 +60,19 @@
   background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
 }
 
+.main-layout-footer:hover {
+  box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Footer Utility Classes */
 .footer-py-4 {
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
+  padding-top: var(--footer-padding-y);
+  padding-bottom: var(--footer-padding-y);
 }
 
 .footer-px-6 {
-  padding-left: 2rem;
-  padding-right: 2rem;
+  padding-left: var(--footer-padding-x);
+  padding-right: var(--footer-padding-x);
 }
 
 .footer-border-t {
@@ -69,28 +94,23 @@
   display: flex;
   align-items: center;
 }
-
 .footer-justify-between {
   justify-content: space-between;
 }
-
 .footer-gap-4 {
   gap: 1.5rem;
 }
-
 .footer-link {
-  transition: all 0.3s ease;
+  transition: var(--transition-base);
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   position: relative;
   padding: 0.25rem 0;
 }
-
 .footer-link:hover {
-  color: white;
+  color: var(--primary-text);
   transform: translateY(-1px);
 }
-
 .footer-link::after {
   content: '';
   position: absolute;
@@ -98,14 +118,12 @@
   left: 0;
   width: 0;
   height: 1px;
-  background: white;
-  transition: width 0.3s ease;
+  background: var(--primary-text);
+  transition: width var(--transition-base);
 }
-
 .footer-link:hover::after {
   width: 100%;
 }
-
 .footer-version {
   background: rgba(255, 255, 255, 0.1);
   padding: 0.25rem 0.75rem;
@@ -115,9 +133,11 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* ===== RESPONSIVE DESIGN ===== */
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
 
-/* Tablettes */
+/* Large Tablets */
 @media (max-width: 1024px) {
   .main-layout-footer {
     width: 95%;
@@ -136,7 +156,7 @@
   }
 }
 
-/* Tablettes petites */
+/* Small Tablets */
 @media (max-width: 768px) {
   .main-layout-footer {
     width: 100%;
@@ -180,7 +200,7 @@
   }
 }
 
-/* Mobiles */
+/* Mobile Devices */
 @media (max-width: 640px) {
   .main-layout-footer {
     border-radius: 0;
@@ -219,7 +239,7 @@
   }
 }
 
-/* Très petits mobiles */
+/* Small Mobile Devices */
 @media (max-width: 480px) {
   .main-layout-footer {
     margin: 0;
@@ -247,13 +267,4 @@
   .footer-flex.footer-justify-between {
     gap: 1rem;
   }
-}
-
-/* Animation subtile au survol */
-.main-layout-footer {
-  transition: all 0.3s ease;
-}
-
-.main-layout-footer:hover {
-  box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.15);
 }

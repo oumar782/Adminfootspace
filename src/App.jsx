@@ -10,6 +10,7 @@ import User from "./Page/user";
 import Contact from "./Page/contact";
 import Connexion from "./Page/connexion";
 import Gestionnaire from "./Page/Gestionnaire";
+import Demonstration from "./Page/Gestiondemonstration";
 import './App.css'
 const App = () => {
   return (
@@ -17,7 +18,7 @@ const App = () => {
       <Routes>
         {/* Redirige "/" vers "/connexion" */}
         <Route path="/" element={<Navigate to="/connexion" replace />} />
-        
+           
         {/* Route pour la connexion */}
         <Route path="/connexion" element={<Connexion />} />
         
@@ -30,6 +31,14 @@ const App = () => {
           element={
             <MainLayout>
               <Dashboard />
+            </MainLayout>
+          }
+        />
+          <Route
+          path="/Demonstration"
+          element={
+            <MainLayout>
+              <Demonstration />
             </MainLayout>
           }
         />
@@ -66,7 +75,7 @@ const App = () => {
           }
         />
         <Route
-          path="/calendrier"
+          path="/souscriptions"
           element={
             <MainLayout>
               <Calendrier />

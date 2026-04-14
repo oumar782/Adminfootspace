@@ -1,5 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Users,
+  Calendar,
+  MapPin,
+  Clock,
+  CalendarRange,
+  Settings,
+  HelpCircle,
+  ChevronRight,
+  ChevronLeft,
+  Phone,
+  Mail,
+  Building2,
+  Sparkles
+} from 'lucide-react';
 import './Navbar.css';
 
 // Import Orbitron via Google Fonts
@@ -27,7 +43,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
             onClick={() => setCollapsed(!collapsed)}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            <ChevronIconLuxe collapsed={collapsed} />
+            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>
         </div>
 
@@ -49,9 +65,9 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
         
         <div className="sidebar-footer-luxe">
           <NavLink to="/contact" className="support-button-luxe">
-            <HelpIconLuxe />
+            <HelpCircle size={20} />
             {!collapsed && <span>Support</span>}
-            {!collapsed && <ChevronRightIconLuxe />}
+            {!collapsed && <ChevronRight size={16} />}
           </NavLink>
         </div>
       </aside>
@@ -220,6 +236,8 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
 };
 
 const SidebarItemLuxe = ({ item, collapsed, isActive, isHovered, onHover, onLeave }) => {
+  const IconComponent = item.icon;
+  
   return (
     <li 
       className="nav-item-luxe"
@@ -231,7 +249,13 @@ const SidebarItemLuxe = ({ item, collapsed, isActive, isHovered, onHover, onLeav
         className={`nav-link-luxe ${isActive ? 'active-luxe' : ''} ${collapsed ? 'collapsed-luxe' : ''}`}
       >
         <div className="nav-icon-luxe">
-          <item.icon />
+          <IconComponent 
+            size={20}
+            style={{ 
+              color: isActive ? 'var(--luxe-gold-primary)' : 'currentColor',
+              filter: isActive ? 'drop-shadow(0 0 2px rgba(212, 175, 55, 0.4))' : 'none'
+            }}
+          />
         </div>
         {!collapsed && <span className="nav-text-luxe">{item.title}</span>}
         {isHovered && collapsed && (
@@ -300,11 +324,6 @@ const SidebarItemLuxe = ({ item, collapsed, isActive, isHovered, onHover, onLeav
           transition: var(--luxe-transition);
         }
         
-        .nav-link-luxe.active-luxe .nav-icon-luxe {
-          color: var(--luxe-gold-primary);
-          filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.4));
-        }
-        
         .nav-text-luxe {
           margin-left: 14px;
           font-size: 14px;
@@ -363,7 +382,7 @@ const LogoLuxe = ({ collapsed }) => {
   return (
     <div className="logo-luxe">
       <div className="logo-icon-luxe">
-        <span>F</span>
+        <Sparkles size={22} color="white" />
       </div>
       {!collapsed && (
         <div className="logo-text-luxe">
@@ -418,148 +437,51 @@ const LogoLuxe = ({ collapsed }) => {
   );
 };
 
-// Icônes SVG personnalisées avec style doré
-const createGoldenIcon = (IconComponent) => {
-  return ({ isActive }) => (
-    <IconComponent 
-      style={{ 
-        color: isActive ? 'var(--luxe-gold-primary)' : 'currentColor',
-        filter: isActive ? 'drop-shadow(0 0 2px rgba(212, 175, 55, 0.4))' : 'none'
-      }} 
-    />
-  );
-};
-
-const LayoutDashboardIconLuxe = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="3" y="3" width="7" height="7" rx="1" />
-    <rect x="14" y="3" width="7" height="7" rx="1" />
-    <rect x="14" y="14" width="7" height="7" rx="1" />
-    <rect x="3" y="14" width="7" height="7" rx="1" />
-  </svg>
-);
-
-const UsersIconLuxe = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-    <circle cx="9" cy="7" r="4" />
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-  </svg>
-);
-
-const CalendarIconLuxe = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-    <line x1="16" y1="2" x2="16" y2="6" />
-    <line x1="8" y1="2" x2="8" y2="6" />
-    <line x1="3" y1="10" x2="21" y2="10" />
-  </svg>
-);
-
-const MapPinIconLuxe = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-    <circle cx="12" cy="10" r="3" />
-  </svg>
-);
-
-const ClockIconLuxe = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10" />
-    <polyline points="12 6 12 12 16 14" />
-  </svg>
-);
-
-const CalendarRangeIconLuxe = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-    <line x1="16" y1="2" x2="16" y2="6" />
-    <line x1="8" y1="2" x2="8" y2="6" />
-    <line x1="3" y1="10" x2="21" y2="10" />
-    <path d="M8 14h.01" />
-    <path d="M12 14h.01" />
-    <path d="M16 14h.01" />
-    <path d="M8 18h.01" />
-    <path d="M12 18h.01" />
-    <path d="M16 18h.01" />
-  </svg>
-);
-
-const SettingsIconLuxe = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-  </svg>
-);
-
-const HelpIconLuxe = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10" />
-    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-    <line x1="12" y1="17" x2="12" y2="17" />
-  </svg>
-);
-
-const ChevronRightIconLuxe = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="9 18 15 12 9 6" />
-  </svg>
-);
-
-const ChevronIconLuxe = ({ collapsed }) => (
-  <svg 
-    width="16" 
-    height="16" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2"
-    style={{ transform: collapsed ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.3s ease' }}
-  >
-    <polyline points="15 18 9 12 15 6" />
-  </svg>
-);
-
+// Configuration des items du sidebar avec les icônes Lucide
 const sidebarItems = [
   {
     title: "Dashboard",
-    icon: LayoutDashboardIconLuxe,
+    icon: LayoutDashboard,
     path: "/dashboard",
   },
   {
     title: "Abonnements",
-    icon: UsersIconLuxe,
+    icon: Users,
     path: "/client",
   },
   {
     title: "Réservations",
-    icon: CalendarIconLuxe,
+    icon: Calendar,
     path: "/reservations",
   },
   {
     title: "Terrains",
-    icon: MapPinIconLuxe,
+    icon: MapPin,
     path: "/terrain",
   },
   {
     title: "Créneaux",
-    icon: ClockIconLuxe,
+    icon: Clock,
     path: "/creneaux",
   },
   {
-    title: "Calendrier",
-    icon: CalendarRangeIconLuxe,
-    path: "/calendrier",
+    title: "Souscriptions",
+    icon: CalendarRange,
+    path: "/souscriptions",
+  },
+  {
+    title: "Démonstration",
+    icon: Sparkles,
+    path: "/Demonstration",
   },
   {
     title: "Utilisateurs",
-    icon: UsersIconLuxe, // Icône cohérente pour la gestion des utilisateurs
+    icon: Users,
     path: "/user",
   },
   {
     title: "Contact",
-    icon: HelpIconLuxe,
+    icon: Phone,
     path: "/contact",
   }
 ];
