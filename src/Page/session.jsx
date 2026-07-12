@@ -98,7 +98,7 @@ const AdminSessions = () => {
     players_needed: 10
   });
 
-  const API_URL = 'http://localhost:5000/api/sessions';
+  const API_URL = 'http://backend-foot-omega.vercel.app/api/sessions';
   const SPORTS = ['football', 'tennis', 'basketball', 'volleyball', 'handball', 'padel', 'badminton'];
   const STATUSES = ['open', 'full', 'completed', 'cancelled'];
 

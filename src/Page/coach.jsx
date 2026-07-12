@@ -99,7 +99,7 @@ const AdminCoaches = () => {
     career: []
   });
 
-  const API_URL = 'http://localhost:5000/api/coach';
+  const API_URL = 'http://backend-foot-omega.vercel.app/api/coach';
   const DISCIPLINES = ['football', 'tennis', 'basketball', 'volleyball', 'handball', 'padel', 'badminton', 'rugby', 'pingpong'];
   const CITIES = ['Casablanca', 'Rabat', 'Tanger', 'Marrakech', 'Fes', 'Agadir', 'Meknes', 'Oujda', 'Kenitra', 'Tetouan', 'Safi', 'Mohammedia'];
 

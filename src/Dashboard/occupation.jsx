@@ -21,7 +21,7 @@ const OccupationChart = () => {
   const [reservations, setReservations] = useState([]);
   const [error, setError] = useState(null);
 
-  const API_URL = 'http://localhost:5000/api/reservation';
+  const API_URL = 'http://backend-foot-omega.vercel.app/api/reservation';
 
   const fetchReservations = async () => {
     try {

@@ -112,7 +112,7 @@ const AdminTournaments = () => {
   });
 
   // 🔥 CORRECTION : Utiliser la bonne URL de l'API
-  const API_URL = 'http://localhost:5000/api/tournoi';
+  const API_URL = 'http://backend-foot-omega.vercel.app/api/tournoi';
   // Si votre API est sur un autre port, ajustez
   // const API_URL = 'http://localhost:5001/api/tournoi';
 

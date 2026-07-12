@@ -303,11 +303,11 @@ const ClientsList = ({ clients = [], onEdit, onDelete, onView, isLoading }) => {
 
     const getStatutEmoji = (statut) => {
         switch (statut) {
-            case 'En attente': return '📋';
-            case 'Confirmé': return '✅';
-            case 'Réalisé': return '🎯';
-            case 'Annulé': return '❌';
-            default: return '📋';
+            case 'En attente': return '';
+            case 'Confirmé': return '';
+            case 'Réalisé': return '';
+            case 'Annulé': return '';
+            default: return '';
         }
     };
 

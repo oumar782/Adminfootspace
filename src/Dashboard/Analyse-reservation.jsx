@@ -940,7 +940,7 @@ const styles = `
   }
 `;
 
-const API_BASE_URL = 'http://localhost:5000/api/analyse-reservation';
+const API_BASE_URL = 'http://backend-foot-omega.vercel.app/api/analyse-reservation';
 
 const ReservationDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');

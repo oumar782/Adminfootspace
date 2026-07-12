@@ -67,8 +67,8 @@ const ReservationDashboard = () => {
   });
 
   // URL de l'API locale
-  const API_URL = 'http://localhost:5000/api/reservation';
-  const API_CRENEAUX = 'http://localhost:5000/api/gestioncreneaux';
+  const API_URL = 'http://backend-foot-omega.vercel.app/api/reservation';
+  const API_CRENEAUX = 'http://backend-foot-omega.vercel.app/api/gestioncreneaux';
 
   const addToast = (message, type = 'info') => {
     const id = Date.now();

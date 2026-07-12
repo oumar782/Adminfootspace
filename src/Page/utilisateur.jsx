@@ -19,7 +19,7 @@ const Utilisateur = () => {
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('http://localhost:5000/api/ajoutuser/');
+      const response = await fetch('http://backend-foot-omega.vercel.app/api/ajoutuser/');
       const data = await response.json();
       
       if (response.ok) {
