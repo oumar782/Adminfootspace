@@ -22,7 +22,7 @@ const DashboardStats = () => {
   // Fonction pour récupérer les statistiques temps réel
   const fetchRealTimeStats = async () => {
     try {
-      const response = await fetch('https://backend-foot-omega.vercel.app/api/reservation/statistiques-temps-reel');
+      const response = await fetch('http://localhost:5000/api/reservation/statistiques-temps-reel');
       const data = await response.json();
       
       if (data.success) {
@@ -38,7 +38,7 @@ const DashboardStats = () => {
   // Fonction pour récupérer les revenus totaux
   const fetchRevenueStats = async (periode) => {
     try {
-      const response = await fetch(`https://backend-foot-omega.vercel.app/api/reservation/revenus-totaux?periode=${periode}`);
+      const response = await fetch(`http://localhost:5000/api/reservation/revenus-totaux?periode=${periode}`);
       const data = await response.json();
       
       if (data.success) {
@@ -54,7 +54,7 @@ const DashboardStats = () => {
   // Fonction pour récupérer le taux de remplissage
   const fetchOccupancyRate = async (type = 'mensuel') => {
     try {
-      const response = await fetch(`https://backend-foot-omega.vercel.app/api/reservation/taux-remplissage?type=${type}`);
+      const response = await fetch(`http://localhost:5000/api/reservation/taux-remplissage?type=${type}`);
       const data = await response.json();
       
       if (data.success && data.data.length > 0) {
@@ -71,7 +71,7 @@ const DashboardStats = () => {
   // Fonction pour récupérer les prévisions détaillées
   const fetchDetailedForecasts = async () => {
     try {
-      const response = await fetch('https://backend-foot-omega.vercel.app/api/reservation/previsions/detaillees?jours=30');
+      const response = await fetch('http://localhost:5000/api/reservation/previsions/detaillees?jours=30');
       const data = await response.json();
       
       if (data.success) {

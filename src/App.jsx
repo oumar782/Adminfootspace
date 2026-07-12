@@ -11,6 +11,9 @@ import Contact from "./Page/contact";
 import Connexion from "./Page/connexion";
 import Gestionnaire from "./Page/Gestionnaire";
 import Demonstration from "./Page/Gestiondemonstration";
+import Session from "./Page/session";
+import Coach from "./Page/coach";
+import Tournoi from "./Page/tournois";
 import './App.css'
 const App = () => {
   return (
@@ -34,11 +37,36 @@ const App = () => {
             </MainLayout>
           }
         />
+         <Route
+          path="/tournois"
+          element={
+            <MainLayout>
+              <Tournoi />
+            </MainLayout>
+          }
+        />
           <Route
           path="/Demonstration"
           element={
             <MainLayout>
               <Demonstration />
+            </MainLayout>
+          }
+        />
+
+          <Route
+          path="/coach"
+          element={
+            <MainLayout>
+              <Coach />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/sessions"
+          element={
+            <MainLayout>
+              <Session />
             </MainLayout>
           }
         />

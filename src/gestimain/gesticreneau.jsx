@@ -23,10 +23,163 @@ import {
   Save,
   BarChart3,
   Award,
-  Home
+  Home,
+  Navigation
 } from 'lucide-react';
 
-// Composant Toast pour les notifications
+// Configuration des sports avec leurs surfaces correspondantes (identique à Reservation)
+const sportConfigs = {
+  'football': {
+    label: 'Football',
+    surfaces: [
+      { value: '7X7', label: '7X7 - 7 joueurs' },
+      { value: '9X9', label: '9X9 - 9 joueurs' },
+      { value: '11X11', label: '11X11 - 11 joueurs' }
+    ]
+  },
+  'tennis': {
+    label: 'Tennis',
+    surfaces: [
+      { value: 'simple', label: 'Simple - 2 joueurs' },
+      { value: 'double', label: 'Double - 4 joueurs' }
+    ]
+  },
+  'basketball': {
+    label: 'Basketball',
+    surfaces: [
+      { value: '3X3', label: '3X3 - 3 joueurs' },
+      { value: '5X5', label: '5X5 - 5 joueurs' }
+    ]
+  },
+  'volleyball': {
+    label: 'Volleyball',
+    surfaces: [
+      { value: '4X4', label: '4X4 - 4 joueurs' },
+      { value: '6X6', label: '6X6 - 6 joueurs' }
+    ]
+  },
+  'handball': {
+    label: 'Handball',
+    surfaces: [
+      { value: '7X7', label: '7X7 - 7 joueurs' }
+    ]
+  },
+  'rugby': {
+    label: 'Rugby',
+    surfaces: [
+      { value: '7X7', label: '7X7 - 7 joueurs' },
+      { value: '15X15', label: '15X15 - 15 joueurs' }
+    ]
+  },
+  'padel': {
+    label: 'Padel',
+    surfaces: [
+      { value: 'double', label: 'Double - 4 joueurs' }
+    ]
+  },
+  'badminton': {
+    label: 'Badminton',
+    surfaces: [
+      { value: 'simple', label: 'Simple - 2 joueurs' },
+      { value: 'double', label: 'Double - 4 joueurs' }
+    ]
+  },
+  'pingpong': {
+    label: 'Ping-Pong',
+    surfaces: [
+      { value: 'simple', label: 'Simple - 2 joueurs' },
+      { value: 'double', label: 'Double - 4 joueurs' }
+    ]
+  },
+  'futsal': {
+    label: 'Futsal',
+    surfaces: [
+      { value: '5X5', label: '5X5 - 5 joueurs' }
+    ]
+  },
+  'beachvolley': {
+    label: 'Beach Volley',
+    surfaces: [
+      { value: '4X4', label: '4X4 - 4 joueurs' }
+    ]
+  },
+  'boxe': {
+    label: 'Boxe',
+    surfaces: [
+      { value: 'ring', label: 'Ring' }
+    ]
+  },
+  'musculation': {
+    label: 'Musculation',
+    surfaces: [
+      { value: 'salle', label: 'Salle' }
+    ]
+  },
+  'yoga': {
+    label: 'Yoga',
+    surfaces: [
+      { value: 'studio', label: 'Studio' },
+      { value: 'salle', label: 'Salle' }
+    ]
+  },
+  'danse': {
+    label: 'Danse',
+    surfaces: [
+      { value: 'studio', label: 'Studio' },
+      { value: 'salle', label: 'Salle' }
+    ]
+  },
+  'escalade': {
+    label: 'Escalade',
+    surfaces: [
+      { value: 'mur', label: 'Mur' }
+    ]
+  },
+  'swimming': {
+    label: 'Natation',
+    surfaces: [
+      { value: '25m', label: '25m' },
+      { value: '50m', label: '50m' }
+    ]
+  },
+  'gymnastique': {
+    label: 'Gymnastique',
+    surfaces: [
+      { value: 'salle', label: 'Salle' }
+    ]
+  },
+  'artsmartiaux': {
+    label: 'Arts Martiaux',
+    surfaces: [
+      { value: 'tatami', label: 'Tatami' },
+      { value: 'dojo', label: 'Dojo' }
+    ]
+  }
+};
+
+// Villes marocaines (identique à Reservation)
+const villesMaroc = [
+  'Casablanca', 'Rabat', 'Tanger', 'Marrakech', 'Fès', 'Agadir',
+  'Meknès', 'Oujda', 'Kenitra', 'Tétouan', 'Safi', 'Mohammedia'
+];
+
+// Quartiers par ville (identique à Reservation)
+const quartiersParVille = {
+  'Casablanca': ['Maarif', 'Sidi Moumen', 'Ain Sebaa', 'Anfa', 'Hay Hassani', 'Derb Sultan', 'Mers Sultan', 'Roches Noires'],
+  'Rabat': ['Agdal', 'Hay Riad', 'Souissi', 'Yacoub El Mansour', 'Temara', 'Hassan', 'Oudayas'],
+  'Tanger': ['Mellah', 'Ain El Kasbah', 'Boukhalef', 'Marshan', 'Charf', 'Gzenaya'],
+  'Marrakech': ['Guéliz', 'Hivernage', 'Médina', 'Sidi Youssef', 'Daoudiate', 'Massira'],
+  'Fès': ['Ville Nouvelle', 'Médina', 'Sais', 'Ziat', 'Ain Kadous'],
+  'Agadir': ['Ville Nouvelle', 'Taddart', 'Founty', 'Ouled Dahhou', 'Souk El Had'],
+  'Meknès': ['Ville Nouvelle', 'Médina', 'Sidi Bouzekri', 'El Bassatine', 'Hamria'],
+  'Oujda': ['Ville Nouvelle', 'Médina', 'El Farch', 'El Gharbi', 'Sidi Maafa'],
+  'Kenitra': ['Ville Nouvelle', 'Médina', 'Briech', 'El Moustakbal', 'Khabazate'],
+  'Tétouan': ['Ville Nouvelle', 'Médina', 'Tamda', 'Wilaya', 'Ras El Ma'],
+  'Safi': ['Ville Nouvelle', 'Médina', 'Chaâba', 'Hajri', 'Harbi'],
+  'Mohammedia': ['Ville Nouvelle', 'Médina', 'Coopérative', 'Roches Noires', 'Moulay Abdallah']
+};
+
+// Toast Component
 const Toast = ({ message, type, onClose }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -48,417 +201,44 @@ const Toast = ({ message, type, onClose }) => {
   );
 };
 
-// Composant Modal pour visualiser un créneau
-const ViewModal = ({ creneau, onClose }) => {
-  if (!creneau) return null;
-
-  return (
-    <div className="gc-modal-overlay" onClick={onClose}>
-      <div className="gc-modal-content gc-view-modal" onClick={e => e.stopPropagation()}>
-        <div className="gc-modal-header">
-          <h2 className="gc-modal-title">
-            <FileText size={22} />
-            Détails du créneau
-          </h2>
-          <button className="gc-modal-close" onClick={onClose}>
-            <X size={20} />
-          </button>
-        </div>
-        <div className="gc-modal-body">
-          <div className="gc-detail-grid">
-            <div className="gc-detail-item">
-              <span className="gc-detail-label">ID</span>
-              <span className="gc-detail-value">
-                <span className="gc-id-badge">#{creneau.idcreneaux}</span>
-              </span>
-            </div>
-            <div className="gc-detail-item">
-              <span className="gc-detail-label">
-                <Calendar size={14} /> Date
-              </span>
-              <span className="gc-detail-value">
-                {new Date(creneau.datecreneaux).toLocaleDateString('fr-FR', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric'
-                })}
-              </span>
-            </div>
-            <div className="gc-detail-item">
-              <span className="gc-detail-label">
-                <Clock size={14} /> Heure début
-              </span>
-              <span className="gc-detail-value">
-                <span className="gc-time-badge">{creneau.heure}</span>
-              </span>
-            </div>
-            <div className="gc-detail-item">
-              <span className="gc-detail-label">
-                <Clock size={14} /> Heure fin
-              </span>
-              <span className="gc-detail-value">
-                {creneau.heurefin ? 
-                  <span className="gc-time-badge">{creneau.heurefin}</span> : 
-                  'Non spécifiée'
-                }
-              </span>
-            </div>
-            <div className="gc-detail-item">
-              <span className="gc-detail-label">Statut</span>
-              <span className={`gc-status-badge gc-status-${creneau.statut}`}>
-                {creneau.statut === 'disponible' && <CheckCircle size={14} />}
-                {creneau.statut === 'réservé' && <Users size={14} />}
-                {creneau.statut === 'maintenance' && <AlertCircle size={14} />}
-                <span className="gc-status-text">{creneau.statut}</span>
-              </span>
-            </div>
-            <div className="gc-detail-item">
-              <span className="gc-detail-label">
-                <MapPin size={14} /> Terrain N°
-              </span>
-              <span className="gc-detail-value">
-                <span className="gc-terrain-number">{creneau.numeroterrain}</span>
-              </span>
-            </div>
-            <div className="gc-detail-item">
-              <span className="gc-detail-label">
-                <Tag size={14} /> Type terrain
-              </span>
-              <span className="gc-detail-value">
-                {creneau.typeterrain ? (
-                  <span className={`gc-type-badge gc-type-${creneau.typeterrain.toLowerCase()}`}>
-                    {creneau.typeterrain}
-                  </span>
-                ) : 'Non spécifié'}
-              </span>
-            </div>
-            <div className="gc-detail-item">
-              <span className="gc-detail-label">Surface</span>
-              <span className="gc-detail-value">
-                {creneau.surfaceterrains ? (
-                  <span className={`gc-surface-badge gc-surface-${creneau.surfaceterrains.toLowerCase().replace('x', '')}`}>
-                    {creneau.surfaceterrains}
-                  </span>
-                ) : 'Non spécifiée'}
-              </span>
-            </div>
-            <div className="gc-detail-item">
-              <span className="gc-detail-label">Nom terrain</span>
-              <span className="gc-detail-value gc-name-text">{creneau.nomterrain || 'Non spécifié'}</span>
-            </div>
-            <div className="gc-detail-item">
-              <span className="gc-detail-label">
-                <DollarSign size={14} /> Tarif
-              </span>
-              <span className="gc-detail-value gc-price-value">{creneau.tarif} DH</span>
-            </div>
-          </div>
-        </div>
-        <div className="gc-modal-footer">
-          <button className="gc-btn gc-btn-secondary" onClick={onClose}>
-            Fermer
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Composant Modal pour ajouter/modifier un créneau
-const CreneauModal = ({ creneau, onClose, onSubmit, isEditing }) => {
-  const [formData, setFormData] = useState({
-    datecreneaux: creneau?.datecreneaux || '',
-    heure: creneau?.heure || '',
-    heurefin: creneau?.heurefin || '',
-    statut: creneau?.statut || 'disponible',
-    numeroterrain: creneau?.numeroterrain || '',
-    typeterrain: creneau?.typeterrain || '',
-    nomterrain: creneau?.nomterrain || '',
-    surfaceterrains: creneau?.surfaceterrains || '',
-    tarif: creneau?.tarif || ''
-  });
-
-  const [errors, setErrors] = useState({});
-
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!formData.datecreneaux) {
-      newErrors.datecreneaux = 'La date est requise';
-    }
-    
-    if (!formData.heure) {
-      newErrors.heure = 'L\'heure de début est requise';
-    }
-    
-    if (formData.heurefin && formData.heure && formData.heurefin <= formData.heure) {
-      newErrors.heurefin = 'L\'heure de fin doit être postérieure à l\'heure de début';
-    }
-    
-    if (!formData.numeroterrain) {
-      newErrors.numeroterrain = 'Le numéro de terrain est requis';
-    }
-    
-    if (!formData.typeterrain) {
-      newErrors.typeterrain = 'Le type de terrain est requis';
-    }
-    
-    if (!formData.surfaceterrains) {
-      newErrors.surfaceterrains = 'La surface est requise';
-    }
-    
-    if (!formData.tarif || formData.tarif <= 0) {
-      newErrors.tarif = 'Le tarif doit être supérieur à 0';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: null
-      }));
-    }
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      onSubmit(formData);
-    }
-  };
-
-  return (
-    <div className="gc-modal-overlay" onClick={onClose}>
-      <div className="gc-modal-content gc-form-modal" onClick={e => e.stopPropagation()}>
-        <div className="gc-modal-header">
-          <h2 className="gc-modal-title">
-            {isEditing ? <Edit size={22} /> : <Plus size={22} />}
-            {isEditing ? 'Modifier le créneau' : 'Nouveau créneau'}
-          </h2>
-          <button className="gc-modal-close" onClick={onClose}>
-            <X size={20} />
-          </button>
-        </div>
-        <div className="gc-modal-body">
-          <form onSubmit={handleSubmit} className="gc-form">
-            <div className="gc-form-grid">
-              <div className="gc-form-group">
-                <label htmlFor="datecreneaux">
-                  <Calendar size={16} />
-                  Date <span className="gc-required">*</span>
-                </label>
-                <input
-                  type="date"
-                  id="datecreneaux"
-                  name="datecreneaux"
-                  value={formData.datecreneaux}
-                  onChange={handleInputChange}
-                  className={`gc-input ${errors.datecreneaux ? 'gc-input-error' : ''}`}
-                />
-                {errors.datecreneaux && (
-                  <span className="gc-error-message">{errors.datecreneaux}</span>
-                )}
-              </div>
-              
-              <div className="gc-form-group">
-                <label htmlFor="heure">
-                  <Clock size={16} />
-                  Heure début <span className="gc-required">*</span>
-                </label>
-                <input
-                  type="time"
-                  id="heure"
-                  name="heure"
-                  value={formData.heure}
-                  onChange={handleInputChange}
-                  className={`gc-input ${errors.heure ? 'gc-input-error' : ''}`}
-                />
-                {errors.heure && (
-                  <span className="gc-error-message">{errors.heure}</span>
-                )}
-              </div>
-              
-              <div className="gc-form-group">
-                <label htmlFor="heurefin">
-                  <Clock size={16} />
-                  Heure fin
-                </label>
-                <input
-                  type="time"
-                  id="heurefin"
-                  name="heurefin"
-                  value={formData.heurefin}
-                  onChange={handleInputChange}
-                  className={`gc-input ${errors.heurefin ? 'gc-input-error' : ''}`}
-                />
-                {errors.heurefin && (
-                  <span className="gc-error-message">{errors.heurefin}</span>
-                )}
-              </div>
-              
-              <div className="gc-form-group">
-                <label htmlFor="statut">
-                  <Settings size={16} />
-                  Statut <span className="gc-required">*</span>
-                </label>
-                <select
-                  id="statut"
-                  name="statut"
-                  value={formData.statut}
-                  onChange={handleInputChange}
-                  className="gc-select"
-                >
-                  <option value="disponible">Disponible</option>
-                  <option value="réservé">Réservé</option>
-                  <option value="maintenance">Maintenance</option>
-                </select>
-              </div>
-              
-              <div className="gc-form-group">
-                <label htmlFor="numeroterrain">
-                  <MapPin size={16} />
-                  Numéro terrain <span className="gc-required">*</span>
-                </label>
-                <input
-                  type="number"
-                  id="numeroterrain"
-                  name="numeroterrain"
-                  value={formData.numeroterrain}
-                  onChange={handleInputChange}
-                  min="1"
-                  className={`gc-input ${errors.numeroterrain ? 'gc-input-error' : ''}`}
-                />
-                {errors.numeroterrain && (
-                  <span className="gc-error-message">{errors.numeroterrain}</span>
-                )}
-              </div>
-              
-              <div className="gc-form-group">
-                <label htmlFor="typeterrain">
-                  <Tag size={16} />
-                  Type terrain <span className="gc-required">*</span>
-                </label>
-                <select
-                  id="typeterrain"
-                  name="typeterrain"
-                  value={formData.typeterrain}
-                  onChange={handleInputChange}
-                  className={`gc-select ${errors.typeterrain ? 'gc-input-error' : ''}`}
-                >
-                  <option value="">Sélectionner un type</option>
-                  <option value="Normal">Normal</option>
-                  <option value="Synthétique">Synthétique</option>
-                </select>
-                {errors.typeterrain && (
-                  <span className="gc-error-message">{errors.typeterrain}</span>
-                )}
-              </div>
-
-              <div className="gc-form-group">
-                <label htmlFor="surfaceterrains">
-                  Surface <span className="gc-required">*</span>
-                </label>
-                <select
-                  id="surfaceterrains"
-                  name="surfaceterrains"
-                  value={formData.surfaceterrains}
-                  onChange={handleInputChange}
-                  className={`gc-select ${errors.surfaceterrains ? 'gc-input-error' : ''}`}
-                >
-                  <option value="">Sélectionner une surface</option>
-                  <option value="7X7">7X7</option>
-                  <option value="9X9">9X9</option>
-                  <option value="11X11">11X11</option>
-                </select>
-                {errors.surfaceterrains && (
-                  <span className="gc-error-message">{errors.surfaceterrains}</span>
-                )}
-              </div>
-              
-              <div className="gc-form-group">
-                <label htmlFor="tarif">
-                  <DollarSign size={16} />
-                  Tarif (DH) <span className="gc-required">*</span>
-                </label>
-                <input
-                  type="number"
-                  id="tarif"
-                  name="tarif"
-                  value={formData.tarif}
-                  onChange={handleInputChange}
-                  min="0"
-                  step="0.01"
-                  className={`gc-input ${errors.tarif ? 'gc-input-error' : ''}`}
-                />
-                {errors.tarif && (
-                  <span className="gc-error-message">{errors.tarif}</span>
-                )}
-              </div>
-              
-              <div className="gc-form-group gc-full-width">
-                <label htmlFor="nomterrain">
-                  Nom terrain
-                </label>
-                <input
-                  type="text"
-                  id="nomterrain"
-                  name="nomterrain"
-                  value={formData.nomterrain}
-                  onChange={handleInputChange}
-                  placeholder="Terrain central..."
-                  className="gc-input"
-                />
-              </div>
-            </div>
-            
-            <div className="gc-form-actions">
-              <button type="submit" className="gc-btn gc-btn-primary">
-                <Save size={16} />
-                {isEditing ? 'Modifier' : 'Créer'}
-              </button>
-              <button type="button" className="gc-btn gc-btn-secondary" onClick={onClose}>
-                <X size={16} />
-                Annuler
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 // Composant principal
 const Crenau = () => {
   const [creneaux, setCreneaux] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
-  const [viewModal, setViewModal] = useState({ show: false, creneau: null });
-  const [creneauModal, setCreneauModal] = useState({ show: false, creneau: null, isEditing: false });
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedCreneau, setSelectedCreneau] = useState(null);
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [editingCreneau, setEditingCreneau] = useState(null);
+  const [stats, setStats] = useState(null);
   const [filters, setFilters] = useState({
     date: '',
     statut: '',
-    terrain: ''
+    terrain: '',
+    ville: '',
+    quartier: '',
+    sport: ''
   });
-  const [stats, setStats] = useState({
-    total_creneaux: 0,
-    disponibles: 0,
-    reserves: 0,
-    maintenance: 0,
-    terrains_actifs: 0,
-    tarif_moyen: 0
+  const [expandedFilters, setExpandedFilters] = useState(false);
+
+  // Formulaire
+  const [formData, setFormData] = useState({
+    datecreneaux: '',
+    heure: '',
+    heurefin: '',
+    statut: 'disponible',
+    numeroterrain: '',
+    typeterrain: '',
+    nomterrain: '',
+    surfaceterrains: '',
+    tarif: '',
+    ville: '',
+    quartier: ''
   });
 
+  const API_URL = 'http://localhost:5000/api/gestioncreneaux';
+
+  // Toast
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
   };
@@ -467,239 +247,434 @@ const Crenau = () => {
     setToast({ show: false, message: '', type: '' });
   };
 
+  // Récupérer les créneaux
   const fetchCreneaux = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://backend-foot-omega.vercel.app/api/gestioncreneaux/');
+      const response = await fetch(`${API_URL}/`);
       const result = await response.json();
-      
       if (result.success) {
         setCreneaux(result.data);
         showToast('Créneaux chargés avec succès', 'success');
-      } else {
-        showToast('Erreur lors du chargement des créneaux', 'error');
       }
     } catch (error) {
-      showToast('Erreur de connexion au serveur', 'error');
-      console.error('Erreur:', error);
+      showToast('Erreur de connexion', 'error');
     } finally {
       setLoading(false);
     }
   };
 
+  // Récupérer les statistiques
   const fetchStats = async () => {
     try {
-      const response = await fetch('https://backend-foot-omega.vercel.app/api/gestioncreneaux/statistiques/overview');
+      const response = await fetch(`${API_URL}/statistiques/overview`);
       const result = await response.json();
-      
       if (result.success) {
         setStats(result.data);
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des statistiques:', error);
-      calculateLocalStats();
+      console.error('Erreur stats:', error);
     }
   };
 
-  const calculateLocalStats = () => {
-    if (creneaux.length > 0) {
-      const total = creneaux.length;
-      const disponibles = creneaux.filter(c => c.statut === 'disponible').length;
-      const reserves = creneaux.filter(c => c.statut === 'réservé').length;
-      const maintenance = creneaux.filter(c => c.statut === 'maintenance').length;
-      const terrainsUniques = new Set(creneaux.map(c => c.numeroterrain)).size;
-      const tarifMoyen = creneaux.reduce((acc, c) => acc + parseFloat(c.tarif || 0), 0) / total;
-      
-      setStats({
-        total_creneaux: total,
-        disponibles,
-        reserves,
-        maintenance,
-        terrains_actifs: terrainsUniques,
-        tarif_moyen: tarifMoyen || 0
-      });
-    }
+  // Chargement initial
+  useEffect(() => {
+    fetchCreneaux();
+    fetchStats();
+  }, []);
+
+  // Gestion des filtres
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({ ...prev, [name]: value }));
   };
 
-  const fetchFilteredCreneaux = async () => {
+  const applyFilters = async () => {
     try {
       setLoading(true);
-      
-      let filtered = [...creneaux];
-      
-      if (filters.date) {
-        filtered = filtered.filter(c => c.datecreneaux === filters.date);
+      const params = new URLSearchParams();
+      Object.keys(filters).forEach(key => {
+        if (filters[key]) params.append(key, filters[key]);
+      });
+      const response = await fetch(`${API_URL}/filtre/recherche?${params}`);
+      const result = await response.json();
+      if (result.success) {
+        setCreneaux(result.data);
+        showToast(`${result.count} créneau(x) trouvé(s)`, 'success');
       }
-      
-      if (filters.statut) {
-        filtered = filtered.filter(c => c.statut === filters.statut);
-      }
-      
-      if (filters.terrain) {
-        filtered = filtered.filter(c => c.numeroterrain.toString() === filters.terrain);
-      }
-      
-      setCreneaux(filtered);
-      showToast(`${filtered.length} créneau(x) trouvé(s)`, 'success');
-      
     } catch (error) {
-      showToast('Erreur lors du filtrage', 'error');
-      console.error('Erreur:', error);
+      showToast('Erreur de filtrage', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchCreneaux();
-  }, []);
-
-  useEffect(() => {
-    if (creneaux.length > 0) {
-      fetchStats();
-    }
-  }, [creneaux]);
-
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
   const resetFilters = () => {
-    setFilters({ date: '', statut: '', terrain: '' });
+    setFilters({ date: '', statut: '', terrain: '', ville: '', quartier: '', sport: '' });
     fetchCreneaux();
   };
 
-  const checkReservationExists = async (creneauData) => {
-    try {
-      const response = await fetch('https://backend-foot-omega.vercel.app/api/reservation');
-      const result = await response.json();
-      
-      if (result.success) {
-        const reservation = result.data.find(r => 
-          r.numeroterrain == creneauData.numeroterrain &&
-          r.datereservation === creneauData.datecreneaux &&
-          r.heurereservation === creneauData.heure &&
-          r.statut === 'confirmée'
-        );
-        return !!reservation;
+  // Gestion du formulaire
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Auto-set surface when sport changes
+    if (name === 'typeterrain') {
+      const surfaces = getAvailableSurfaces(value);
+      if (surfaces.length > 0) {
+        setFormData(prev => ({ ...prev, surfaceterrains: surfaces[0].value }));
+      } else {
+        setFormData(prev => ({ ...prev, surfaceterrains: '' }));
       }
-      return false;
-    } catch (error) {
-      console.error('Erreur lors de la vérification des réservations:', error);
-      return false;
+    }
+    
+    // Reset quartier when ville changes
+    if (name === 'ville') {
+      setFormData(prev => ({ ...prev, quartier: '' }));
     }
   };
 
-  const handleSubmit = async (formData) => {
+  // Ouvrir/fermer les modals
+  const openAddModal = () => {
+    setFormData({
+      datecreneaux: '',
+      heure: '',
+      heurefin: '',
+      statut: 'disponible',
+      numeroterrain: '',
+      typeterrain: '',
+      nomterrain: '',
+      surfaceterrains: '',
+      tarif: '',
+      ville: '',
+      quartier: ''
+    });
+    setEditingCreneau(null);
+    setShowFormModal(true);
+  };
+
+  const openEditModal = (creneau) => {
+    setFormData({
+      datecreneaux: creneau.datecreneaux || '',
+      heure: creneau.heure || '',
+      heurefin: creneau.heurefin || '',
+      statut: creneau.statut || 'disponible',
+      numeroterrain: creneau.numeroterrain || '',
+      typeterrain: creneau.typeterrain || '',
+      nomterrain: creneau.nomterrain || '',
+      surfaceterrains: creneau.surfaceterrains || '',
+      tarif: creneau.tarif || '',
+      ville: creneau.ville || '',
+      quartier: creneau.quartier || ''
+    });
+    setEditingCreneau(creneau);
+    setShowFormModal(true);
+  };
+
+  const openViewModal = (creneau) => {
+    setSelectedCreneau(creneau);
+    setShowViewModal(true);
+  };
+
+  const closeModal = () => {
+    setShowFormModal(false);
+    setShowViewModal(false);
+    setSelectedCreneau(null);
+    setEditingCreneau(null);
+  };
+
+  // CRUD Operations
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      if (!creneauModal.isEditing) {
-        const existingCreneau = creneaux.find(c => 
-          c.datecreneaux === formData.datecreneaux && 
-          c.heure === formData.heure && 
-          c.numeroterrain.toString() === formData.numeroterrain.toString()
-        );
-        
-        if (existingCreneau) {
-          showToast('Un créneau existe déjà pour cette date, heure et terrain', 'error');
-          return;
-        }
-      }
-
-      if (formData.statut === 'disponible') {
-        const hasReservation = await checkReservationExists(formData);
-        if (hasReservation) {
-          showToast('Impossible de mettre ce créneau disponible car il a une réservation confirmée', 'error');
-          return;
-        }
-      }
-
-      const url = creneauModal.isEditing 
-        ? `https://backend-foot-omega.vercel.app/api/gestioncreneaux/${creneauModal.creneau.idcreneaux}`
-        : 'https://backend-foot-omega.vercel.app/api/gestioncreneaux/';
-      
-      const method = creneauModal.isEditing ? 'PUT' : 'POST';
+      const url = editingCreneau 
+        ? `${API_URL}/${editingCreneau.idcreneaux}`
+        : `${API_URL}/`;
+      const method = editingCreneau ? 'PUT' : 'POST';
       
       const response = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
       
       const result = await response.json();
-      
       if (result.success) {
-        showToast(creneauModal.isEditing ? 'Créneau modifié avec succès' : 'Créneau ajouté avec succès', 'success');
-        setCreneauModal({ show: false, creneau: null, isEditing: false });
-        await fetchCreneaux();
+        showToast(editingCreneau ? '✅ Créneau modifié avec succès' : '✅ Créneau ajouté avec succès');
+        closeModal();
+        fetchCreneaux();
+        fetchStats();
       } else {
-        showToast(result.message || 'Erreur lors de l\'opération', 'error');
+        showToast(result.message || '❌ Erreur lors de l\'opération', 'error');
       }
     } catch (error) {
-      showToast('Erreur de connexion au serveur', 'error');
-      console.error('Erreur:', error);
+      showToast('❌ Erreur de connexion', 'error');
     }
-  };
-
-  const handleEdit = (creneau) => {
-    setCreneauModal({ show: true, creneau, isEditing: true });
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce créneau ?')) return;
-    
     try {
-      const creneauToDelete = creneaux.find(c => c.idcreneaux === id);
-      if (creneauToDelete && creneauToDelete.statut === 'réservé') {
-        const hasReservation = await checkReservationExists(creneauToDelete);
-        if (hasReservation) {
-          showToast('Impossible de supprimer ce créneau car il a une réservation confirmée', 'error');
-          return;
-        }
-      }
-      
-      const response = await fetch(`https://backend-foot-omega.vercel.app/api/gestioncreneaux/${id}`, {
-        method: 'DELETE'
-      });
-      
+      const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
       const result = await response.json();
-      
       if (result.success) {
-        showToast('Créneau supprimé avec succès', 'success');
-        await fetchCreneaux();
+        showToast('🗑️ Créneau supprimé avec succès');
+        fetchCreneaux();
+        fetchStats();
       } else {
-        showToast(result.message || 'Erreur lors de la suppression', 'error');
+        showToast(result.message || '❌ Erreur lors de la suppression', 'error');
       }
     } catch (error) {
-      showToast('Erreur de connexion au serveur', 'error');
-      console.error('Erreur:', error);
+      showToast('❌ Erreur de connexion', 'error');
     }
   };
 
-  const handleView = (creneau) => {
-    setViewModal({ show: true, creneau });
+  // Utilitaires - identiques à Reservation
+  const getAvailableSurfaces = (sport) => {
+    if (!sport) return [];
+    return sportConfigs[sport]?.surfaces || [];
   };
 
-  const openAddModal = () => {
-    setCreneauModal({ show: true, creneau: null, isEditing: false });
+  const getAvailableQuartiers = () => {
+    if (!formData.ville) return [];
+    return quartiersParVille[formData.ville] || [];
   };
 
-  const formatDate = (dateString) => {
-    try {
-      return new Date(dateString).toLocaleDateString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
-    } catch {
-      return dateString;
-    }
+  const getSportLabel = (sport) => {
+    return sportConfigs[sport?.toLowerCase()]?.label || sport || '-';
   };
+
+  const getSurfaceLabel = (sport, surface) => {
+    const surfaces = getAvailableSurfaces(sport);
+    const found = surfaces.find(s => s.value === surface);
+    return found ? found.label : surface || '-';
+  };
+
+  const getSportIcon = (sport) => {
+    const icons = {
+      'football': '⚽', 'tennis': '🎾', 'basketball': '🏀',
+      'volleyball': '🏐', 'handball': '🤾', 'rugby': '🏉',
+      'padel': '🎾', 'badminton': '🏸', 'pingpong': '🏓',
+      'futsal': '⚽', 'beachvolley': '🏐', 'boxe': '🥊',
+      'musculation': '💪', 'yoga': '🧘', 'danse': '💃',
+      'escalade': '🧗', 'swimming': '🏊', 'gymnastique': '🤸',
+      'artsmartiaux': '🥋'
+    };
+    return icons[sport?.toLowerCase()] || '🏟️';
+  };
+
+  // Rendu du formulaire
+  const renderForm = () => (
+    <form onSubmit={handleSubmit} className="gc-form">
+      <div className="gc-form-grid">
+        <div className="gc-form-group">
+          <label htmlFor="datecreneaux">
+            <Calendar size={16} /> Date <span className="gc-required">*</span>
+          </label>
+          <input
+            type="date"
+            id="datecreneaux"
+            name="datecreneaux"
+            value={formData.datecreneaux}
+            onChange={handleFormChange}
+            required
+            className="gc-input"
+          />
+        </div>
+        
+        <div className="gc-form-group">
+          <label htmlFor="heure">
+            <Clock size={16} /> Heure début <span className="gc-required">*</span>
+          </label>
+          <input
+            type="time"
+            id="heure"
+            name="heure"
+            value={formData.heure}
+            onChange={handleFormChange}
+            required
+            className="gc-input"
+          />
+        </div>
+        
+        <div className="gc-form-group">
+          <label htmlFor="heurefin">
+            <Clock size={16} /> Heure fin
+          </label>
+          <input
+            type="time"
+            id="heurefin"
+            name="heurefin"
+            value={formData.heurefin}
+            onChange={handleFormChange}
+            className="gc-input"
+          />
+        </div>
+        
+        <div className="gc-form-group">
+          <label htmlFor="statut">
+            <Settings size={16} /> Statut <span className="gc-required">*</span>
+          </label>
+          <select
+            id="statut"
+            name="statut"
+            value={formData.statut}
+            onChange={handleFormChange}
+            required
+            className="gc-select"
+          >
+            <option value="disponible">Disponible</option>
+            <option value="réservé">Réservé</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
+        
+        <div className="gc-form-group">
+          <label htmlFor="typeterrain">
+            <Tag size={16} /> Sport <span className="gc-required">*</span>
+          </label>
+          <select
+            id="typeterrain"
+            name="typeterrain"
+            value={formData.typeterrain}
+            onChange={handleFormChange}
+            required
+            className="gc-select"
+          >
+            <option value="">Sélectionnez un sport</option>
+            {Object.entries(sportConfigs).map(([key, config]) => (
+              <option key={key} value={key}>{config.label}</option>
+            ))}
+          </select>
+        </div>
+        
+        <div className="gc-form-group">
+          <label htmlFor="surfaceterrains">
+            <Grid size={16} /> Surface <span className="gc-required">*</span>
+          </label>
+          <select
+            id="surfaceterrains"
+            name="surfaceterrains"
+            value={formData.surfaceterrains}
+            onChange={handleFormChange}
+            required
+            disabled={!formData.typeterrain}
+            className="gc-select"
+          >
+            <option value="">
+              {formData.typeterrain ? 'Sélectionnez une surface' : 'Choisissez d\'abord un sport'}
+            </option>
+            {getAvailableSurfaces(formData.typeterrain).map((surf) => (
+              <option key={surf.value} value={surf.value}>
+                {surf.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        <div className="gc-form-group">
+          <label htmlFor="numeroterrain">
+            <MapPin size={16} /> N° Terrain <span className="gc-required">*</span>
+          </label>
+          <input
+            type="number"
+            id="numeroterrain"
+            name="numeroterrain"
+            value={formData.numeroterrain}
+            onChange={handleFormChange}
+            required
+            min="1"
+            className="gc-input"
+            placeholder="1"
+          />
+        </div>
+        
+        <div className="gc-form-group">
+          <label htmlFor="tarif">
+            <DollarSign size={16} /> Tarif (DH) <span className="gc-required">*</span>
+          </label>
+          <input
+            type="number"
+            id="tarif"
+            name="tarif"
+            value={formData.tarif}
+            onChange={handleFormChange}
+            required
+            min="0"
+            step="0.01"
+            className="gc-input"
+            placeholder="150"
+          />
+        </div>
+        
+        <div className="gc-form-group gc-full-width">
+          <label htmlFor="nomterrain">
+            <FileText size={16} /> Nom du terrain
+          </label>
+          <input
+            type="text"
+            id="nomterrain"
+            name="nomterrain"
+            value={formData.nomterrain}
+            onChange={handleFormChange}
+            className="gc-input"
+            placeholder="Ex: Stade Principal, Complexe Sportif..."
+          />
+        </div>
+
+        <div className="gc-form-group">
+          <label htmlFor="ville">
+            <Home size={16} /> Ville <span className="gc-required">*</span>
+          </label>
+          <select
+            id="ville"
+            name="ville"
+            value={formData.ville}
+            onChange={handleFormChange}
+            required
+            className="gc-select"
+          >
+            <option value="">Sélectionnez une ville</option>
+            {villesMaroc.map(v => (
+              <option key={v} value={v}>{v}</option>
+            ))}
+          </select>
+        </div>
+        
+        <div className="gc-form-group">
+          <label htmlFor="quartier">
+            <Navigation size={16} /> Quartier <span className="gc-required">*</span>
+          </label>
+          <select
+            id="quartier"
+            name="quartier"
+            value={formData.quartier}
+            onChange={handleFormChange}
+            required
+            disabled={!formData.ville}
+            className="gc-select"
+          >
+            <option value="">
+              {formData.ville ? 'Sélectionnez un quartier' : 'Choisissez d\'abord une ville'}
+            </option>
+            {getAvailableQuartiers().map(q => (
+              <option key={q} value={q}>{q}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+      
+      <div className="gc-form-actions">
+        <button type="button" className="gc-btn gc-btn-secondary" onClick={closeModal}>
+          <X size={16} /> Annuler
+        </button>
+        <button type="submit" className="gc-btn gc-btn-primary">
+          <Save size={16} /> {editingCreneau ? 'Modifier' : 'Ajouter'}
+        </button>
+      </div>
+    </form>
+  );
 
   return (
     <div className="gc-container">
@@ -719,6 +694,7 @@ const Crenau = () => {
       </header>
 
       <main className="gc-main">
+        {/* Statistiques */}
         {stats && (
           <section className="gc-stats-section">
             <h2 className="gc-section-title">
@@ -727,54 +703,42 @@ const Crenau = () => {
             </h2>
             <div className="gc-stats-grid">
               <div className="gc-stat-card">
-                <div className="gc-stat-icon">
-                  <Calendar size={28} />
-                </div>
+                <div className="gc-stat-icon"><Calendar size={28} /></div>
                 <div className="gc-stat-content">
                   <div className="gc-stat-value">{stats.total_creneaux || 0}</div>
                   <div className="gc-stat-label">Total créneaux</div>
                 </div>
               </div>
               <div className="gc-stat-card">
-                <div className="gc-stat-icon">
-                  <CheckCircle size={28} />
-                </div>
+                <div className="gc-stat-icon"><CheckCircle size={28} /></div>
                 <div className="gc-stat-content">
                   <div className="gc-stat-value">{stats.disponibles || 0}</div>
                   <div className="gc-stat-label">Disponibles</div>
                 </div>
               </div>
               <div className="gc-stat-card">
-                <div className="gc-stat-icon">
-                  <Users size={28} />
-                </div>
+                <div className="gc-stat-icon"><Users size={28} /></div>
                 <div className="gc-stat-content">
                   <div className="gc-stat-value">{stats.reserves || 0}</div>
                   <div className="gc-stat-label">Réservés</div>
                 </div>
               </div>
               <div className="gc-stat-card">
-                <div className="gc-stat-icon">
-                  <AlertCircle size={28} />
-                </div>
+                <div className="gc-stat-icon"><AlertCircle size={28} /></div>
                 <div className="gc-stat-content">
                   <div className="gc-stat-value">{stats.maintenance || 0}</div>
                   <div className="gc-stat-label">Maintenance</div>
                 </div>
               </div>
               <div className="gc-stat-card">
-                <div className="gc-stat-icon">
-                  <MapPin size={28} />
-                </div>
+                <div className="gc-stat-icon"><MapPin size={28} /></div>
                 <div className="gc-stat-content">
                   <div className="gc-stat-value">{stats.terrains_actifs || 0}</div>
                   <div className="gc-stat-label">Terrains actifs</div>
                 </div>
               </div>
               <div className="gc-stat-card">
-                <div className="gc-stat-icon">
-                  <DollarSign size={28} />
-                </div>
+                <div className="gc-stat-icon"><DollarSign size={28} /></div>
                 <div className="gc-stat-content">
                   <div className="gc-stat-value">{parseFloat(stats.tarif_moyen || 0).toFixed(2)} DH</div>
                   <div className="gc-stat-label">Tarif moyen</div>
@@ -784,6 +748,7 @@ const Crenau = () => {
           </section>
         )}
 
+        {/* Actions */}
         <section className="gc-actions-section">
           <div className="gc-actions-header">
             <h2 className="gc-section-title">
@@ -797,82 +762,71 @@ const Crenau = () => {
           </div>
         </section>
 
+        {/* Filtres */}
         <section className="gc-filters-section">
-          <h2 className="gc-section-title">
-            <Filter size={22} />
-            Filtres avancés
-          </h2>
-          <div className="gc-filters">
-            <div className="gc-filter-group">
-              <label htmlFor="filter-date">
-                <Calendar size={16} />
-                Date
-              </label>
-              <input
-                type="date"
-                id="filter-date"
-                name="date"
-                value={filters.date}
-                onChange={handleFilterChange}
-                className="gc-filter-input"
-              />
-            </div>
-            
-            <div className="gc-filter-group">
-              <label htmlFor="filter-statut">
-                <Settings size={16} />
-                Statut
-              </label>
-              <select
-                id="filter-statut"
-                name="statut"
-                value={filters.statut}
-                onChange={handleFilterChange}
-                className="gc-filter-select"
-              >
-                <option value="">Tous</option>
-                <option value="disponible">Disponible</option>
-                <option value="réservé">Réservé</option>
-                <option value="maintenance">Maintenance</option>
-              </select>
-            </div>
-            
-            <div className="gc-filter-group">
-              <label htmlFor="filter-terrain">
-                <MapPin size={16} />
-                N° Terrain
-              </label>
-              <input
-                type="number"
-                id="filter-terrain"
-                name="terrain"
-                value={filters.terrain}
-                onChange={handleFilterChange}
-                min="1"
-                className="gc-filter-input"
-                placeholder="N° terrain"
-              />
-            </div>
-            
-            <div className="gc-filter-actions">
-              <button 
-                className="gc-btn gc-btn-primary" 
-                onClick={fetchFilteredCreneaux}
-              >
-                <Search size={16} />
-                Appliquer
-              </button>
-              <button 
-                className="gc-btn gc-btn-outline" 
-                onClick={resetFilters}
-              >
-                <RefreshCw size={16} />
-                Réinitialiser
-              </button>
-            </div>
+          <div className="gc-filters-header" onClick={() => setExpandedFilters(!expandedFilters)}>
+            <h2 className="gc-section-title">
+              <Filter size={22} />
+              Filtres avancés
+            </h2>
+            <button className="gc-btn-toggle">
+              {expandedFilters ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+            </button>
           </div>
+          {expandedFilters && (
+            <div className="gc-filters">
+              <div className="gc-filter-group">
+                <label><Calendar size={16} /> Date</label>
+                <input type="date" name="date" value={filters.date} onChange={handleFilterChange} className="gc-filter-input" />
+              </div>
+              <div className="gc-filter-group">
+                <label><Settings size={16} /> Statut</label>
+                <select name="statut" value={filters.statut} onChange={handleFilterChange} className="gc-filter-select">
+                  <option value="">Tous</option>
+                  <option value="disponible">Disponible</option>
+                  <option value="réservé">Réservé</option>
+                  <option value="maintenance">Maintenance</option>
+                </select>
+              </div>
+              <div className="gc-filter-group">
+                <label><Tag size={16} /> Sport</label>
+                <select name="sport" value={filters.sport} onChange={handleFilterChange} className="gc-filter-select">
+                  <option value="">Tous</option>
+                  {Object.entries(sportConfigs).map(([k, v]) => (
+                    <option key={k} value={k}>{v.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="gc-filter-group">
+                <label><MapPin size={16} /> Terrain</label>
+                <input type="number" name="terrain" value={filters.terrain} onChange={handleFilterChange} className="gc-filter-input" placeholder="N°" />
+              </div>
+              <div className="gc-filter-group">
+                <label><Home size={16} /> Ville</label>
+                <select name="ville" value={filters.ville} onChange={handleFilterChange} className="gc-filter-select">
+                  <option value="">Toutes</option>
+                  {villesMaroc.map(v => (
+                    <option key={v} value={v}>{v}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="gc-filter-group">
+                <label><Navigation size={16} /> Quartier</label>
+                <input type="text" name="quartier" value={filters.quartier} onChange={handleFilterChange} className="gc-filter-input" placeholder="Ex: Maarif" />
+              </div>
+              <div className="gc-filter-actions">
+                <button className="gc-btn gc-btn-primary" onClick={applyFilters}>
+                  <Search size={16} /> Appliquer
+                </button>
+                <button className="gc-btn gc-btn-outline" onClick={resetFilters}>
+                  <RefreshCw size={16} /> Réinitialiser
+                </button>
+              </div>
+            </div>
+          )}
         </section>
 
+        {/* Tableau */}
         <section className="gc-table-section">
           <div className="gc-table-header">
             <h2 className="gc-section-title">
@@ -901,120 +855,108 @@ const Crenau = () => {
                     <th>Début</th>
                     <th>Fin</th>
                     <th>Statut</th>
-                    <th>Terrain</th>
-                    <th>Type</th>
+                    <th>Sport</th>
                     <th>Surface</th>
+                    <th>Terrain</th>
                     <th>Nom</th>
                     <th>Tarif</th>
+                    <th>Ville</th>
+                    <th>Quartier</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {creneaux.length === 0 ? (
                     <tr>
-                      <td colSpan="11" className="gc-no-data">
+                      <td colSpan="13" className="gc-no-data">
                         <div className="gc-no-data-content">
                           <FileText size={48} />
                           <p>Aucun créneau trouvé</p>
                           <button className="gc-btn gc-btn-primary" onClick={openAddModal}>
-                            <Plus size={16} />
-                            Ajouter un créneau
+                            <Plus size={16} /> Ajouter un créneau
                           </button>
                         </div>
                       </td>
                     </tr>
                   ) : (
-                    creneaux.map((creneau, index) => (
-                      <tr key={creneau.idcreneaux || index} className="gc-table-row" style={{ animationDelay: `${index * 0.05}s` }}>
-                        <td>
-                          <span className="gc-id-badge">#{creneau.idcreneaux}</span>
-                        </td>
+                    creneaux.map((c, i) => (
+                      <tr key={c.idcreneaux} className="gc-table-row" style={{ animationDelay: `${i * 0.05}s` }}>
+                        <td><span className="gc-id-badge">#{c.idcreneaux}</span></td>
                         <td className="gc-date-cell">
                           <div className="gc-cell-content">
                             <Calendar size={14} className="gc-cell-icon" />
-                            {formatDate(creneau.datecreneaux)}
+                            {new Date(c.datecreneaux).toLocaleDateString('fr-FR')}
                           </div>
                         </td>
                         <td>
                           <div className="gc-cell-content">
                             <Clock size={14} className="gc-cell-icon" />
-                            <span className="gc-time-badge">{creneau.heure}</span>
+                            <span className="gc-time-badge">{c.heure}</span>
                           </div>
                         </td>
                         <td>
                           <div className="gc-cell-content">
                             <Clock size={14} className="gc-cell-icon" />
-                            {creneau.heurefin ? 
-                              <span className="gc-time-badge">{creneau.heurefin}</span> : 
-                              '-'
-                            }
+                            {c.heurefin ? <span className="gc-time-badge">{c.heurefin}</span> : '-'}
                           </div>
                         </td>
                         <td className="gc-status-cell">
-                          <span className={`gc-status-badge gc-status-${creneau.statut || 'disponible'}`}>
-                            {creneau.statut === 'disponible' && <CheckCircle size={14} />}
-                            {creneau.statut === 'réservé' && <Users size={14} />}
-                            {creneau.statut === 'maintenance' && <AlertCircle size={14} />}
-                            <span className="gc-status-text">{creneau.statut || 'disponible'}</span>
+                          <span className={`gc-status-badge gc-status-${c.statut}`}>
+                            {c.statut === 'disponible' && <CheckCircle size={14} />}
+                            {c.statut === 'réservé' && <Users size={14} />}
+                            {c.statut === 'maintenance' && <AlertCircle size={14} />}
+                            <span className="gc-status-text">{c.statut}</span>
                           </span>
                         </td>
                         <td>
                           <div className="gc-cell-content">
-                            <MapPin size={14} className="gc-cell-icon" />
-                            <span className="gc-terrain-number">N°{creneau.numeroterrain}</span>
+                            <span className="gc-sport-badge">
+                              {getSportIcon(c.typeterrain)} {getSportLabel(c.typeterrain)}
+                            </span>
                           </div>
                         </td>
                         <td>
                           <div className="gc-cell-content">
-                            <Tag size={14} className="gc-cell-icon" />
-                            {creneau.typeterrain ? (
-                              <span className={`gc-type-badge gc-type-${creneau.typeterrain.toLowerCase()}`}>
-                                {creneau.typeterrain}
-                              </span>
-                            ) : '-'}
+                            <span className="gc-surface-badge">
+                              {getSurfaceLabel(c.typeterrain, c.surfaceterrains)}
+                            </span>
                           </div>
                         </td>
                         <td>
-                          {creneau.surfaceterrains ? (
-                            <span className={`gc-surface-badge gc-surface-${creneau.surfaceterrains.toLowerCase().replace('x', '')}`}>
-                              {creneau.surfaceterrains}
-                            </span>
-                          ) : '-'}
+                          <div className="gc-cell-content">
+                            <MapPin size={14} className="gc-cell-icon" />
+                            <span className="gc-terrain-number">N°{c.numeroterrain}</span>
+                          </div>
                         </td>
-                        <td>
-                          <span className="gc-name-text">{creneau.nomterrain || '-'}</span>
-                        </td>
+                        <td><span className="gc-name-text">{c.nomterrain || '-'}</span></td>
                         <td className="gc-price-cell">
                           <div className="gc-cell-content">
                             <DollarSign size={14} className="gc-price-icon" />
-                            <span className="gc-price-value">{creneau.tarif} DH</span>
+                            <span className="gc-price-value">{c.tarif} DH</span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="gc-cell-content">
+                            <Home size={14} className="gc-cell-icon" />
+                            {c.ville || '-'}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="gc-cell-content">
+                            <Navigation size={14} className="gc-cell-icon" />
+                            {c.quartier || '-'}
                           </div>
                         </td>
                         <td>
                           <div className="gc-actions-container">
-                            <button 
-                              className="gc-action-btn gc-view-btn" 
-                              onClick={() => handleView(creneau)}
-                              title="Voir les détails"
-                            >
+                            <button className="gc-action-btn gc-view-btn" onClick={() => openViewModal(c)} title="Voir">
                               <Eye size={16} />
-                              <span className="gc-action-tooltip">Voir</span>
                             </button>
-                            <button 
-                              className="gc-action-btn gc-edit-btn" 
-                              onClick={() => handleEdit(creneau)}
-                              title="Modifier"
-                            >
+                            <button className="gc-action-btn gc-edit-btn" onClick={() => openEditModal(c)} title="Modifier">
                               <Edit size={16} />
-                              <span className="gc-action-tooltip">Modifier</span>
                             </button>
-                            <button 
-                              className="gc-action-btn gc-delete-btn" 
-                              onClick={() => handleDelete(creneau.idcreneaux)}
-                              title="Supprimer"
-                            >
+                            <button className="gc-action-btn gc-delete-btn" onClick={() => handleDelete(c.idcreneaux)} title="Supprimer">
                               <Trash2 size={16} />
-                              <span className="gc-action-tooltip">Supprimer</span>
                             </button>
                           </div>
                         </td>
@@ -1028,31 +970,107 @@ const Crenau = () => {
         </section>
       </main>
 
+      {/* Toast */}
       {toast.show && (
-        <Toast 
-          message={toast.message} 
-          type={toast.type} 
-          onClose={closeToast} 
-        />
+        <Toast message={toast.message} type={toast.type} onClose={closeToast} />
       )}
 
-      {viewModal.show && (
-        <ViewModal 
-          creneau={viewModal.creneau} 
-          onClose={() => setViewModal({ show: false, creneau: null })} 
-        />
+      {/* Modal Visualisation */}
+      {showViewModal && selectedCreneau && (
+        <div className="gc-modal-overlay" onClick={closeModal}>
+          <div className="gc-modal-content gc-view-modal" onClick={e => e.stopPropagation()}>
+            <div className="gc-modal-header">
+              <h2 className="gc-modal-title">
+                <Eye size={22} />
+                Détails du créneau #{selectedCreneau.idcreneaux}
+              </h2>
+              <button className="gc-modal-close" onClick={closeModal}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="gc-modal-body">
+              <div className="gc-detail-grid">
+                <div className="gc-detail-item">
+                  <span className="gc-detail-label"><Calendar size={14} /> Date</span>
+                  <span className="gc-detail-value">
+                    {new Date(selectedCreneau.datecreneaux).toLocaleDateString('fr-FR')}
+                  </span>
+                </div>
+                <div className="gc-detail-item">
+                  <span className="gc-detail-label"><Clock size={14} /> Heure</span>
+                  <span className="gc-detail-value">
+                    {selectedCreneau.heure} - {selectedCreneau.heurefin || '...'}
+                  </span>
+                </div>
+                <div className="gc-detail-item">
+                  <span className="gc-detail-label">Statut</span>
+                  <span className={`gc-status-badge gc-status-${selectedCreneau.statut}`}>
+                    {selectedCreneau.statut}
+                  </span>
+                </div>
+                <div className="gc-detail-item">
+                  <span className="gc-detail-label"><Tag size={14} /> Sport</span>
+                  <span className="gc-detail-value">
+                    {getSportIcon(selectedCreneau.typeterrain)} {getSportLabel(selectedCreneau.typeterrain)}
+                  </span>
+                </div>
+                <div className="gc-detail-item">
+                  <span className="gc-detail-label">Surface</span>
+                  <span className="gc-detail-value">
+                    {getSurfaceLabel(selectedCreneau.typeterrain, selectedCreneau.surfaceterrains)}
+                  </span>
+                </div>
+                <div className="gc-detail-item">
+                  <span className="gc-detail-label"><MapPin size={14} /> Terrain</span>
+                  <span className="gc-detail-value">N°{selectedCreneau.numeroterrain}</span>
+                </div>
+                <div className="gc-detail-item">
+                  <span className="gc-detail-label"><DollarSign size={14} /> Tarif</span>
+                  <span className="gc-price-value">{selectedCreneau.tarif} DH</span>
+                </div>
+                <div className="gc-detail-item">
+                  <span className="gc-detail-label"><Home size={14} /> Ville</span>
+                  <span className="gc-detail-value">{selectedCreneau.ville || '-'}</span>
+                </div>
+                <div className="gc-detail-item">
+                  <span className="gc-detail-label"><Navigation size={14} /> Quartier</span>
+                  <span className="gc-detail-value">{selectedCreneau.quartier || '-'}</span>
+                </div>
+              </div>
+            </div>
+            <div className="gc-modal-footer">
+              <button className="gc-btn gc-btn-secondary" onClick={closeModal}>
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
-      {creneauModal.show && (
-        <CreneauModal 
-          creneau={creneauModal.creneau}
-          onClose={() => setCreneauModal({ show: false, creneau: null, isEditing: false })}
-          onSubmit={handleSubmit}
-          isEditing={creneauModal.isEditing}
-        />
+      {/* Modal Formulaire */}
+      {showFormModal && (
+        <div className="gc-modal-overlay" onClick={closeModal}>
+          <div className="gc-modal-content gc-form-modal" onClick={e => e.stopPropagation()}>
+            <div className="gc-modal-header">
+              <h2 className="gc-modal-title">
+                {editingCreneau ? <Edit size={22} /> : <Plus size={22} />}
+                {editingCreneau ? 'Modifier' : 'Ajouter'} un créneau
+              </h2>
+              <button className="gc-modal-close" onClick={closeModal}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="gc-modal-body">
+              {renderForm()}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
 };
+
+// Import des icônes manquantes
+import { ChevronDown, ChevronUp, Grid } from 'lucide-react';
 
 export default Crenau;

@@ -1,308 +1,138 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  Calendar, Clock, MapPin, Home, DollarSign, 
+  Search, Filter, Plus, Edit, Trash2, Eye,
+  RefreshCw, X, CheckCircle, AlertCircle, Info,
+  Trophy, Users, Target, Zap, 
+  Activity, Save,
+  AlertTriangle, Building,
+  Star, Crown, Award, TrendingUp,
+  ChevronDown, ChevronUp, Timer, 
+  Navigation,
+  Grid, List, BarChart,
+  TrendingDown, Minus, UserCheck,
+  UserX, ThumbsUp, ThumbsDown, Loader2
+} from 'lucide-react';
 import './crenaux.css';
 
-// Composant Toast pour les notifications
+// Configuration des sports avec leurs surfaces
+const sportConfigs = {
+  'football': { label: '⚽ Football', surfaces: ['7X7', '9X9', '11X11'] },
+  'tennis': { label: '🎾 Tennis', surfaces: ['Simple', 'Double'] },
+  'basketball': { label: '🏀 Basketball', surfaces: ['3X3', '5X5'] },
+  'volleyball': { label: '🏐 Volleyball', surfaces: ['4X4', '6X6'] },
+  'handball': { label: '🤾 Handball', surfaces: ['7X7'] },
+  'rugby': { label: '🏉 Rugby', surfaces: ['7X7', '15X15'] },
+  'padel': { label: '🎾 Padel', surfaces: ['Double'] },
+  'badminton': { label: '🏸 Badminton', surfaces: ['Simple', 'Double'] },
+  'pingpong': { label: '🏓 Ping-Pong', surfaces: ['Simple', 'Double'] },
+  'futsal': { label: '⚽ Futsal', surfaces: ['5X5'] },
+  'beachvolley': { label: '🏐 Beach Volley', surfaces: ['4X4'] },
+  'boxe': { label: '🥊 Boxe', surfaces: ['Ring'] },
+  'musculation': { label: '💪 Musculation', surfaces: ['Salle'] },
+  'yoga': { label: '🧘 Yoga', surfaces: ['Studio', 'Salle'] },
+  'danse': { label: '💃 Danse', surfaces: ['Studio', 'Salle'] },
+  'escalade': { label: '🧗 Escalade', surfaces: ['Mur'] },
+  'swimming': { label: '🏊 Natation', surfaces: ['25m', '50m'] },
+  'gymnastique': { label: '🤸 Gymnastique', surfaces: ['Salle'] },
+  'artsmartiaux': { label: '🥋 Arts Martiaux', surfaces: ['Tatami', 'Dojo'] }
+};
+
+// Villes et quartiers
+const villesMaroc = ['Casablanca', 'Rabat', 'Tanger', 'Marrakech', 'Fès', 'Agadir', 'Meknès', 'Oujda', 'Kenitra', 'Tétouan', 'Safi', 'Mohammedia'];
+const quartiersParVille = {
+  'Casablanca': ['Maarif', 'Sidi Moumen', 'Ain Sebaa', 'Anfa', 'Hay Hassani', 'Derb Sultan', 'Mers Sultan', 'Roches Noires'],
+  'Rabat': ['Agdal', 'Hay Riad', 'Souissi', 'Yacoub El Mansour', 'Temara', 'Hassan', 'Oudayas'],
+  'Tanger': ['Mellah', 'Ain El Kasbah', 'Boukhalef', 'Marshan', 'Charf', 'Gzenaya'],
+  'Marrakech': ['Guéliz', 'Hivernage', 'Médina', 'Sidi Youssef', 'Daoudiate', 'Massira'],
+  'Fès': ['Ville Nouvelle', 'Médina', 'Sais', 'Ziat', 'Ain Kadous'],
+  'Agadir': ['Ville Nouvelle', 'Taddart', 'Founty', 'Ouled Dahhou', 'Souk El Had'],
+  'Meknès': ['Ville Nouvelle', 'Médina', 'Sidi Bouzekri', 'El Bassatine', 'Hamria'],
+  'Oujda': ['Ville Nouvelle', 'Médina', 'El Farch', 'El Gharbi', 'Sidi Maafa'],
+  'Kenitra': ['Ville Nouvelle', 'Médina', 'Briech', 'El Moustakbal', 'Khabazate'],
+  'Tétouan': ['Ville Nouvelle', 'Médina', 'Tamda', 'Wilaya', 'Ras El Ma'],
+  'Safi': ['Ville Nouvelle', 'Médina', 'Chaâba', 'Hajri', 'Harbi'],
+  'Mohammedia': ['Ville Nouvelle', 'Médina', 'Coopérative', 'Roches Noires', 'Moulay Abdallah']
+};
+
+// Toast
 const Toast = ({ message, type, onClose }) => {
   useEffect(() => {
-    const timer = setTimeout(() => {
-      onClose();
-    }, 4000);
+    const timer = setTimeout(onClose, 4000);
     return () => clearTimeout(timer);
   }, [onClose]);
 
   return (
     <div className={`toast toast-${type}`}>
       <span className="toast-icon">
-        {type === 'success' ? '✓' : '✗'}
+        {type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
       </span>
       <span className="toast-message">{message}</span>
-      <button className="toast-close" onClick={onClose}>×</button>
-    </div>
-  );
-};
-
-// Composant Modal pour visualiser un créneau
-const ViewModal = ({ creneau, onClose }) => {
-  if (!creneau) return null;
-
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>Détails du créneau</h2>
-          <button className="modal-close" onClick={onClose}>×</button>
-        </div>
-        <div className="modal-body">
-          <div className="detail-grid">
-            <div className="detail-item">
-              <label>ID:</label>
-              <span>{creneau.idcreneaux}</span>
-            </div>
-            <div className="detail-item">
-              <label>Date:</label>
-              <span>{new Date(creneau.datecreneaux).toLocaleDateString('fr-FR')}</span>
-            </div>
-            <div className="detail-item">
-              <label>Heure début:</label>
-              <span>{creneau.heure}</span>
-            </div>
-            <div className="detail-item">
-              <label>Heure fin:</label>
-              <span>{creneau.heurefin || 'Non spécifiée'}</span>
-            </div>
-            <div className="detail-item">
-              <label>Statut:</label>
-              <span className={`status-badge status-${creneau.statut}`}>
-                {creneau.statut}
-              </span>
-            </div>
-            <div className="detail-item">
-              <label>Numéro terrain:</label>
-              <span>{creneau.numeroterrain}</span>
-            </div>
-            <div className="detail-item">
-              <label>Type terrain:</label>
-              <span>{creneau.typeterrain || 'Non spécifié'}</span>
-            </div>
-            <div className="detail-item">
-              <label>Nom terrain:</label>
-              <span>{creneau.nomterrain || 'Non spécifié'}</span>
-            </div>
-            <div className="detail-item">
-              <label>Surface terrain:</label>
-              <span>{creneau.surfaceterrains || 'Non spécifiée'}</span>
-            </div>
-            <div className="detail-item">
-              <label>Tarif:</label>
-              <span>{creneau.tarif} €</span>
-            </div>
-          </div>
-        </div>
-        <div className="modal-footer">
-          <button className="btn btn-secondary" onClick={onClose}>
-            Fermer
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Composant Modal pour ajouter/modifier un créneau
-const CreneauModal = ({ creneau, onClose, onSubmit, isEditing }) => {
-  const [formData, setFormData] = useState({
-    datecreneaux: creneau?.datecreneaux || '',
-    heure: creneau?.heure || '',
-    heurefin: creneau?.heurefin || '',
-    statut: creneau?.statut || 'disponible',
-    numeroterrain: creneau?.numeroterrain || '',
-    typeterrain: creneau?.typeterrain || '',
-    nomterrain: creneau?.nomterrain || '',
-    surfaceterrains: creneau?.surfaceterrains || '',
-    tarif: creneau?.tarif || ''
-  });
-
-  // Gérer les changements dans le formulaire
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  // Soumettre le formulaire
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(formData);
-  };
-
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content compact" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>{isEditing ? 'Modifier un créneau' : 'Ajouter un créneau'}</h2>
-          <button className="modal-close" onClick={onClose}>×</button>
-        </div>
-        <div className="modal-body">
-          <form onSubmit={handleSubmit} className="creneau-form">
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="datecreneaux">Date *</label>
-                <input
-                  type="date"
-                  id="datecreneaux"
-                  name="datecreneaux"
-                  value={formData.datecreneaux}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="heure">Heure début *</label>
-                <input
-                  type="time"
-                  id="heure"
-                  name="heure"
-                  value={formData.heure}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="heurefin">Heure fin</label>
-                <input
-                  type="time"
-                  id="heurefin"
-                  name="heurefin"
-                  value={formData.heurefin}
-                  onChange={handleInputChange}
-                />
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="statut">Statut *</label>
-                <select
-                  id="statut"
-                  name="statut"
-                  value={formData.statut}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="disponible">Disponible</option>
-                  <option value="réservé">Réservé</option>
-                  <option value="maintenance">Maintenance</option>
-                </select>
-              </div>
-            </div>
-            
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="numeroterrain">Numéro terrain *</label>
-                <input
-                  type="number"
-                  id="numeroterrain"
-                  name="numeroterrain"
-                  value={formData.numeroterrain}
-                  onChange={handleInputChange}
-                  required
-                  min="1"
-                />
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="tarif">Tarif (DH) *</label>
-                <input
-                  type="number"
-                  id="tarif"
-                  name="tarif"
-                  value={formData.tarif}
-                  onChange={handleInputChange}
-                  required
-                  min="0"
-                  step="0.01"
-                />
-              </div>
-            </div>
-            
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="typeterrain">Type terrain</label>
-                <input
-                  type="text"
-                  id="typeterrain"
-                  name="typeterrain"
-                  value={formData.typeterrain}
-                  onChange={handleInputChange}
-                  placeholder="Football, Tennis..."
-                />
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="nomterrain">Nom terrain</label>
-                <input
-                  type="text"
-                  id="nomterrain"
-                  name="nomterrain"
-                  value={formData.nomterrain}
-                  onChange={handleInputChange}
-                  placeholder="Terrain central..."
-                />
-              </div>
-            </div>
-            
-            <div className="form-row">
-              <div className="form-group full-width">
-                <label htmlFor="surfaceterrains">Surface terrain</label>
-                <input
-                  type="text"
-                  id="surfaceterrains"
-                  name="surfaceterrains"
-                  value={formData.surfaceterrains}
-                  onChange={handleInputChange}
-                  placeholder="100m², Gazon synthétique..."
-                />
-              </div>
-            </div>
-            
-            <div className="form-actions">
-              <button type="submit" className="btn btn-primary">
-                {isEditing ? 'Modifier' : 'Ajouter'}
-              </button>
-              <button type="button" className="btn btn-secondary" onClick={onClose}>
-                Annuler
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
+      <button className="toast-close" onClick={onClose}>
+        <X size={16} />
+      </button>
     </div>
   );
 };
 
 // Composant principal
 const Crenau = () => {
+  // États
   const [creneaux, setCreneaux] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [toast, setToast] = useState({ show: false, message: '', type: '' });
-  const [viewModal, setViewModal] = useState({ show: false, creneau: null });
-  const [creneauModal, setCreneauModal] = useState({ show: false, creneau: null, isEditing: false });
+  const [showToast, setShowToast] = useState({ show: false, message: '', type: '' });
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedCreneau, setSelectedCreneau] = useState(null);
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [editingCreneau, setEditingCreneau] = useState(null);
+  const [stats, setStats] = useState(null);
   const [filters, setFilters] = useState({
     date: '',
     statut: '',
-    terrain: ''
+    terrain: '',
+    ville: '',
+    quartier: '',
+    sport: ''
   });
-  const [stats, setStats] = useState(null);
+  const [expandedFilters, setExpandedFilters] = useState(false);
 
-  // Afficher un toast
-  const showToast = (message, type = 'success') => {
-    setToast({ show: true, message, type });
+  // Formulaire
+  const [formData, setFormData] = useState({
+    datecreneaux: '',
+    heure: '',
+    heurefin: '',
+    statut: 'disponible',
+    numeroterrain: '',
+    typeterrain: '',
+    nomterrain: '',
+    surfaceterrains: '',
+    tarif: '',
+    ville: '',
+    quartier: ''
+  });
+
+  const API_URL = 'http://localhost:5000/api/gestioncreneaux';
+
+  // Toast
+  const toast = (message, type = 'success') => {
+    setShowToast({ show: true, message, type });
   };
 
-  // Fermer le toast
   const closeToast = () => {
-    setToast({ show: false, message: '', type: '' });
+    setShowToast({ show: false, message: '', type: '' });
   };
 
-  // Récupérer tous les créneaux
+  // Récupérer les créneaux
   const fetchCreneaux = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://backend-foot-omega.vercel.app/api/gestioncreneaux/');
+      const response = await fetch(`${API_URL}/`);
       const result = await response.json();
-      
       if (result.success) {
         setCreneaux(result.data);
-      } else {
-        showToast('Erreur lors du chargement des créneaux', 'error');
       }
     } catch (error) {
-      showToast('Erreur de connexion au serveur', 'error');
-      console.error('Erreur:', error);
+      toast('Erreur de connexion', 'error');
     } finally {
       setLoading(false);
     }
@@ -311,296 +141,523 @@ const Crenau = () => {
   // Récupérer les statistiques
   const fetchStats = async () => {
     try {
-      const response = await fetch('https://backend-foot-omega.vercel.app/api/gestioncreneaux/statistiques/overview');
+      const response = await fetch(`${API_URL}/statistiques/overview`);
       const result = await response.json();
-      
       if (result.success) {
         setStats(result.data);
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des statistiques:', error);
+      console.error('Erreur stats:', error);
     }
   };
 
-  // Appliquer les filtres
-  const fetchFilteredCreneaux = async () => {
-    try {
-      setLoading(true);
-      const queryParams = new URLSearchParams();
-      
-      if (filters.date) queryParams.append('date', filters.date);
-      if (filters.statut) queryParams.append('statut', filters.statut);
-      if (filters.terrain) queryParams.append('terrain', filters.terrain);
-      
-      const url = `https://backend-foot-omega.vercel.app/api/gestioncreneaux/filtre/recherche?${queryParams}`;
-      const response = await fetch(url);
-      const result = await response.json();
-      
-      if (result.success) {
-        setCreneaux(result.data);
-        showToast(`${result.count} créneau(x) trouvé(s)`);
-      } else {
-        showToast('Erreur lors du filtrage', 'error');
-      }
-    } catch (error) {
-      showToast('Erreur de connexion au serveur', 'error');
-      console.error('Erreur:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Charger les créneaux et statistiques au montage du composant
+  // Chargement initial
   useEffect(() => {
     fetchCreneaux();
     fetchStats();
   }, []);
 
-  // Gérer les changements dans les filtres
+  // Gestion des filtres
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-    setFilters(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFilters(prev => ({ ...prev, [name]: value }));
   };
 
-  // Vérifier s'il existe une réservation pour ce créneau
-  const checkReservationExists = async (creneauData) => {
+  const applyFilters = async () => {
     try {
-      const response = await fetch('https://backend-foot-omega.vercel.app/api/reservation');
+      setLoading(true);
+      const params = new URLSearchParams();
+      Object.keys(filters).forEach(key => {
+        if (filters[key]) params.append(key, filters[key]);
+      });
+      const response = await fetch(`${API_URL}/filtre/recherche?${params}`);
       const result = await response.json();
-      
       if (result.success) {
-        const reservation = result.data.find(r => 
-          r.numeroterrain == creneauData.numeroterrain &&
-          r.datereservation === creneauData.datecreneaux &&
-          r.heurereservation === creneauData.heure &&
-          r.statut === 'confirmée'
-        );
-        return !!reservation;
+        setCreneaux(result.data);
+        toast(`${result.count} créneau(x) trouvé(s)`);
       }
-      return false;
     } catch (error) {
-      console.error('Erreur lors de la vérification des réservations:', error);
-      return false;
+      toast('Erreur de filtrage', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Soumettre le formulaire (ajout ou modification)
-  const handleSubmit = async (formData) => {
-    try {
-      // Si on essaie de mettre un créneau en "disponible" mais qu'il a une réservation confirmée, empêcher
-      if (formData.statut === 'disponible') {
-        const hasReservation = await checkReservationExists(formData);
-        if (hasReservation) {
-          showToast('Impossible de mettre ce créneau disponible car il a une réservation confirmée', 'error');
-          return;
-        }
-      }
+  const resetFilters = () => {
+    setFilters({ date: '', statut: '', terrain: '', ville: '', quartier: '', sport: '' });
+    fetchCreneaux();
+  };
 
-      const url = creneauModal.isEditing 
-        ? `https://backend-foot-omega.vercel.app/api/gestioncreneaux/${creneauModal.creneau.idcreneaux}`
-        : 'https://backend-foot-omega.vercel.app/api/gestioncreneaux/';
-      
-      const method = creneauModal.isEditing ? 'PUT' : 'POST';
+  // Gestion du formulaire
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (name === 'typeterrain') {
+      const surfaces = sportConfigs[value]?.surfaces || [];
+      if (surfaces.length > 0) {
+        setFormData(prev => ({ ...prev, surfaceterrains: surfaces[0] }));
+      }
+    }
+    
+    if (name === 'ville') {
+      setFormData(prev => ({ ...prev, quartier: '' }));
+    }
+  };
+
+  // Ouvrir/fermer les modals
+  const openAddModal = () => {
+    setFormData({
+      datecreneaux: '',
+      heure: '',
+      heurefin: '',
+      statut: 'disponible',
+      numeroterrain: '',
+      typeterrain: '',
+      nomterrain: '',
+      surfaceterrains: '',
+      tarif: '',
+      ville: '',
+      quartier: ''
+    });
+    setEditingCreneau(null);
+    setShowFormModal(true);
+  };
+
+  const openEditModal = (creneau) => {
+    setFormData({
+      datecreneaux: creneau.datecreneaux || '',
+      heure: creneau.heure || '',
+      heurefin: creneau.heurefin || '',
+      statut: creneau.statut || 'disponible',
+      numeroterrain: creneau.numeroterrain || '',
+      typeterrain: creneau.typeterrain || '',
+      nomterrain: creneau.nomterrain || '',
+      surfaceterrains: creneau.surfaceterrains || '',
+      tarif: creneau.tarif || '',
+      ville: creneau.ville || '',
+      quartier: creneau.quartier || ''
+    });
+    setEditingCreneau(creneau);
+    setShowFormModal(true);
+  };
+
+  const openViewModal = (creneau) => {
+    setSelectedCreneau(creneau);
+    setShowViewModal(true);
+  };
+
+  const closeModal = () => {
+    setShowFormModal(false);
+    setShowViewModal(false);
+    setSelectedCreneau(null);
+    setEditingCreneau(null);
+  };
+
+  // CRUD Operations
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const url = editingCreneau 
+        ? `${API_URL}/${editingCreneau.idcreneaux}`
+        : `${API_URL}/`;
+      const method = editingCreneau ? 'PUT' : 'POST';
       
       const response = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
       
       const result = await response.json();
-      
       if (result.success) {
-        showToast(creneauModal.isEditing ? 'Créneau modifié avec succès' : 'Créneau ajouté avec succès');
-        setCreneauModal({ show: false, creneau: null, isEditing: false });
+        toast(editingCreneau ? '✅ Créneau modifié avec succès' : '✅ Créneau ajouté avec succès');
+        closeModal();
         fetchCreneaux();
         fetchStats();
       } else {
-        showToast(result.message || 'Erreur lors de l\'opération', 'error');
+        toast(result.message || '❌ Erreur lors de l\'opération', 'error');
       }
     } catch (error) {
-      showToast('Erreur de connexion au serveur', 'error');
-      console.error('Erreur:', error);
+      toast('❌ Erreur de connexion', 'error');
     }
   };
 
-  // Modifier un créneau
-  const handleEdit = (creneau) => {
-    setCreneauModal({ show: true, creneau, isEditing: true });
-  };
-
-  // Supprimer un créneau
   const handleDelete = async (id) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce créneau ?')) return;
-    
     try {
-      // Vérifier s'il y a une réservation pour ce créneau
-      const creneauToDelete = creneaux.find(c => c.idcreneaux === id);
-      if (creneauToDelete) {
-        const hasReservation = await checkReservationExists(creneauToDelete);
-        if (hasReservation) {
-          showToast('Impossible de supprimer ce créneau car il a une réservation confirmée', 'error');
-          return;
-        }
-      }
-      
-      const response = await fetch(`https://backend-foot-omega.vercel.app/api/gestioncreneaux/${id}`, {
-        method: 'DELETE'
-      });
-      
+      const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
       const result = await response.json();
-      
       if (result.success) {
-        showToast('Créneau supprimé avec succès');
+        toast('🗑️ Créneau supprimé avec succès');
         fetchCreneaux();
         fetchStats();
       } else {
-        showToast(result.message || 'Erreur lors de la suppression', 'error');
+        toast(result.message || '❌ Erreur lors de la suppression', 'error');
       }
     } catch (error) {
-      showToast('Erreur de connexion au serveur', 'error');
-      console.error('Erreur:', error);
+      toast('❌ Erreur de connexion', 'error');
     }
   };
 
-  // Visualiser un créneau
-  const handleView = (creneau) => {
-    setViewModal({ show: true, creneau });
+  // Utilitaires
+  const getSportIcon = (sport) => {
+    const icons = {
+      'football': '⚽', 'tennis': '🎾', 'basketball': '🏀',
+      'volleyball': '🏐', 'handball': '🤾', 'rugby': '🏉',
+      'padel': '🎾', 'badminton': '🏸', 'pingpong': '🏓',
+      'futsal': '⚽', 'beachvolley': '🏐', 'boxe': '🥊',
+      'musculation': '💪', 'yoga': '🧘', 'danse': '💃',
+      'escalade': '🧗', 'swimming': '🏊', 'gymnastique': '🤸',
+      'artsmartiaux': '🥋'
+    };
+    return icons[sport?.toLowerCase()] || '🏟️';
   };
 
-  // Ouvrir le modal pour ajouter un créneau
-  const openAddModal = () => {
-    setCreneauModal({ show: true, creneau: null, isEditing: false });
+  const getSportLabel = (sport) => {
+    return sportConfigs[sport?.toLowerCase()]?.label || sport || '-';
   };
+
+  const getAvailableQuartiers = () => {
+    return quartiersParVille[formData.ville] || [];
+  };
+
+  const getAvailableSurfaces = () => {
+    return sportConfigs[formData.typeterrain]?.surfaces || [];
+  };
+
+  // Rendu du formulaire
+  const renderForm = () => (
+    <form onSubmit={handleSubmit} className="creneau-form">
+      <div className="form-row">
+        <div className="form-group">
+          <label>
+            <Calendar size={16} /> Date *
+          </label>
+          <input
+            type="date"
+            name="datecreneaux"
+            value={formData.datecreneaux}
+            onChange={handleFormChange}
+            required
+            className="form-input"
+          />
+        </div>
+        <div className="form-group">
+          <label>
+            <Clock size={16} /> Heure début *
+          </label>
+          <input
+            type="time"
+            name="heure"
+            value={formData.heure}
+            onChange={handleFormChange}
+            required
+            className="form-input"
+          />
+        </div>
+      </div>
+      
+      <div className="form-row">
+        <div className="form-group">
+          <label>
+            <Timer size={16} /> Heure fin
+          </label>
+          <input
+            type="time"
+            name="heurefin"
+            value={formData.heurefin}
+            onChange={handleFormChange}
+            className="form-input"
+          />
+        </div>
+        <div className="form-group">
+          <label>
+            <Info size={16} /> Statut *
+          </label>
+          <select
+            name="statut"
+            value={formData.statut}
+            onChange={handleFormChange}
+            required
+            className="form-select"
+          >
+            <option value="disponible">Disponible</option>
+            <option value="réservé">Réservé</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
+      </div>
+      
+      <div className="form-row">
+        <div className="form-group">
+          <label>
+            <Trophy size={16} /> Sport *
+          </label>
+          <select
+            name="typeterrain"
+            value={formData.typeterrain}
+            onChange={handleFormChange}
+            required
+            className="form-select"
+          >
+            <option value="">Sélectionnez un sport</option>
+            {Object.entries(sportConfigs).map(([key, config]) => (
+              <option key={key} value={key}>{config.label}</option>
+            ))}
+          </select>
+        </div>
+        <div className="form-group">
+          <label>
+            <Grid size={16} /> Surface *
+          </label>
+          <select
+            name="surfaceterrains"
+            value={formData.surfaceterrains}
+            onChange={handleFormChange}
+            required
+            disabled={!formData.typeterrain}
+            className="form-select"
+          >
+            <option value="">Sélectionnez une surface</option>
+            {getAvailableSurfaces().map(s => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+      
+      <div className="form-row">
+        <div className="form-group">
+          <label>
+            <MapPin size={16} /> N° Terrain *
+          </label>
+          <input
+            type="number"
+            name="numeroterrain"
+            value={formData.numeroterrain}
+            onChange={handleFormChange}
+            required
+            min="1"
+            className="form-input"
+            placeholder="1"
+          />
+        </div>
+        <div className="form-group">
+          <label>
+            <DollarSign size={16} /> Tarif (DH) *
+          </label>
+          <input
+            type="number"
+            name="tarif"
+            value={formData.tarif}
+            onChange={handleFormChange}
+            required
+            min="0"
+            step="0.01"
+            className="form-input"
+            placeholder="150"
+          />
+        </div>
+      </div>
+      
+      <div className="form-row">
+        <div className="form-group full-width">
+          <label>
+            <Building size={16} /> Nom du terrain
+          </label>
+          <input
+            type="text"
+            name="nomterrain"
+            value={formData.nomterrain}
+            onChange={handleFormChange}
+            className="form-input"
+            placeholder="Ex: Stade Principal, Complexe Sportif..."
+          />
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-group">
+          <label>
+            <Home size={16} /> Ville *
+          </label>
+          <select
+            name="ville"
+            value={formData.ville}
+            onChange={handleFormChange}
+            required
+            className="form-select"
+          >
+            <option value="">Sélectionnez une ville</option>
+            {villesMaroc.map(v => (
+              <option key={v} value={v}>{v}</option>
+            ))}
+          </select>
+        </div>
+        <div className="form-group">
+          <label>
+            <Navigation size={16} /> Quartier *
+          </label>
+          <select
+            name="quartier"
+            value={formData.quartier}
+            onChange={handleFormChange}
+            required
+            disabled={!formData.ville}
+            className="form-select"
+          >
+            <option value="">Sélectionnez un quartier</option>
+            {getAvailableQuartiers().map(q => (
+              <option key={q} value={q}>{q}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+      
+      <div className="form-actions">
+        <button type="button" className="btn btn-secondary" onClick={closeModal}>
+          <X size={16} /> Annuler
+        </button>
+        <button type="submit" className="btn btn-primary">
+          <Save size={16} /> {editingCreneau ? 'Modifier' : 'Ajouter'}
+        </button>
+      </div>
+    </form>
+  );
 
   return (
     <div className="app">
       <header className="app-header">
         <div className="header-content">
-          <h1>Administration des Créneaux</h1>
-          <p>Gestion des créneaux horaires des terrains de Football</p>
+          <h1><Calendar size={28} /> Administration des Créneaux</h1>
+          <p>Gestion complète des créneaux horaires - Tous sports confondus</p>
         </div>
       </header>
 
       <main className="app-main">
-        {/* Cartes de statistiques */}
+        {/* Statistiques */}
         {stats && (
           <section className="stats-section">
             <div className="stats-grid">
               <div className="stat-card">
+                <div className="stat-icon"><Calendar size={24} /></div>
                 <div className="stat-value">{stats.total_creneaux}</div>
                 <div className="stat-label">Total créneaux</div>
               </div>
               <div className="stat-card">
+                <div className="stat-icon"><CheckCircle size={24} /></div>
                 <div className="stat-value">{stats.disponibles}</div>
                 <div className="stat-label">Disponibles</div>
               </div>
               <div className="stat-card">
+                <div className="stat-icon"><Clock size={24} /></div>
                 <div className="stat-value">{stats.reserves}</div>
                 <div className="stat-label">Réservés</div>
               </div>
-          
               <div className="stat-card">
+                <div className="stat-icon"><MapPin size={24} /></div>
                 <div className="stat-value">{stats.terrains_actifs}</div>
                 <div className="stat-label">Terrains actifs</div>
               </div>
               <div className="stat-card">
-                <div className="stat-value">{parseFloat(stats.tarif_moyen).toFixed(2)}DH</div>
+                <div className="stat-icon"><DollarSign size={24} /></div>
+                <div className="stat-value">{parseFloat(stats.tarif_moyen).toFixed(2)} DH</div>
                 <div className="stat-label">Tarif moyen</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon"><Home size={24} /></div>
+                <div className="stat-value">{stats.villes_disponibles || 0}</div>
+                <div className="stat-label">Villes disponibles</div>
               </div>
             </div>
           </section>
         )}
 
-        {/* Actions principales */}
+        {/* Actions */}
         <section className="actions-section">
           <div className="section-header">
             <h2>Gestion des créneaux</h2>
             <button className="btn btn-primary" onClick={openAddModal}>
-              Nouveau créneau
+              <Plus size={20} /> Nouveau créneau
             </button>
           </div>
         </section>
 
         {/* Filtres */}
         <section className="filters-section">
-          <h2>Filtres</h2>
-          <div className="filters">
-            <div className="filter-group">
-              <label htmlFor="filter-date">Date</label>
-              <input
-                type="date"
-                id="filter-date"
-                name="date"
-                value={filters.date}
-                onChange={handleFilterChange}
-              />
-            </div>
-            
-            <div className="filter-group">
-              <label htmlFor="filter-statut">Statut</label>
-              <select
-                id="filter-statut"
-                name="statut"
-                value={filters.statut}
-                onChange={handleFilterChange}
-              >
-                <option value="">Tous</option>
-                <option value="disponible">Disponible</option>
-                <option value="réservé">Réservé</option>
-              </select>
-            </div>
-            
-            <div className="filter-group">
-              <label htmlFor="filter-terrain">Numéro terrain</label>
-              <input
-                type="number"
-                id="filter-terrain"
-                name="terrain"
-                value={filters.terrain}
-                onChange={handleFilterChange}
-                min="1"
-              />
-            </div>
-            
-            <div className="filter-actions">
-              <button 
-                className="btn btn-primary" 
-                onClick={fetchFilteredCreneaux}
-              >
-                Appliquer
-              </button>
-              <button 
-                className="btn btn-secondary" 
-                onClick={() => {
-                  setFilters({ date: '', statut: '', terrain: '' });
-                  fetchCreneaux();
-                }}
-              >
-                Réinitialiser
-              </button>
-            </div>
+          <div className="filters-header" onClick={() => setExpandedFilters(!expandedFilters)}>
+            <h2><Filter size={20} /> Filtres</h2>
+            <button className="btn-toggle">
+              {expandedFilters ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+            </button>
           </div>
+          {expandedFilters && (
+            <div className="filters">
+              <div className="filter-group">
+                <label><Calendar size={16} /> Date</label>
+                <input type="date" name="date" value={filters.date} onChange={handleFilterChange} className="filter-input" />
+              </div>
+              <div className="filter-group">
+                <label><Info size={16} /> Statut</label>
+                <select name="statut" value={filters.statut} onChange={handleFilterChange} className="filter-select">
+                  <option value="">Tous</option>
+                  <option value="disponible">Disponible</option>
+                  <option value="réservé">Réservé</option>
+                  <option value="maintenance">Maintenance</option>
+                </select>
+              </div>
+              <div className="filter-group">
+                <label><Trophy size={16} /> Sport</label>
+                <select name="sport" value={filters.sport} onChange={handleFilterChange} className="filter-select">
+                  <option value="">Tous</option>
+                  {Object.entries(sportConfigs).map(([k, v]) => (
+                    <option key={k} value={k}>{v.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="filter-group">
+                <label><MapPin size={16} /> Terrain</label>
+                <input type="number" name="terrain" value={filters.terrain} onChange={handleFilterChange} className="filter-input" placeholder="N°" />
+              </div>
+              <div className="filter-group">
+                <label><Home size={16} /> Ville</label>
+                <select name="ville" value={filters.ville} onChange={handleFilterChange} className="filter-select">
+                  <option value="">Toutes</option>
+                  {villesMaroc.map(v => (
+                    <option key={v} value={v}>{v}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="filter-group">
+                <label><Navigation size={16} /> Quartier</label>
+                <input type="text" name="quartier" value={filters.quartier} onChange={handleFilterChange} className="filter-input" placeholder="Ex: Maarif" />
+              </div>
+              <div className="filter-actions">
+                <button className="btn btn-primary" onClick={applyFilters}>
+                  <Search size={16} /> Appliquer
+                </button>
+                <button className="btn btn-secondary" onClick={resetFilters}>
+                  <X size={16} /> Réinitialiser
+                </button>
+              </div>
+            </div>
+          )}
         </section>
 
-        {/* Tableau des créneaux */}
+        {/* Tableau */}
         <section className="table-section">
           <div className="section-header">
-            <h2>Liste des créneaux ({creneaux.length})</h2>
+            <h2><List size={20} /> Liste des créneaux ({creneaux.length})</h2>
             <button className="btn btn-outline" onClick={fetchCreneaux}>
-              Actualiser
+              <RefreshCw size={16} /> Actualiser
             </button>
           </div>
           
           {loading ? (
             <div className="loading">
-              <div className="spinner"></div>
-              <p>Chargement des créneaux...</p>
+              <Loader2 size={32} className="spinning" />
+              <p>Chargement...</p>
             </div>
           ) : (
             <div className="table-container">
@@ -609,67 +666,66 @@ const Crenau = () => {
                   <tr>
                     <th>ID</th>
                     <th>Date</th>
-                    <th>Heure début</th>
-                    <th>Heure fin</th>
+                    <th>Début</th>
+                    <th>Fin</th>
                     <th>Statut</th>
-                    <th>Terrain</th>
-                    <th>Type</th>
-                    <th>Nom</th>
+                    <th>Sport</th>
                     <th>Surface</th>
+                    <th>Terrain</th>
+                    <th>Nom</th>
                     <th>Tarif</th>
+                    <th>Ville</th>
+                    <th>Quartier</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {creneaux.length === 0 ? (
                     <tr>
-                      <td colSpan="11" className="no-data">
+                      <td colSpan="13" className="no-data">
                         <div className="no-data-content">
+                          <AlertCircle size={48} />
                           <p>Aucun créneau trouvé</p>
                           <button className="btn btn-primary" onClick={openAddModal}>
-                            Ajouter un créneau
+                            <Plus size={16} /> Ajouter un créneau
                           </button>
                         </div>
                       </td>
                     </tr>
                   ) : (
-                    creneaux.map((creneau, index) => (
-                      <tr key={creneau.idcreneaux} className="fade-in" style={{ animationDelay: `${index * 0.05}s` }}>
-                        <td>{creneau.idcreneaux}</td>
-                        <td>{new Date(creneau.datecreneaux).toLocaleDateString('fr-FR')}</td>
-                        <td>{creneau.heure}</td>
-                        <td>{creneau.heurefin || '-'}</td>
+                    creneaux.map((c, i) => (
+                      <tr key={c.idcreneaux} className="fade-in" style={{ animationDelay: `${i * 0.05}s` }}>
+                        <td><span className="id-badge">#{c.idcreneaux}</span></td>
+                        <td>{new Date(c.datecreneaux).toLocaleDateString('fr-FR')}</td>
+                        <td>{c.heure}</td>
+                        <td>{c.heurefin || '-'}</td>
                         <td>
-                          <span className={`status-badge status-${creneau.statut}`}>
-                            {creneau.statut}
+                          <span className={`status-badge status-${c.statut}`}>{c.statut}</span>
+                        </td>
+                        <td>
+                          <span className="sport-badge">
+                            {getSportIcon(c.typeterrain)} {getSportLabel(c.typeterrain)}
                           </span>
                         </td>
-                        <td>{creneau.numeroterrain}</td>
-                        <td>{creneau.typeterrain || '-'}</td>
-                        <td>{creneau.nomterrain || '-'}</td>
-                        <td>{creneau.surfaceterrains || '-'}</td>
-                        <td>{creneau.tarif} DH</td>
+                        <td>{c.surfaceterrains || '-'}</td>
+                        <td><span className="terrain-badge">N°{c.numeroterrain}</span></td>
+                        <td>{c.nomterrain || '-'}</td>
+                        <td><span className="price-badge">{c.tarif} DH</span></td>
+                        <td>
+                          <span className="ville-badge">{c.ville || '-'}</span>
+                        </td>
+                        <td>
+                          <span className="quartier-badge">{c.quartier || '-'}</span>
+                        </td>
                         <td className="actions">
-                          <button 
-                            className="btn-icon view" 
-                            onClick={() => handleView(creneau)}
-                            title="Voir"
-                          >
-                            👁️
+                          <button className="btn-icon view" onClick={() => openViewModal(c)} title="Voir">
+                            <Eye size={16} />
                           </button>
-                          <button 
-                            className="btn-icon edit" 
-                            onClick={() => handleEdit(creneau)}
-                            title="Modifier"
-                          >
-                            ✏️
+                          <button className="btn-icon edit" onClick={() => openEditModal(c)} title="Modifier">
+                            <Edit size={16} />
                           </button>
-                          <button 
-                            className="btn-icon delete" 
-                            onClick={() => handleDelete(creneau.idcreneaux)}
-                            title="Supprimer"
-                          >
-                            🗑️
+                          <button className="btn-icon delete" onClick={() => handleDelete(c.idcreneaux)} title="Supprimer">
+                            <Trash2 size={16} />
                           </button>
                         </td>
                       </tr>
@@ -682,31 +738,87 @@ const Crenau = () => {
         </section>
       </main>
 
-      {/* Toast de notification */}
-      {toast.show && (
-        <Toast 
-          message={toast.message} 
-          type={toast.type} 
-          onClose={closeToast} 
-        />
+      {/* Toast */}
+      {showToast.show && (
+        <Toast message={showToast.message} type={showToast.type} onClose={closeToast} />
       )}
 
-      {/* Modal de visualisation */}
-      {viewModal.show && (
-        <ViewModal 
-          creneau={viewModal.creneau} 
-          onClose={() => setViewModal({ show: false, creneau: null })} 
-        />
+      {/* Modal Visualisation */}
+      {showViewModal && selectedCreneau && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2><Eye size={20} /> Détails du créneau #{selectedCreneau.idcreneaux}</h2>
+              <button className="modal-close" onClick={closeModal}>
+                <X size={24} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="detail-grid">
+                <div className="detail-item">
+                  <label><Calendar size={16} /> Date</label>
+                  <span>{new Date(selectedCreneau.datecreneaux).toLocaleDateString('fr-FR')}</span>
+                </div>
+                <div className="detail-item">
+                  <label><Clock size={16} /> Heure</label>
+                  <span>{selectedCreneau.heure} - {selectedCreneau.heurefin || '...'}</span>
+                </div>
+                <div className="detail-item">
+                  <label><Info size={16} /> Statut</label>
+                  <span className={`status-badge status-${selectedCreneau.statut}`}>
+                    {selectedCreneau.statut}
+                  </span>
+                </div>
+                <div className="detail-item">
+                  <label><Trophy size={16} /> Sport</label>
+                  <span>{getSportIcon(selectedCreneau.typeterrain)} {getSportLabel(selectedCreneau.typeterrain)}</span>
+                </div>
+                <div className="detail-item">
+                  <label><Grid size={16} /> Surface</label>
+                  <span>{selectedCreneau.surfaceterrains || '-'}</span>
+                </div>
+                <div className="detail-item">
+                  <label><MapPin size={16} /> Terrain</label>
+                  <span>N°{selectedCreneau.numeroterrain} - {selectedCreneau.nomterrain || '-'}</span>
+                </div>
+                <div className="detail-item">
+                  <label><DollarSign size={16} /> Tarif</label>
+                  <span className="price-badge">{selectedCreneau.tarif} DH</span>
+                </div>
+                <div className="detail-item">
+                  <label><Home size={16} /> Ville</label>
+                  <span className="ville-badge">{selectedCreneau.ville || '-'}</span>
+                </div>
+                <div className="detail-item">
+                  <label><Navigation size={16} /> Quartier</label>
+                  <span className="quartier-badge">{selectedCreneau.quartier || '-'}</span>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={closeModal}>
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Modal d'ajout/modification */}
-      {creneauModal.show && (
-        <CreneauModal 
-          creneau={creneauModal.creneau}
-          onClose={() => setCreneauModal({ show: false, creneau: null, isEditing: false })}
-          onSubmit={handleSubmit}
-          isEditing={creneauModal.isEditing}
-        />
+      {/* Modal Formulaire */}
+      {showFormModal && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content compact" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{editingCreneau ? <Edit size={20} /> : <Plus size={20} />} {editingCreneau ? 'Modifier' : 'Ajouter'} un créneau</h2>
+              <button className="modal-close" onClick={closeModal}>
+                <X size={24} />
+              </button>
+            </div>
+            <div className="modal-body">
+              {renderForm()}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

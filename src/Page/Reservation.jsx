@@ -17,7 +17,9 @@ import {
   CheckCircle,
   AlertCircle,
   Info,
-  MessageCircle
+  MessageCircle,
+  Home,
+  Map
 } from 'lucide-react';
 import './ReservationAdmin.css';
 
@@ -37,13 +39,15 @@ const ReservationDashboard = () => {
   const [filterDateRange, setFilterDateRange] = useState({ start: '', end: '' });
   const [filterPriceRange, setFilterPriceRange] = useState({ min: '', max: '' });
   const [filterSurface, setFilterSurface] = useState('');
+  const [filterVille, setFilterVille] = useState('');
+  const [filterQuartier, setFilterQuartier] = useState('');
   const [sortBy, setSortBy] = useState('date');
   const [sortOrder, setSortOrder] = useState('desc');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   // Options pour les combobox
-  const terrainTypes = ['Normal', 'Synthétique'];
-  const surfaceTypes = ['7X7', '9X9', '11X11'];
+  const terrainTypes = ['Football', 'Tennis', 'Basketball', 'Volleyball', 'Handball', 'Padel', 'Multisport'];
+  const surfaceTypes = ['7X7', '9X9', '11X11', '5X5', '6X6', 'Simple', 'Double'];
 
   const [formData, setFormData] = useState({
     datereservation: '',
@@ -57,8 +61,14 @@ const ReservationDashboard = () => {
     typeterrain: '',
     tarif: '',
     surface: '',
-    nomterrain: ''
+    nomterrain: '',
+    ville: '',
+    quartier: ''
   });
+
+  // URL de l'API locale
+  const API_URL = 'http://localhost:5000/api/reservation';
+  const API_CRENEAUX = 'http://localhost:5000/api/gestioncreneaux';
 
   const addToast = (message, type = 'info') => {
     const id = Date.now();
@@ -74,7 +84,7 @@ const ReservationDashboard = () => {
   const fetchReservations = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://backend-foot-omega.vercel.app/api/reservation');
+      const response = await fetch(`${API_URL}/`);
       
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
@@ -84,6 +94,11 @@ const ReservationDashboard = () => {
       
       if (data.success) {
         const reservationsData = data.data || [];
+        console.log('📊 Réservations chargées:', reservationsData.length);
+        if (reservationsData.length > 0) {
+          console.log('🏙️ Exemple - Ville:', reservationsData[0].ville);
+          console.log('🏠 Exemple - Quartier:', reservationsData[0].quartier);
+        }
         setAllReservations(reservationsData);
         setReservations(reservationsData);
       } else {
@@ -110,11 +125,19 @@ const ReservationDashboard = () => {
     return [...new Set(allReservations.map(r => r.nomterrain).filter(Boolean))];
   }, [allReservations]);
 
+  const uniqueVilles = useMemo(() => {
+    return [...new Set(allReservations.map(r => r.ville).filter(Boolean))];
+  }, [allReservations]);
+
+  const uniqueQuartiers = useMemo(() => {
+    return [...new Set(allReservations.map(r => r.quartier).filter(Boolean))];
+  }, [allReservations]);
+
   // Fonction de filtrage optimisée
   const filterReservations = useCallback(() => {
     let filtered = [...allReservations];
 
-    // Filtre de recherche texte (nom, email, téléphone, terrain)
+    // Filtre de recherche texte (nom, email, téléphone, terrain, ville, quartier)
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(reservation => 
@@ -122,7 +145,9 @@ const ReservationDashboard = () => {
         reservation.prenom?.toLowerCase().includes(term) ||
         reservation.email?.toLowerCase().includes(term) ||
         reservation.telephone?.includes(term) ||
-        reservation.nomterrain?.toLowerCase().includes(term)
+        reservation.nomterrain?.toLowerCase().includes(term) ||
+        reservation.ville?.toLowerCase().includes(term) ||
+        reservation.quartier?.toLowerCase().includes(term)
       );
     }
 
@@ -159,6 +184,16 @@ const ReservationDashboard = () => {
     // Filtre par surface
     if (filterSurface) {
       filtered = filtered.filter(reservation => reservation.surface === filterSurface);
+    }
+
+    // Filtre par ville
+    if (filterVille) {
+      filtered = filtered.filter(reservation => reservation.ville === filterVille);
+    }
+
+    // Filtre par quartier
+    if (filterQuartier) {
+      filtered = filtered.filter(reservation => reservation.quartier === filterQuartier);
     }
 
     // Tri des résultats
@@ -202,7 +237,9 @@ const ReservationDashboard = () => {
     filterDate, 
     filterDateRange, 
     filterPriceRange, 
-    filterSurface, 
+    filterSurface,
+    filterVille,
+    filterQuartier,
     sortBy, 
     sortOrder
   ]);
@@ -225,6 +262,8 @@ const ReservationDashboard = () => {
     setFilterDateRange({ start: '', end: '' });
     setFilterPriceRange({ min: '', max: '' });
     setFilterSurface('');
+    setFilterVille('');
+    setFilterQuartier('');
     setSortBy('date');
     setSortOrder('desc');
   };
@@ -232,7 +271,7 @@ const ReservationDashboard = () => {
   // Fonction pour envoyer un message WhatsApp
   const sendWhatsAppMessage = (reservation) => {
     const phoneNumber = reservation.telephone.replace(/\D/g, '');
-    const message = `Bonjour ${reservation.prenom} ${reservation.nomclient},\n\nVotre réservation a été confirmée!\n\n📅 Date: ${formatDate(reservation.datereservation)}\n⏰ Heure: ${reservation.heurereservation} - ${reservation.heurefin}\n🏟️ Terrain: ${reservation.nomterrain}\n💵 Prix: ${reservation.tarif} Dh\n\nMerci pour votre confiance!`;
+    const message = `Bonjour ${reservation.prenom} ${reservation.nomclient},\n\nVotre réservation a été confirmée!\n\n📅 Date: ${formatDate(reservation.datereservation)}\n⏰ Heure: ${reservation.heurereservation} - ${reservation.heurefin}\n🏟️ Terrain: ${reservation.nomterrain}\n📍 Ville: ${reservation.ville || 'Non spécifiée'}\n📍 Quartier: ${reservation.quartier || 'Non spécifié'}\n💵 Prix: ${reservation.tarif} Dh\n\nMerci pour votre confiance!`;
     
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -259,7 +298,9 @@ const ReservationDashboard = () => {
       typeterrain: '',
       tarif: '',
       surface: '',
-      nomterrain: ''
+      nomterrain: '',
+      ville: '',
+      quartier: ''
     });
     setModalMode('create');
     setShowModal(true);
@@ -278,7 +319,9 @@ const ReservationDashboard = () => {
       typeterrain: reservation.typeterrain || '',
       tarif: reservation.tarif || '',
       surface: reservation.surface || '',
-      nomterrain: reservation.nomterrain || ''
+      nomterrain: reservation.nomterrain || '',
+      ville: reservation.ville || '',
+      quartier: reservation.quartier || ''
     });
     setEditingReservation(reservation);
     setModalMode('edit');
@@ -292,7 +335,7 @@ const ReservationDashboard = () => {
 
   const updateCreneauStatus = async (nomterrain, datereservation, heurereservation, newStatus) => {
     try {
-      const creneauxResponse = await fetch('https://backend-foot-omega.vercel.app/api/gestioncreneaux/');
+      const creneauxResponse = await fetch(`${API_CRENEAUX}/`);
       const creneauxData = await creneauxResponse.json();
       
       if (creneauxData.success) {
@@ -303,7 +346,7 @@ const ReservationDashboard = () => {
         );
         
         if (creneau) {
-          const updateResponse = await fetch(`https://backend-foot-omega.vercel.app/api/gestioncreneaux/${creneau.idcreneaux}`, {
+          const updateResponse = await fetch(`${API_CRENEAUX}/${creneau.idcreneaux}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -329,10 +372,9 @@ const ReservationDashboard = () => {
     e.preventDefault();
     
     try {
-      const baseUrl = 'https://backend-foot-omega.vercel.app/api/reservation';
       const url = modalMode === 'create' 
-        ? baseUrl
-        : `${baseUrl}/${editingReservation.id}`;
+        ? `${API_URL}/`
+        : `${API_URL}/${editingReservation.id}`;
       
       const method = modalMode === 'create' ? 'POST' : 'PUT';
       
@@ -383,7 +425,7 @@ const ReservationDashboard = () => {
     try {
       const reservation = reservations.find(r => r.id === id);
       
-      const url = `https://backend-foot-omega.vercel.app/api/reservation/${id}`;
+      const url = `${API_URL}/${id}`;
       
       const response = await fetch(url, {
         method: 'DELETE',
@@ -416,7 +458,7 @@ const ReservationDashboard = () => {
     try {
       const reservation = reservations.find(r => r.id === id);
       
-      const url = `https://backend-foot-omega.vercel.app/api/reservation/${id}/statut`;
+      const url = `${API_URL}/${id}/statut`;
       
       const response = await fetch(url, {
         method: 'PUT',
@@ -504,7 +546,7 @@ const ReservationDashboard = () => {
             <Search className="rd-search-icon" size={20} />
             <input
               type="text"
-              placeholder="Rechercher par nom, email, téléphone, terrain..."
+              placeholder="Rechercher par nom, email, téléphone, terrain, ville, quartier..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="rd-search-input"
@@ -557,7 +599,7 @@ const ReservationDashboard = () => {
             {showAdvancedFilters ? 'Masquer' : 'Afficher'} Filtres
           </button>
 
-          {(searchTerm || filterStatus || filterDate || filterDateRange.start || filterPriceRange.min || filterSurface) && (
+          {(searchTerm || filterStatus || filterDate || filterDateRange.start || filterPriceRange.min || filterSurface || filterVille || filterQuartier) && (
             <button 
               className="rd-btn rd-btn-danger"
               onClick={resetFilters}
@@ -645,6 +687,40 @@ const ReservationDashboard = () => {
                 <option value="">Toutes les surfaces</option>
                 {uniqueSurfaces.map(surface => (
                   <option key={surface} value={surface}>{surface}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="rd-filter-group">
+              <label className="rd-filter-label">
+                <Map size={16} />
+                Ville
+              </label>
+              <select 
+                value={filterVille} 
+                onChange={(e) => setFilterVille(e.target.value)}
+                className="rd-filter-select"
+              >
+                <option value="">Toutes les villes</option>
+                {uniqueVilles.map(ville => (
+                  <option key={ville} value={ville}>{ville}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="rd-filter-group">
+              <label className="rd-filter-label">
+                <Home size={16} />
+                Quartier
+              </label>
+              <select 
+                value={filterQuartier} 
+                onChange={(e) => setFilterQuartier(e.target.value)}
+                className="rd-filter-select"
+              >
+                <option value="">Tous les quartiers</option>
+                {uniqueQuartiers.map(quartier => (
+                  <option key={quartier} value={quartier}>{quartier}</option>
                 ))}
               </select>
             </div>
@@ -749,6 +825,32 @@ const ReservationDashboard = () => {
                       <span className="rd-info-value">{reservation.typeterrain}</span>
                     </div>
                   </div>
+
+                  {/* ✅ VILLE */}
+                  <div className="rd-info-item">
+                    <div className="rd-info-icon-wrapper">
+                      <Map size={16} className="rd-info-icon" />
+                    </div>
+                    <div className="rd-info-content">
+                      <span className="rd-info-label">Ville</span>
+                      <span className="rd-info-value rd-ville-badge">
+                        {reservation.ville || 'Non spécifiée'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* ✅ QUARTIER */}
+                  <div className="rd-info-item">
+                    <div className="rd-info-icon-wrapper">
+                      <Home size={16} className="rd-info-icon" />
+                    </div>
+                    <div className="rd-info-content">
+                      <span className="rd-info-label">Quartier</span>
+                      <span className="rd-info-value rd-quartier-badge">
+                        {reservation.quartier || 'Non spécifié'}
+                      </span>
+                    </div>
+                  </div>
                   
                   <div className="rd-info-item rd-info-highlight">
                     <div className="rd-info-icon-wrapper">
@@ -795,7 +897,7 @@ const ReservationDashboard = () => {
 
                     {reservation.statut === 'confirmée' && (
                       <button 
-                        className="rd-btn rd-btn-whatsapp rd-btn-sm rd-btn-whatsapp"
+                        className="rd-btn rd-btn-whatsapp rd-btn-sm"
                         onClick={() => sendWhatsAppMessage(reservation)}
                         title="Envoyer un message WhatsApp"
                       >
@@ -848,7 +950,7 @@ const ReservationDashboard = () => {
                 <div className="rd-form-group">
                   <label className="rd-form-label">
                     <Calendar size={18} className="rd-form-label-icon" />
-                    Date de réservation
+                    Date de réservation *
                   </label>
                   <input
                     type="date"
@@ -863,7 +965,7 @@ const ReservationDashboard = () => {
                 <div className="rd-form-group">
                   <label className="rd-form-label">
                     <Clock size={18} className="rd-form-label-icon" />
-                    Heure de début
+                    Heure de début *
                   </label>
                   <input
                     type="time"
@@ -878,7 +980,7 @@ const ReservationDashboard = () => {
                 <div className="rd-form-group">
                   <label className="rd-form-label">
                     <Clock size={18} className="rd-form-label-icon" />
-                    Heure de fin
+                    Heure de fin *
                   </label>
                   <input
                     type="time"
@@ -912,7 +1014,7 @@ const ReservationDashboard = () => {
                 <div className="rd-form-group">
                   <label className="rd-form-label">
                     <User size={18} className="rd-form-label-icon" />
-                    Nom du client
+                    Nom du client *
                   </label>
                   <input
                     type="text"
@@ -927,7 +1029,7 @@ const ReservationDashboard = () => {
                 <div className="rd-form-group">
                   <label className="rd-form-label">
                     <User size={18} className="rd-form-label-icon" />
-                    Prénom
+                    Prénom *
                   </label>
                   <input
                     type="text"
@@ -942,7 +1044,7 @@ const ReservationDashboard = () => {
                 <div className="rd-form-group">
                   <label className="rd-form-label">
                     <Mail size={18} className="rd-form-label-icon" />
-                    Email
+                    Email *
                   </label>
                   <input
                     type="email"
@@ -957,7 +1059,7 @@ const ReservationDashboard = () => {
                 <div className="rd-form-group">
                   <label className="rd-form-label">
                     <Phone size={18} className="rd-form-label-icon" />
-                    Téléphone
+                    Téléphone *
                   </label>
                   <input
                     type="tel"
@@ -972,7 +1074,7 @@ const ReservationDashboard = () => {
                 <div className="rd-form-group">
                   <label className="rd-form-label">
                     <MapPin size={18} className="rd-form-label-icon" />
-                    Type de terrain
+                    Type de terrain *
                   </label>
                   <select
                     name="typeterrain"
@@ -991,7 +1093,7 @@ const ReservationDashboard = () => {
                 <div className="rd-form-group">
                   <label className="rd-form-label">
                     <Ruler size={18} className="rd-form-label-icon" />
-                    Surface
+                    Surface *
                   </label>
                   <select
                     name="surface"
@@ -1010,7 +1112,7 @@ const ReservationDashboard = () => {
                 <div className="rd-form-group">
                   <label className="rd-form-label">
                     <DollarSign size={18} className="rd-form-label-icon" />
-                    Tarif (Dh)
+                    Tarif (Dh) *
                   </label>
                   <input
                     type="number"
@@ -1036,6 +1138,38 @@ const ReservationDashboard = () => {
                     className="rd-form-input"
                     placeholder="Ex: Terrain Principal, Stade Central..."
                     required
+                  />
+                </div>
+
+                {/* ✅ VILLE */}
+                <div className="rd-form-group">
+                  <label className="rd-form-label">
+                    <Map size={18} className="rd-form-label-icon" />
+                    Ville
+                  </label>
+                  <input
+                    type="text"
+                    name="ville"
+                    value={formData.ville}
+                    onChange={handleInputChange}
+                    className="rd-form-input"
+                    placeholder="Ex: Casablanca, Rabat, Tanger..."
+                  />
+                </div>
+
+                {/* ✅ QUARTIER */}
+                <div className="rd-form-group">
+                  <label className="rd-form-label">
+                    <Home size={18} className="rd-form-label-icon" />
+                    Quartier
+                  </label>
+                  <input
+                    type="text"
+                    name="quartier"
+                    value={formData.quartier}
+                    onChange={handleInputChange}
+                    className="rd-form-input"
+                    placeholder="Ex: Maarif, Agdal, Boukhalef..."
                   />
                 </div>
               </div>

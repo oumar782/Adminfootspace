@@ -470,6 +470,21 @@ const sidebarItems = [
     path: "/souscriptions",
   },
   {
+    title: "Sessions",
+    icon: CalendarRange,
+    path: "/sessions",
+  }, 
+  {
+    title: "coach",
+    icon: CalendarRange,
+    path: "/coach",
+  },
+  {
+    title: "Tournois",
+    icon: CalendarRange,
+    path: "/tournois",
+  },
+  {
     title: "Démonstration",
     icon: Sparkles,
     path: "/Demonstration",

@@ -16,6 +16,7 @@ import Sous from "../Dashboard/Souscription";
 import Anademo from "../Dashboard/Analysedemo";
 import Anacontact from "../Dashboard/Anacontact";
 import Analysereserve from "../Dashboard/Analyse-reservation";
+import Machine from "../Dashboard/Ia";
 
 /* ─── Error Boundary ─── */
 class FsDashErrorBoundary extends React.Component {
@@ -54,6 +55,7 @@ const COMPONENTS = [
   { id: 'annulation',          name: "Taux d'Annulation",     icon: XCircle,        component: Annulation },
   { id: 'reservations',        name: 'Réservations recente',          icon: Calendar,       component: RecentReservations },
   { id: 'contact',             name: 'Analyse Contact',       icon: MessageCircle,  component: Anacontact },
+  { id: 'IA',                  name: 'Intelligence Artificielle', icon: Activity, component: Machine },
 ];
 
 /* ─── Helper période ─── */

@@ -1,0 +1,916 @@
+// pages/AdminCoaches.jsx
+import React, { useState, useEffect } from 'react';
+import {
+  Users,
+  User,
+  Star,
+  Award,
+  MapPin,
+  Calendar,
+  DollarSign,
+  Tag,
+  Search,
+  Filter,
+  RefreshCw,
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  X,
+  Save,
+  BarChart3,
+  Trophy,
+  Home,
+  Mail,
+  Phone,
+  ChevronDown,
+  ChevronUp,
+  TrendingUp,
+  Activity,
+  CheckCircle,
+  XCircle,
+  FileText,
+  Settings,
+  GraduationCap
+} from 'lucide-react';
+import './coach.css';
+
+// Toast Component
+const Toast = ({ message, type, onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onClose();
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div className={`ac-toast ac-toast-${type}`}>
+      <span className="ac-toast-icon">
+        {type === 'success' ? <CheckCircle size={20} /> : <XCircle size={20} />}
+      </span>
+      <span className="ac-toast-message">{message}</span>
+      <button className="ac-toast-close" onClick={onClose}>
+        <X size={18} />
+      </button>
+    </div>
+  );
+};
+
+const AdminCoaches = () => {
+  const [coaches, setCoaches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState({ show: false, message: '', type: '' });
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedCoach, setSelectedCoach] = useState(null);
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [editingCoach, setEditingCoach] = useState(null);
+  const [stats, setStats] = useState({
+    total_coaches: 0,
+    total_disciplines: 0,
+    total_cities: 0,
+    avg_rating: 0,
+    min_price: 0,
+    max_price: 0,
+    avg_price: 0,
+    total_reviews: 0
+  });
+  const [filters, setFilters] = useState({
+    discipline: '',
+    city: '',
+    search: ''
+  });
+  const [expandedFilters, setExpandedFilters] = useState(false);
+
+  const [formData, setFormData] = useState({
+    name: '',
+    discipline: '',
+    city: '',
+    experience: '',
+    price: '',
+    availability: '',
+    languages: [],
+    certifications: [],
+    specialties: [],
+    bio: '',
+    skills: { technique: 85, pedagogy: 85, motivation: 85, experience: 85 },
+    colors: ['#3e6c1a', '#027e0f'],
+    dna: [],
+    career: []
+  });
+
+  const API_URL = 'http://localhost:5000/api/coaches';
+  const DISCIPLINES = ['football', 'tennis', 'basketball', 'volleyball', 'handball', 'padel', 'badminton', 'rugby', 'pingpong'];
+  const CITIES = ['Casablanca', 'Rabat', 'Tanger', 'Marrakech', 'Fes', 'Agadir', 'Meknes', 'Oujda', 'Kenitra', 'Tetouan', 'Safi', 'Mohammedia'];
+
+  // Toast
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+  };
+
+  const closeToast = () => {
+    setToast({ show: false, message: '', type: '' });
+  };
+
+  // Récupérer les coaches
+  const fetchCoaches = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (filters.discipline) params.append('discipline', filters.discipline);
+      if (filters.city) params.append('city', filters.city);
+      if (filters.search) params.append('search', filters.search);
+      
+      const url = `${API_URL}${params.toString() ? `?${params.toString()}` : ''}`;
+      const response = await fetch(url);
+      const result = await response.json();
+      
+      if (result.success) {
+        setCoaches(result.data);
+        setStats({
+          total_coaches: result.total || result.data.length,
+          total_disciplines: result.data.reduce((acc, c) => {
+            if (!acc.includes(c.discipline)) acc.push(c.discipline);
+            return acc;
+          }, []).length,
+          total_cities: result.data.reduce((acc, c) => {
+            if (c.city && !acc.includes(c.city)) acc.push(c.city);
+            return acc;
+          }, []).length,
+          avg_rating: (result.data.reduce((acc, c) => acc + (c.rating || 0), 0) / (result.data.length || 1)).toFixed(2),
+          min_price: Math.min(...result.data.map(c => c.price || 0)),
+          max_price: Math.max(...result.data.map(c => c.price || 0)),
+          avg_price: (result.data.reduce((acc, c) => acc + (c.price || 0), 0) / (result.data.length || 1)).toFixed(2),
+          total_reviews: result.data.reduce((acc, c) => acc + (c.reviewCount || 0), 0)
+        });
+      }
+    } catch (error) {
+      showToast('Erreur de connexion', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCoaches();
+  }, [filters.discipline, filters.city]);
+
+  // Gestion des filtres
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({ ...prev, [name]: value }));
+  };
+
+  const resetFilters = () => {
+    setFilters({ discipline: '', city: '', search: '' });
+    fetchCoaches();
+  };
+
+  // Gestion du formulaire
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'languages' || name === 'certifications' || name === 'specialties' || name === 'dna') {
+      setFormData(prev => ({ ...prev, [name]: value.split(',').map(item => item.trim()) }));
+    } else if (name === 'skills') {
+      try {
+        const skills = JSON.parse(value);
+        setFormData(prev => ({ ...prev, skills }));
+      } catch {
+        // Ignorer si JSON invalide
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  // Ouvrir/fermer les modals
+  const openAddModal = () => {
+    setFormData({
+      name: '',
+      discipline: '',
+      city: '',
+      experience: '',
+      price: '',
+      availability: '',
+      languages: [],
+      certifications: [],
+      specialties: [],
+      bio: '',
+      skills: { technique: 85, pedagogy: 85, motivation: 85, experience: 85 },
+      colors: ['#3e6c1a', '#027e0f'],
+      dna: [],
+      career: []
+    });
+    setEditingCoach(null);
+    setShowFormModal(true);
+  };
+
+  const openEditModal = (coach) => {
+    setFormData({
+      name: coach.name || '',
+      discipline: coach.discipline || '',
+      city: coach.city || '',
+      experience: coach.experience || '',
+      price: coach.price || '',
+      availability: coach.availability || '',
+      languages: coach.languages || [],
+      certifications: coach.certifications || [],
+      specialties: coach.specialties || [],
+      bio: coach.bio || '',
+      skills: coach.skills || { technique: 85, pedagogy: 85, motivation: 85, experience: 85 },
+      colors: coach.colors || ['#3e6c1a', '#027e0f'],
+      dna: coach.dna || [],
+      career: coach.career || []
+    });
+    setEditingCoach(coach);
+    setShowFormModal(true);
+  };
+
+  const openViewModal = (coach) => {
+    setSelectedCoach(coach);
+    setShowViewModal(true);
+  };
+
+  const closeModal = () => {
+    setShowFormModal(false);
+    setShowViewModal(false);
+    setSelectedCoach(null);
+    setEditingCoach(null);
+  };
+
+  // CRUD Operations
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const url = editingCoach 
+        ? `${API_URL}/${editingCoach.id}`
+        : `${API_URL}/`;
+      const method = editingCoach ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      
+      const result = await response.json();
+      if (result.success) {
+        showToast(editingCoach ? 'Coach modifie avec succes' : 'Coach cree avec succes');
+        closeModal();
+        fetchCoaches();
+      } else {
+        showToast(result.message || 'Erreur lors de l\'operation', 'error');
+      }
+    } catch (error) {
+      showToast('Erreur de connexion', 'error');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Etes-vous sur de vouloir supprimer ce coach ?')) return;
+    try {
+      const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      const result = await response.json();
+      if (result.success) {
+        showToast('Coach desactive avec succes');
+        fetchCoaches();
+      } else {
+        showToast(result.message || 'Erreur lors de la suppression', 'error');
+      }
+    } catch (error) {
+      showToast('Erreur de connexion', 'error');
+    }
+  };
+
+  const getDisciplineColor = (discipline) => {
+    const colors = {
+      football: '#0a750d',
+      tennis: '#ffd700',
+      basketball: '#e67e22',
+      volleyball: '#8e44ad',
+      handball: '#2980b9',
+      padel: '#27ae60',
+      badminton: '#e74c3c',
+      rugby: '#2c3e50',
+      pingpong: '#e67e22'
+    };
+    return colors[discipline?.toLowerCase()] || '#0a750d';
+  };
+
+  const getDisciplineInitial = (discipline) => {
+    const initials = {
+      football: 'F',
+      tennis: 'T',
+      basketball: 'B',
+      volleyball: 'V',
+      handball: 'H',
+      padel: 'P',
+      badminton: 'Bad',
+      rugby: 'R',
+      pingpong: 'PP'
+    };
+    return initials[discipline?.toLowerCase()] || discipline?.charAt(0).toUpperCase() || '?';
+  };
+
+  const filteredCoaches = coaches.filter(coach => {
+    if (!filters.search) return true;
+    const searchLower = filters.search.toLowerCase();
+    return (
+      coach.name?.toLowerCase().includes(searchLower) ||
+      coach.discipline?.toLowerCase().includes(searchLower) ||
+      coach.city?.toLowerCase().includes(searchLower) ||
+      coach.bio?.toLowerCase().includes(searchLower)
+    );
+  });
+
+  return (
+    <div className="ac-container">
+      <header className="ac-header">
+        <div className="ac-header-content">
+          <div className="ac-header-left">
+            <div className="ac-header-icon">
+              <GraduationCap size={28} />
+            </div>
+            <div>
+              <h1 className="ac-main-title">
+                <span className="ac-title-glow">Administration</span> des Coachs
+              </h1>
+              <p className="ac-header-subtitle">
+                Gerer efficacement les coachs sportifs PlayZone
+              </p>
+            </div>
+          </div>
+          <div className="ac-header-right">
+            <div className="ac-header-badge">
+              <Activity size={16} />
+              <span>{coaches.length} coachs actifs</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="ac-main">
+        {/* Statistiques - MÊMES COULEURS QUE SESSIONS */}
+        <section className="ac-stats-section">
+          <div className="ac-section-header">
+            <h2 className="ac-section-title">
+              <BarChart3 size={22} />
+              Tableau de bord
+            </h2>
+            <span className="ac-section-subtitle">Apercu en temps reel</span>
+          </div>
+          <div className="ac-stats-grid">
+            <div className="ac-stat-card">
+              <div className="ac-stat-icon ac-stat-icon-total"><Users size={24} /></div>
+              <div className="ac-stat-content">
+                <div className="ac-stat-value">{stats.total_coaches || 0}</div>
+                <div className="ac-stat-label">Total coachs</div>
+              </div>
+              <div className="ac-stat-trend up">
+                <TrendingUp size={14} />
+              </div>
+            </div>
+            <div className="ac-stat-card">
+              <div className="ac-stat-icon ac-stat-icon-discipline"><Tag size={24} /></div>
+              <div className="ac-stat-content">
+                <div className="ac-stat-value" style={{ color: '#8b5cf6' }}>{stats.total_disciplines || 0}</div>
+                <div className="ac-stat-label">Disciplines</div>
+              </div>
+            </div>
+            <div className="ac-stat-card">
+              <div className="ac-stat-icon ac-stat-icon-city"><MapPin size={24} /></div>
+              <div className="ac-stat-content">
+                <div className="ac-stat-value" style={{ color: '#ec4899' }}>{stats.total_cities || 0}</div>
+                <div className="ac-stat-label">Villes</div>
+              </div>
+            </div>
+            <div className="ac-stat-card">
+              <div className="ac-stat-icon ac-stat-icon-rating"><Star size={24} /></div>
+              <div className="ac-stat-content">
+                <div className="ac-stat-value" style={{ color: '#f59e0b' }}>{stats.avg_rating || 0}</div>
+                <div className="ac-stat-label">Note moyenne</div>
+              </div>
+            </div>
+            <div className="ac-stat-card">
+              <div className="ac-stat-icon ac-stat-icon-price"><DollarSign size={24} /></div>
+              <div className="ac-stat-content">
+                <div className="ac-stat-value" style={{ color: '#0a750d' }}>{stats.avg_price || 0} DH</div>
+                <div className="ac-stat-label">Tarif moyen</div>
+              </div>
+            </div>
+            <div className="ac-stat-card">
+              <div className="ac-stat-icon ac-stat-icon-reviews"><Award size={24} /></div>
+              <div className="ac-stat-content">
+                <div className="ac-stat-value" style={{ color: '#3b82f6' }}>{stats.total_reviews || 0}</div>
+                <div className="ac-stat-label">Total avis</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Actions */}
+        <section className="ac-actions-section">
+          <div className="ac-actions-header">
+            <div className="ac-actions-left">
+              <h2 className="ac-section-title">
+                <Settings size={22} />
+                Gestion des coachs
+              </h2>
+            </div>
+            <div className="ac-actions-right">
+              <button className="ac-btn ac-btn-primary" onClick={openAddModal}>
+                <Plus size={18} />
+                Nouveau coach
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Filtres */}
+        <section className="ac-filters-section">
+          <div className="ac-filters-header" onClick={() => setExpandedFilters(!expandedFilters)}>
+            <div className="ac-filters-header-left">
+              <Filter size={20} />
+              <h2 className="ac-section-title">Filtres avances</h2>
+              {Object.values(filters).some(v => v) && (
+                <span className="ac-filters-active">Filtres actifs</span>
+              )}
+            </div>
+            <button className="ac-btn-toggle">
+              {expandedFilters ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+            </button>
+          </div>
+          {expandedFilters && (
+            <div className="ac-filters">
+              <div className="ac-filter-group">
+                <label><Tag size={16} /> Discipline</label>
+                <select name="discipline" value={filters.discipline} onChange={handleFilterChange} className="ac-filter-select">
+                  <option value="">Toutes</option>
+                  {DISCIPLINES.map(d => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="ac-filter-group">
+                <label><MapPin size={16} /> Ville</label>
+                <select name="city" value={filters.city} onChange={handleFilterChange} className="ac-filter-select">
+                  <option value="">Toutes</option>
+                  {CITIES.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="ac-filter-group">
+                <label><Search size={16} /> Recherche</label>
+                <input type="text" name="search" value={filters.search} onChange={handleFilterChange} className="ac-filter-input" placeholder="Nom, discipline..." />
+              </div>
+              <div className="ac-filter-actions">
+                <button className="ac-btn ac-btn-primary" onClick={fetchCoaches}>
+                  <Search size={16} /> Appliquer
+                </button>
+                <button className="ac-btn ac-btn-outline" onClick={resetFilters}>
+                  <RefreshCw size={16} /> Reinitialiser
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* Tableau - MÊME STYLE QUE SESSIONS */}
+        <section className="ac-table-section">
+          <div className="ac-table-header">
+            <div className="ac-table-header-left">
+              <FileText size={20} />
+              <h2 className="ac-section-title">Liste des coachs</h2>
+              <span className="ac-count-badge">{filteredCoaches.length}</span>
+            </div>
+            <button className="ac-btn ac-btn-outline ac-btn-sm" onClick={fetchCoaches}>
+              <RefreshCw size={16} />
+              Actualiser
+            </button>
+          </div>
+          
+          {loading ? (
+            <div className="ac-loading">
+              <div className="ac-spinner"></div>
+              <p>Chargement des coachs...</p>
+            </div>
+          ) : (
+            <div className="ac-table-wrapper">
+              <table className="ac-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Discipline</th>
+                    <th>Ville</th>
+                    <th>Experience</th>
+                    <th>Note</th>
+                    <th>Tarif</th>
+                    <th>Avis</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredCoaches.length === 0 ? (
+                    <tr>
+                      <td colSpan="9" className="ac-no-data">
+                        <div className="ac-no-data-content">
+                          <FileText size={48} />
+                          <p>Aucun coach trouve</p>
+                          <button className="ac-btn ac-btn-primary" onClick={openAddModal}>
+                            <Plus size={16} /> Ajouter un coach
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredCoaches.map((coach, i) => {
+                      const color = getDisciplineColor(coach.discipline);
+
+                      return (
+                        <tr key={coach.id} className="ac-table-row" style={{ animationDelay: `${i * 0.05}s` }}>
+                          <td><span className="ac-id-badge">#{coach.id}</span></td>
+                          <td>
+                            <div className="ac-cell-content">
+                              <div className="ac-avatar" style={{ background: color }}>
+                                {coach.name?.charAt(0).toUpperCase()}
+                              </div>
+                              <span className="ac-name-text">{coach.name}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <span className="ac-discipline-badge" style={{ background: `${color}20`, color: color }}>
+                              {getDisciplineInitial(coach.discipline)} {coach.discipline}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="ac-cell-content">
+                              <MapPin size={14} className="ac-cell-icon" />
+                              {coach.city || '-'}
+                            </div>
+                          </td>
+                          <td>
+                            <div className="ac-cell-content">
+                              <Calendar size={14} className="ac-cell-icon" />
+                              {coach.experience || '-'}
+                            </div>
+                          </td>
+                          <td>
+                            <div className="ac-cell-content">
+                              <Star size={14} className="ac-cell-icon" style={{ color: '#f59e0b' }} />
+                              <span className="ac-rating-value">{coach.rating || 0}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="ac-cell-content">
+                              <DollarSign size={14} className="ac-cell-icon" />
+                              <span className="ac-price-value">{coach.price || 0} DH</span>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="ac-cell-content">
+                              <Award size={14} className="ac-cell-icon" />
+                              <span className="ac-review-count">{coach.reviewCount || 0}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="ac-actions-container">
+                              <button className="ac-action-btn ac-view-btn" onClick={() => openViewModal(coach)} title="Voir">
+                                <Eye size={16} />
+                              </button>
+                              <button className="ac-action-btn ac-edit-btn" onClick={() => openEditModal(coach)} title="Modifier">
+                                <Edit size={16} />
+                              </button>
+                              <button className="ac-action-btn ac-delete-btn" onClick={() => handleDelete(coach.id)} title="Supprimer">
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </main>
+
+      {/* Toast */}
+      {toast.show && (
+        <Toast message={toast.message} type={toast.type} onClose={closeToast} />
+      )}
+
+      {/* Modal Visualisation */}
+      {showViewModal && selectedCoach && (
+        <div className="ac-modal-overlay" onClick={closeModal}>
+          <div className="ac-modal-content ac-view-modal" onClick={e => e.stopPropagation()}>
+            <div className="ac-modal-header">
+              <h2 className="ac-modal-title">
+                <Eye size={22} />
+                Details du coach #{selectedCoach.id}
+              </h2>
+              <button className="ac-modal-close" onClick={closeModal}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="ac-modal-body">
+              <div className="ac-detail-grid">
+                <div className="ac-detail-item ac-detail-full">
+                  <div className="ac-detail-profile">
+                    <div className="ac-detail-avatar" style={{ 
+                      background: `linear-gradient(135deg, ${selectedCoach.colors?.[0] || '#3e6c1a'}, ${selectedCoach.colors?.[1] || '#027e0f'})` 
+                    }}>
+                      {selectedCoach.name?.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="ac-detail-name">{selectedCoach.name}</div>
+                      <div className="ac-detail-subtitle">{selectedCoach.discipline} • {selectedCoach.city}</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="ac-detail-item">
+                  <span className="ac-detail-label"><User size={14} /> Nom</span>
+                  <span className="ac-detail-value">{selectedCoach.name}</span>
+                </div>
+                <div className="ac-detail-item">
+                  <span className="ac-detail-label"><Tag size={14} /> Discipline</span>
+                  <span className="ac-detail-value">{selectedCoach.discipline}</span>
+                </div>
+                <div className="ac-detail-item">
+                  <span className="ac-detail-label"><MapPin size={14} /> Ville</span>
+                  <span className="ac-detail-value">{selectedCoach.city}</span>
+                </div>
+                <div className="ac-detail-item">
+                  <span className="ac-detail-label"><Calendar size={14} /> Experience</span>
+                  <span className="ac-detail-value">{selectedCoach.experience}</span>
+                </div>
+                <div className="ac-detail-item">
+                  <span className="ac-detail-label"><Star size={14} /> Note</span>
+                  <span className="ac-detail-value">{selectedCoach.rating || 0} / 5</span>
+                </div>
+                <div className="ac-detail-item">
+                  <span className="ac-detail-label"><DollarSign size={14} /> Tarif</span>
+                  <span className="ac-detail-value">{selectedCoach.price} DH/h</span>
+                </div>
+                <div className="ac-detail-item">
+                  <span className="ac-detail-label">Disponibilite</span>
+                  <span className="ac-detail-value">{selectedCoach.availability}</span>
+                </div>
+                <div className="ac-detail-item ac-detail-full">
+                  <span className="ac-detail-label">Bio</span>
+                  <span className="ac-detail-value">{selectedCoach.bio || 'Aucune bio'}</span>
+                </div>
+                {selectedCoach.specialties && selectedCoach.specialties.length > 0 && (
+                  <div className="ac-detail-item ac-detail-full">
+                    <span className="ac-detail-label">Specialites</span>
+                    <div className="ac-detail-tags">
+                      {selectedCoach.specialties.map((spec, i) => (
+                        <span key={i} className="ac-detail-tag">{spec}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {selectedCoach.certifications && selectedCoach.certifications.length > 0 && (
+                  <div className="ac-detail-item ac-detail-full">
+                    <span className="ac-detail-label">Certifications</span>
+                    <div className="ac-detail-tags">
+                      {selectedCoach.certifications.map((cert, i) => (
+                        <span key={i} className="ac-detail-tag ac-detail-tag-cert">{cert}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {selectedCoach.dna && selectedCoach.dna.length > 0 && (
+                  <div className="ac-detail-item ac-detail-full">
+                    <span className="ac-detail-label">ADN</span>
+                    <div className="ac-detail-tags">
+                      {selectedCoach.dna.map((trait, i) => (
+                        <span key={i} className="ac-detail-tag ac-detail-tag-dna">{trait}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {selectedCoach.career && selectedCoach.career.length > 0 && (
+                  <div className="ac-detail-item ac-detail-full">
+                    <span className="ac-detail-label">Carriere</span>
+                    <div className="ac-career-list">
+                      {selectedCoach.career.map((item, i) => (
+                        <div key={i} className="ac-career-item">
+                          <span className="ac-career-year">{item.year}</span>
+                          <span className="ac-career-role">{item.role}</span>
+                          <span className="ac-career-club">{item.club}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="ac-modal-footer">
+              <button className="ac-btn ac-btn-secondary" onClick={closeModal}>
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Formulaire */}
+      {showFormModal && (
+        <div className="ac-modal-overlay" onClick={closeModal}>
+          <div className="ac-modal-content ac-form-modal" onClick={e => e.stopPropagation()}>
+            <div className="ac-modal-header">
+              <h2 className="ac-modal-title">
+                {editingCoach ? <Edit size={22} /> : <Plus size={22} />}
+                {editingCoach ? 'Modifier' : 'Creer'} un coach
+              </h2>
+              <button className="ac-modal-close" onClick={closeModal}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="ac-modal-body">
+              <form onSubmit={handleSubmit} className="ac-form">
+                <div className="ac-form-grid">
+                  <div className="ac-form-group">
+                    <label htmlFor="name">
+                      <User size={16} /> Nom <span className="ac-required">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleFormChange}
+                      required
+                      className="ac-input"
+                      placeholder="Nom complet"
+                    />
+                  </div>
+
+                  <div className="ac-form-group">
+                    <label htmlFor="discipline">
+                      <Tag size={16} /> Discipline <span className="ac-required">*</span>
+                    </label>
+                    <select
+                      id="discipline"
+                      name="discipline"
+                      value={formData.discipline}
+                      onChange={handleFormChange}
+                      required
+                      className="ac-select"
+                    >
+                      <option value="">Selectionnez une discipline</option>
+                      {DISCIPLINES.map(d => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="ac-form-group">
+                    <label htmlFor="city">
+                      <MapPin size={16} /> Ville <span className="ac-required">*</span>
+                    </label>
+                    <select
+                      id="city"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleFormChange}
+                      required
+                      className="ac-select"
+                    >
+                      <option value="">Selectionnez une ville</option>
+                      {CITIES.map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="ac-form-group">
+                    <label htmlFor="experience">
+                      <Calendar size={16} /> Experience
+                    </label>
+                    <input
+                      type="text"
+                      id="experience"
+                      name="experience"
+                      value={formData.experience}
+                      onChange={handleFormChange}
+                      className="ac-input"
+                      placeholder="Ex: 5 ans"
+                    />
+                  </div>
+
+                  <div className="ac-form-group">
+                    <label htmlFor="price">
+                      <DollarSign size={16} /> Tarif (DH) <span className="ac-required">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      id="price"
+                      name="price"
+                      value={formData.price}
+                      onChange={handleFormChange}
+                      required
+                      className="ac-input"
+                      placeholder="250"
+                      min="0"
+                    />
+                  </div>
+
+                  <div className="ac-form-group">
+                    <label htmlFor="availability">
+                      <Calendar size={16} /> Disponibilite
+                    </label>
+                    <input
+                      type="text"
+                      id="availability"
+                      name="availability"
+                      value={formData.availability}
+                      onChange={handleFormChange}
+                      className="ac-input"
+                      placeholder="Lun-Sam 8h-20h"
+                    />
+                  </div>
+
+                  <div className="ac-form-group ac-full-width">
+                    <label htmlFor="bio">
+                      <FileText size={16} /> Bio
+                    </label>
+                    <textarea
+                      id="bio"
+                      name="bio"
+                      value={formData.bio}
+                      onChange={handleFormChange}
+                      className="ac-textarea"
+                      placeholder="Description du coach..."
+                      rows="3"
+                    />
+                  </div>
+
+                  <div className="ac-form-group ac-full-width">
+                    <label htmlFor="specialties">
+                      <Award size={16} /> Specialites (separes par des virgules)
+                    </label>
+                    <input
+                      type="text"
+                      id="specialties"
+                      name="specialties"
+                      value={formData.specialties.join(', ')}
+                      onChange={handleFormChange}
+                      className="ac-input"
+                      placeholder="Ex: Tactique offensive, Jeu de position"
+                    />
+                  </div>
+
+                  <div className="ac-form-group ac-full-width">
+                    <label htmlFor="certifications">
+                      <GraduationCap size={16} /> Certifications (separes par des virgules)
+                    </label>
+                    <input
+                      type="text"
+                      id="certifications"
+                      name="certifications"
+                      value={formData.certifications.join(', ')}
+                      onChange={handleFormChange}
+                      className="ac-input"
+                      placeholder="Ex: UEFA B, CAF Coach Level 2"
+                    />
+                  </div>
+
+                  <div className="ac-form-group ac-full-width">
+                    <label htmlFor="languages">
+                      <Mail size={16} /> Langues (separes par des virgules)
+                    </label>
+                    <input
+                      type="text"
+                      id="languages"
+                      name="languages"
+                      value={formData.languages.join(', ')}
+                      onChange={handleFormChange}
+                      className="ac-input"
+                      placeholder="Ex: Francais, Arabe, Anglais"
+                    />
+                  </div>
+                </div>
+
+                <div className="ac-form-actions">
+                  <button type="button" className="ac-btn ac-btn-secondary" onClick={closeModal}>
+                    <X size={16} /> Annuler
+                  </button>
+                  <button type="submit" className="ac-btn ac-btn-primary">
+                    <Save size={16} /> {editingCoach ? 'Modifier' : 'Creer'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AdminCoaches;
