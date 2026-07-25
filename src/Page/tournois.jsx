@@ -18,7 +18,6 @@ import {
   Save,
   BarChart3,
   Award,
-  Home,
   Mail,
   Phone,
   ChevronDown,
@@ -34,12 +33,10 @@ import {
   UserPlus,
   UserMinus,
   UserCheck,
-  User
+  User,
+  AlertCircle
 } from 'lucide-react';
-import './tournoi.css'; // Vérifiez que ce fichier existe
-
-// Si le CSS n'existe pas, créez-le ou commentez cette ligne
-// import './tournois.css';
+import './tournoi.css';
 
 // Toast Component
 const Toast = ({ message, type, onClose }) => {
@@ -111,10 +108,8 @@ const AdminTournaments = () => {
     status: 'open'
   });
 
-  // 🔥 CORRECTION : Utiliser la bonne URL de l'API
-  const API_URL = 'http://backend-foot-omega.vercel.app/api/tournoi';
-  // Si votre API est sur un autre port, ajustez
-  // const API_URL = 'http://localhost:5001/api/tournoi';
+  // URL de l'API
+  const API_URL = 'https://backend-foot-omega.vercel.app/api/tournoi';
 
   const SPORTS = ['football', 'tennis', 'basketball', 'volleyball', 'handball', 'padel', 'badminton', 'rugby', 'pingpong'];
   const STATUSES = ['open', 'full', 'completed', 'cancelled'];
@@ -129,6 +124,27 @@ const AdminTournaments = () => {
     setToast({ show: false, message: '', type: '' });
   };
 
+  // Mettre à jour les statistiques
+  const updateStats = (data) => {
+    const total = data.length;
+    const open = data.filter(t => t.status === 'open').length;
+    const full = data.filter(t => t.status === 'full').length;
+    const completed = data.filter(t => t.status === 'completed').length;
+    const cancelled = data.filter(t => t.status === 'cancelled').length;
+    const registrations = data.reduce((sum, t) => sum + (t.teams_joined || 0), 0);
+    const sports = [...new Set(data.filter(t => t.status === 'open' || t.status === 'full').map(t => t.sport))];
+    
+    setStats({
+      total_tournaments: total,
+      open_tournaments: open,
+      full_tournaments: full,
+      completed_tournaments: completed,
+      cancelled_tournaments: cancelled,
+      total_registrations: registrations,
+      active_sports: sports
+    });
+  };
+
   // Récupérer les tournois
   const fetchTournaments = async () => {
     try {
@@ -139,28 +155,38 @@ const AdminTournaments = () => {
       if (filters.search) params.append('search', filters.search);
       
       const url = `${API_URL}${params.toString() ? `?${params.toString()}` : ''}`;
-      console.log('🔍 Fetching:', url); // Debug
+      console.log('🔍 Fetching:', url);
       
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors',
+      });
+
+      console.log('📡 Response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const result = await response.json();
+      console.log('📦 Données reçues:', result);
       
       if (result.success) {
-        setTournaments(result.data || []);
-        try {
-          const statsResponse = await fetch(`${API_URL}/statistiques/overview`);
-          const statsResult = await statsResponse.json();
-          if (statsResult.success) {
-            setStats(statsResult.data);
-          }
-        } catch (statsError) {
-          console.warn('Impossible de charger les statistiques:', statsError);
-        }
+        const tournamentsData = result.data || [];
+        console.log('✅ Tournois trouvés:', tournamentsData.length);
+        setTournaments(tournamentsData);
+        updateStats(tournamentsData);
       } else {
         showToast(result.message || 'Erreur de chargement', 'error');
+        setTournaments([]);
       }
     } catch (error) {
-      console.error('Erreur fetchTournaments:', error);
-      showToast('Erreur de connexion au serveur', 'error');
+      console.error('❌ Erreur fetchTournaments:', error);
+      showToast(`Erreur de connexion: ${error.message}`, 'error');
       setTournaments([]);
     } finally {
       setLoading(false);
@@ -179,7 +205,6 @@ const AdminTournaments = () => {
 
   const resetFilters = () => {
     setFilters({ sport: '', status: '', search: '' });
-    fetchTournaments();
   };
 
   // Gestion du formulaire
@@ -253,35 +278,46 @@ const AdminTournaments = () => {
     try {
       const url = editingTournament 
         ? `${API_URL}/${editingTournament.id}`
-        : `${API_URL}/`;
+        : `${API_URL}`;
       const method = editingTournament ? 'PUT' : 'POST';
+      
+      console.log(`📤 ${method} ${url}`);
       
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify(formData)
       });
       
       const result = await response.json();
+      console.log('📥 Response:', result);
+      
       if (result.success) {
-        showToast(editingTournament ? 'Tournoi modifie avec succes' : 'Tournoi cree avec succes');
+        showToast(editingTournament ? 'Tournoi modifié avec succès' : 'Tournoi créé avec succès');
         closeModal();
         fetchTournaments();
       } else {
-        showToast(result.message || 'Erreur lors de l\'operation', 'error');
+        showToast(result.message || 'Erreur lors de l\'opération', 'error');
       }
     } catch (error) {
+      console.error('❌ Erreur:', error);
       showToast('Erreur de connexion', 'error');
     }
   };
 
   const handleDeleteTournament = async (id) => {
-    if (!window.confirm('Etes-vous sur de vouloir supprimer ce tournoi ?')) return;
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce tournoi ?')) return;
     try {
-      const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      const response = await fetch(`${API_URL}/${id}`, { 
+        method: 'DELETE',
+        headers: { 'Accept': 'application/json' }
+      });
       const result = await response.json();
       if (result.success) {
-        showToast('Tournoi annule avec succes');
+        showToast('Tournoi annulé avec succès');
         fetchTournaments();
       } else {
         showToast(result.message || 'Erreur lors de la suppression', 'error');
@@ -322,13 +358,16 @@ const AdminTournaments = () => {
     try {
       const response = await fetch(`${API_URL}/${selectedTournament.id}/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify(teamFormData)
       });
       
       const result = await response.json();
       if (result.success) {
-        showToast('Equipe ajoutee avec succes');
+        showToast('Équipe ajoutée avec succès');
         setShowTeamModal(false);
         fetchTournaments();
       } else {
@@ -343,7 +382,8 @@ const AdminTournaments = () => {
     e.preventDefault();
     try {
       const cancelResponse = await fetch(`${API_URL}/registrations/${selectedTeam.id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: { 'Accept': 'application/json' }
       });
       
       if (!cancelResponse.ok) {
@@ -353,13 +393,16 @@ const AdminTournaments = () => {
 
       const registerResponse = await fetch(`${API_URL}/${selectedTournament.id}/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify(teamFormData)
       });
       
       const result = await registerResponse.json();
       if (result.success) {
-        showToast('Equipe modifiee avec succes');
+        showToast('Équipe modifiée avec succès');
         setShowTeamModal(false);
         fetchTournaments();
       } else {
@@ -371,15 +414,16 @@ const AdminTournaments = () => {
   };
 
   const handleDeleteTeam = async (tournamentId, registrationId) => {
-    if (!window.confirm('Etes-vous sur de vouloir retirer cette equipe ?')) return;
+    if (!window.confirm('Êtes-vous sûr de vouloir retirer cette équipe ?')) return;
     try {
       const response = await fetch(`${API_URL}/registrations/${registrationId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: { 'Accept': 'application/json' }
       });
       
       const result = await response.json();
       if (result.success) {
-        showToast('Equipe retiree avec succes');
+        showToast('Équipe retirée avec succès');
         fetchTournaments();
       } else {
         showToast(result.message || 'Erreur lors du retrait', 'error');
@@ -389,6 +433,7 @@ const AdminTournaments = () => {
     }
   };
 
+  // Utilitaires
   const getSportColor = (sport) => {
     const colors = {
       football: '#0a750d',
@@ -406,15 +451,15 @@ const AdminTournaments = () => {
 
   const getSportInitial = (sport) => {
     const initials = {
-      football: 'F',
-      tennis: 'T',
-      basketball: 'B',
-      volleyball: 'V',
-      handball: 'H',
-      padel: 'P',
-      badminton: 'Bad',
-      rugby: 'R',
-      pingpong: 'PP'
+      football: '⚽',
+      tennis: '🎾',
+      basketball: '🏀',
+      volleyball: '🏐',
+      handball: '🤾',
+      padel: '🏸',
+      badminton: '🏸',
+      rugby: '🏉',
+      pingpong: '🏓'
     };
     return initials[sport?.toLowerCase()] || sport?.charAt(0).toUpperCase() || '?';
   };
@@ -423,8 +468,8 @@ const AdminTournaments = () => {
     const labels = {
       open: 'Ouvert',
       full: 'Complet',
-      completed: 'Termine',
-      cancelled: 'Annule'
+      completed: 'Terminé',
+      cancelled: 'Annulé'
     };
     return labels[status] || status;
   };
@@ -462,7 +507,7 @@ const AdminTournaments = () => {
                 <span className="at-title-glow">Administration</span> des Tournois
               </h1>
               <p className="at-header-subtitle">
-                Gerer efficacement les tournois sportifs PlayZone
+                Gérer efficacement les tournois sportifs PlayZone
               </p>
             </div>
           </div>
@@ -484,7 +529,7 @@ const AdminTournaments = () => {
                 <BarChart3 size={22} />
                 Tableau de bord
               </h2>
-              <span className="at-section-subtitle">Apercu en temps reel</span>
+              <span className="at-section-subtitle">Aperçu en temps réel</span>
             </div>
             <div className="at-stats-grid">
               <div className="at-stat-card">
@@ -560,7 +605,7 @@ const AdminTournaments = () => {
             <div className="at-filters-header" onClick={() => setExpandedFilters(!expandedFilters)}>
               <div className="at-filters-header-left">
                 <Filter size={20} />
-                <h2 className="at-section-title">Filtres avances</h2>
+                <h2 className="at-section-title">Filtres avancés</h2>
                 {Object.values(filters).some(v => v) && (
                   <span className="at-filters-active">Filtres actifs</span>
                 )}
@@ -576,7 +621,7 @@ const AdminTournaments = () => {
                   <select name="sport" value={filters.sport} onChange={handleFilterChange} className="at-filter-select">
                     <option value="">Tous</option>
                     {SPORTS.map(s => (
-                      <option key={s} value={s}>{s}</option>
+                      <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
                     ))}
                   </select>
                 </div>
@@ -598,7 +643,7 @@ const AdminTournaments = () => {
                     <Search size={16} /> Appliquer
                   </button>
                   <button className="at-btn at-btn-outline" onClick={resetFilters}>
-                    <RefreshCw size={16} /> Reinitialiser
+                    <RefreshCw size={16} /> Réinitialiser
                   </button>
                 </div>
               </div>
@@ -635,7 +680,7 @@ const AdminTournaments = () => {
                       <th>Type</th>
                       <th>Date</th>
                       <th>Lieu</th>
-                      <th>Equipes</th>
+                      <th>Équipes</th>
                       <th>Tarif</th>
                       <th>Statut</th>
                       <th>Actions</th>
@@ -647,9 +692,9 @@ const AdminTournaments = () => {
                         <td colSpan="10" className="at-no-data">
                           <div className="at-no-data-content">
                             <FileText size={48} />
-                            <p>Aucun tournoi trouve</p>
+                            <p>Aucun tournoi trouvé</p>
                             <button className="at-btn at-btn-primary" onClick={openAddModal}>
-                              <Plus size={16} /> Creer un tournoi
+                              <Plus size={16} /> Créer un tournoi
                             </button>
                           </div>
                         </td>
@@ -746,7 +791,7 @@ const AdminTournaments = () => {
             <div className="at-modal-header">
               <h2 className="at-modal-title">
                 <Eye size={22} />
-                Details du tournoi #{selectedTournament.id}
+                Détails du tournoi #{selectedTournament.id}
               </h2>
               <button className="at-modal-close" onClick={closeModal}>
                 <X size={20} />
@@ -786,7 +831,7 @@ const AdminTournaments = () => {
                   </span>
                 </div>
                 <div className="at-detail-item">
-                  <span className="at-detail-label"><Calendar size={14} /> Date debut</span>
+                  <span className="at-detail-label"><Calendar size={14} /> Date début</span>
                   <span className="at-detail-value">{selectedTournament.date}</span>
                 </div>
                 <div className="at-detail-item">
@@ -802,7 +847,7 @@ const AdminTournaments = () => {
                   <span className="at-detail-value">{selectedTournament.location}</span>
                 </div>
                 <div className="at-detail-item">
-                  <span className="at-detail-label"><Users size={14} /> Equipes</span>
+                  <span className="at-detail-label"><Users size={14} /> Équipes</span>
                   <span className="at-detail-value">{selectedTournament.teams_joined || 0} / {selectedTournament.teams_needed}</span>
                 </div>
                 <div className="at-detail-item">
@@ -817,13 +862,13 @@ const AdminTournaments = () => {
                 {/* Gestion des équipes */}
                 <div className="at-detail-item at-detail-full">
                   <div className="at-teams-section-header">
-                    <span className="at-detail-label"><Users size={14} /> Equipes inscrites</span>
+                    <span className="at-detail-label"><Users size={14} /> Équipes inscrites</span>
                     <button 
                       className="at-btn at-btn-sm at-btn-primary"
                       onClick={() => openAddTeamModal(selectedTournament)}
                     >
                       <UserPlus size={14} />
-                      Ajouter une equipe
+                      Ajouter une équipe
                     </button>
                   </div>
                   <div className="at-teams-list">
@@ -855,7 +900,7 @@ const AdminTournaments = () => {
                         </div>
                       ))
                     ) : (
-                      <span className="at-no-teams">Aucune equipe inscrite</span>
+                      <span className="at-no-teams">Aucune équipe inscrite</span>
                     )}
                   </div>
                 </div>
@@ -877,7 +922,7 @@ const AdminTournaments = () => {
             <div className="at-modal-header">
               <h2 className="at-modal-title">
                 {editingTournament ? <Edit size={22} /> : <Plus size={22} />}
-                {editingTournament ? 'Modifier' : 'Creer'} un tournoi
+                {editingTournament ? 'Modifier' : 'Créer'} un tournoi
               </h2>
               <button className="at-modal-close" onClick={closeModal}>
                 <X size={20} />
@@ -924,9 +969,9 @@ const AdminTournaments = () => {
                       required
                       className="at-select"
                     >
-                      <option value="">Selectionnez un sport</option>
+                      <option value="">Sélectionnez un sport</option>
                       {SPORTS.map(s => (
-                        <option key={s} value={s}>{s}</option>
+                        <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
                       ))}
                     </select>
                   </div>
@@ -947,7 +992,7 @@ const AdminTournaments = () => {
                   </div>
 
                   <div className="at-form-group">
-                    <label htmlFor="date"><Calendar size={16} /> Date debut <span className="at-required">*</span></label>
+                    <label htmlFor="date"><Calendar size={16} /> Date début <span className="at-required">*</span></label>
                     <input
                       type="date"
                       id="date"
@@ -1000,7 +1045,7 @@ const AdminTournaments = () => {
                   </div>
 
                   <div className="at-form-group">
-                    <label htmlFor="teams_needed"><Users size={16} /> Nombre d'equipes <span className="at-required">*</span></label>
+                    <label htmlFor="teams_needed"><Users size={16} /> Nombre d'équipes <span className="at-required">*</span></label>
                     <input
                       type="number"
                       id="teams_needed"
@@ -1061,7 +1106,7 @@ const AdminTournaments = () => {
                     <X size={16} /> Annuler
                   </button>
                   <button type="submit" className="at-btn at-btn-primary">
-                    <Save size={16} /> {editingTournament ? 'Modifier' : 'Creer'}
+                    <Save size={16} /> {editingTournament ? 'Modifier' : 'Créer'}
                   </button>
                 </div>
               </form>
@@ -1070,14 +1115,14 @@ const AdminTournaments = () => {
         </div>
       )}
 
-      {/* Modal Gestion des Equipes */}
+      {/* Modal Gestion des Équipes */}
       {showTeamModal && selectedTournament && (
         <div className="at-modal-overlay" onClick={closeModal}>
           <div className="at-modal-content at-team-modal" onClick={e => e.stopPropagation()}>
             <div className="at-modal-header">
               <h2 className="at-modal-title">
                 {editingTeam ? <Edit size={22} /> : <UserPlus size={22} />}
-                {editingTeam ? 'Modifier' : 'Ajouter'} une equipe
+                {editingTeam ? 'Modifier' : 'Ajouter'} une équipe
               </h2>
               <button className="at-modal-close" onClick={closeModal}>
                 <X size={20} />
@@ -1091,7 +1136,7 @@ const AdminTournaments = () => {
                 <div className="at-form-grid">
                   <div className="at-form-group at-full-width">
                     <label htmlFor="team_name">
-                      <Users size={16} /> Nom de l'equipe <span className="at-required">*</span>
+                      <Users size={16} /> Nom de l'équipe <span className="at-required">*</span>
                     </label>
                     <input
                       type="text"
@@ -1101,7 +1146,7 @@ const AdminTournaments = () => {
                       onChange={handleTeamFormChange}
                       required
                       className="at-input"
-                      placeholder="Nom de l'equipe"
+                      placeholder="Nom de l'équipe"
                     />
                   </div>
 
@@ -1139,7 +1184,7 @@ const AdminTournaments = () => {
 
                   <div className="at-form-group">
                     <label htmlFor="phone">
-                      <Phone size={16} /> Telephone <span className="at-required">*</span>
+                      <Phone size={16} /> Téléphone <span className="at-required">*</span>
                     </label>
                     <input
                       type="tel"

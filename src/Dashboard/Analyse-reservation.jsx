@@ -30,10 +30,7 @@ import {
   DollarSign,
   AlertTriangle,
   Building,
-  List,
-  Grid,
   LayoutDashboard,
-  ChartBar,
   ChartLine,
   Gauge,
   CircleCheck,
@@ -42,76 +39,51 @@ import {
   Sparkles,
   Rocket,
   Gem,
-  Home
+  Home,
+  Filter,
+  Search,
+  Download,
+  Eye,
+  BarChart3,
+  PieChart,
+  ArrowUpRight,
+  ArrowDownRight,
+  MoreVertical,
+  ChevronDown,
+  ChevronUp,
+  Database,
+  Server,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 
-// Styles CSS intégrés directement dans le composant
+// Styles CSS avec mise en forme corrigée
 const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
   .fa-dashboard {
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #f3f6f4;
-    padding: 20px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0f4f8;
+    padding: 24px;
     max-width: 1440px;
     margin: 0 auto;
     min-height: 100vh;
   }
 
-  .fa-dashboard-loader {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: #f3f6f4;
-  }
-
-  .fa-loader-spinner {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .fa-loader-dot {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #1a3d06;
-    animation: fa-bounce 1.4s infinite ease-in-out both;
-  }
-
-  .fa-loader-dot:nth-child(1) { animation-delay: -0.32s; }
-  .fa-loader-dot:nth-child(2) { animation-delay: -0.16s; }
-
-  @keyframes fa-bounce {
-    0%, 80%, 100% { transform: scale(0); }
-    40% { transform: scale(1); }
-  }
-
-  .fa-loader-text {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #1a3d06;
-    font-size: 1.1rem;
-    font-weight: 500;
-  }
-
-  .fa-spinning {
-    animation: fa-spin 1s linear infinite;
-  }
-
-  @keyframes fa-spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-
+  /* Header */
   .fa-header {
     background: #ffffff;
     border-radius: 16px;
-    padding: 16px 24px;
+    padding: 20px 24px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(26, 61, 6, 0.06);
-    border: 1px solid #e0e8e2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid #e8edf2;
   }
 
   .fa-header-content {
@@ -129,7 +101,6 @@ const styles = `
   }
 
   .fa-logo-icon {
-    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -138,31 +109,18 @@ const styles = `
     background: linear-gradient(135deg, #1a3d06, #2ea84e);
     border-radius: 12px;
     color: #fff;
-  }
-
-  .fa-logo-pulse {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 12px;
-    background: rgba(46, 168, 78, 0.3);
-    animation: fa-pulse 2s infinite;
-  }
-
-  @keyframes fa-pulse {
-    0% { transform: scale(1); opacity: 1; }
-    100% { transform: scale(1.5); opacity: 0; }
+    flex-shrink: 0;
   }
 
   .fa-logo-text h1 {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
     font-weight: 700;
     margin: 0;
     color: #1a3d06;
   }
 
-  .fa-subtitle {
-    font-size: 0.8rem;
+  .fa-logo-text .fa-subtitle {
+    font-size: 0.75rem;
     color: #6d7a86;
   }
 
@@ -184,64 +142,76 @@ const styles = `
     font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
+    font-family: 'Inter', sans-serif;
     transition: all 0.2s;
   }
 
   .fa-btn-refresh:hover {
-    background: #e0f0e0;
-    transform: translateY(-1px);
+    background: #e0efe0;
   }
 
   .fa-btn-mobile-menu {
     display: none;
     padding: 8px;
     background: transparent;
-    border: none;
+    border: 1px solid #e0e8e2;
+    border-radius: 8px;
     cursor: pointer;
-    color: #1a3d06;
   }
 
   .fa-header-time {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    padding: 6px 12px;
+    background: #f8faf8;
+    border-radius: 8px;
     font-size: 0.8rem;
     color: #6d7a86;
   }
 
+  .fa-dot-online {
+    width: 8px;
+    height: 8px;
+    background: #2ea84e;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* Navigation */
   .fa-nav {
     background: #ffffff;
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 6px;
     margin-bottom: 20px;
-    border: 1px solid #e0e8e2;
-    box-shadow: 0 2px 8px rgba(26, 61, 6, 0.06);
+    border: 1px solid #e8edf2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     overflow-x: auto;
   }
 
   .fa-nav-track {
     display: flex;
     gap: 4px;
-    position: relative;
+    min-width: max-content;
   }
 
   .fa-nav-tab {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 18px;
+    padding: 10px 16px;
     border: none;
     background: transparent;
-    border-radius: 10px;
+    border-radius: 8px;
     color: #6d7a86;
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.04em;
     cursor: pointer;
+    font-family: 'Inter', sans-serif;
     transition: all 0.2s;
     white-space: nowrap;
-    font-family: 'DM Sans', sans-serif;
   }
 
   .fa-nav-tab:hover {
@@ -251,36 +221,13 @@ const styles = `
 
   .fa-nav-tab-active {
     color: #1a3d06;
-    background: rgba(26, 61, 6, 0.06);
-    border-color: rgba(26, 61, 6, 0.16);
+    background: #f0f7f0;
   }
 
-  .fa-nav-tab svg {
-    flex-shrink: 0;
-  }
-
-  .fa-main {
-    background: transparent;
-  }
-
-  .fa-content-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .fa-tab-content {
-    animation: fa-fade-up 0.35s ease both;
-  }
-
-  @keyframes fa-fade-up {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
+  /* KPI Grid - CORRIGÉ */
   .fa-kpi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 16px;
     margin-bottom: 20px;
   }
@@ -292,22 +239,22 @@ const styles = `
     padding: 20px;
     background: #ffffff;
     border-radius: 12px;
-    border: 1px solid #e0e8e2;
-    box-shadow: 0 2px 8px rgba(26, 61, 6, 0.06);
+    border: 1px solid #e8edf2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     transition: all 0.2s;
   }
 
   .fa-kpi-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(26, 61, 6, 0.1);
   }
 
   .fa-kpi-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
     border-radius: 12px;
     flex-shrink: 0;
   }
@@ -334,32 +281,34 @@ const styles = `
 
   .fa-kpi-content {
     flex: 1;
+    min-width: 0;
   }
 
   .fa-kpi-title {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: #6d7a86;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
   }
 
   .fa-kpi-value {
     font-size: 1.5rem;
     font-weight: 700;
     color: #1a3d06;
+    line-height: 1.2;
   }
 
   .fa-kpi-trend {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     padding: 2px 8px;
     border-radius: 100px;
-    margin-top: 4px;
+    margin-top: 2px;
   }
 
   .fa-positive {
@@ -372,16 +321,21 @@ const styles = `
     background: rgba(231, 76, 60, 0.1);
   }
 
-  .fa-kpi-subtitle {
-    font-size: 0.7rem;
-    color: #95a5a6;
-    margin-top: 2px;
+  .fa-neutral {
+    color: #6d7a86;
+    background: rgba(109, 122, 134, 0.1);
   }
 
+  .fa-kpi-subtitle {
+    font-size: 0.65rem;
+    color: #95a5a6;
+  }
+
+  /* Insight Section - CORRIGÉ */
   .fa-insight-section {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 16px;
     margin-bottom: 20px;
   }
 
@@ -389,8 +343,8 @@ const styles = `
     padding: 20px;
     background: #ffffff;
     border-radius: 12px;
-    border: 1px solid #e0e8e2;
-    box-shadow: 0 2px 8px rgba(26, 61, 6, 0.06);
+    border: 1px solid #e8edf2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   }
 
   .fa-status-card {
@@ -402,7 +356,7 @@ const styles = `
   .fa-status-content {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
   }
 
   .fa-status-badge {
@@ -414,9 +368,8 @@ const styles = `
     font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
     background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     width: fit-content;
   }
 
@@ -442,10 +395,11 @@ const styles = `
   .fa-status-item {
     display: flex;
     flex-direction: column;
+    gap: 2px;
   }
 
   .fa-status-item .fa-label {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     opacity: 0.7;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -456,10 +410,21 @@ const styles = `
     font-weight: 700;
   }
 
+  .fa-insight-card h3 {
+    margin: 0 0 16px 0;
+    font-size: 0.95rem;
+    color: #1a3d06;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Top List - CORRIGÉ */
   .fa-top-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
   }
 
   .fa-top-item {
@@ -472,14 +437,29 @@ const styles = `
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: #f0f7f0;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 700;
     color: #1a3d06;
     flex-shrink: 0;
+  }
+
+  .fa-rank-1 {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: white;
+  }
+
+  .fa-rank-2 {
+    background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
+    color: white;
+  }
+
+  .fa-rank-3 {
+    background: linear-gradient(135deg, #CD7F32, #B8860B);
+    color: white;
   }
 
   .fa-top-item-content {
@@ -487,50 +467,51 @@ const styles = `
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 8px;
   }
 
   .fa-name {
-    font-weight: 500;
+    font-weight: 600;
     font-size: 0.85rem;
+    color: #1a3d06;
   }
 
   .fa-metric {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #6d7a86;
+    font-weight: 500;
   }
 
   .fa-progress {
     flex: 1;
     height: 4px;
     background: #f0f0f0;
-    border-radius: 4px;
+    border-radius: 100px;
     overflow: hidden;
-    margin-left: 8px;
+    min-width: 40px;
   }
 
   .fa-progress-fill {
     height: 100%;
     background: linear-gradient(90deg, #1a3d06, #2ea84e);
-    border-radius: 4px;
+    border-radius: 100px;
     transition: width 0.6s ease;
   }
 
-  .fa-comparison-grid {
-    margin-top: 20px;
-  }
-
+  /* Comparison - CORRIGÉ */
   .fa-comparison-card {
     padding: 20px;
     background: #ffffff;
     border-radius: 12px;
-    border: 1px solid #e0e8e2;
-    box-shadow: 0 2px 8px rgba(26, 61, 6, 0.06);
+    border: 1px solid #e8edf2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   }
 
   .fa-comparison-header h3 {
     margin: 0 0 16px 0;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: #1a3d06;
+    font-weight: 600;
   }
 
   .fa-comparison-metrics {
@@ -540,17 +521,19 @@ const styles = `
   }
 
   .fa-comparison-metric {
-    padding: 12px;
+    padding: 14px;
     background: #f8faf8;
     border-radius: 8px;
+    border: 1px solid #e8edf2;
   }
 
   .fa-metric-label {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: #6d7a86;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     margin-bottom: 8px;
+    font-weight: 600;
   }
 
   .fa-metric-values {
@@ -562,7 +545,7 @@ const styles = `
   .fa-metric-current small,
   .fa-metric-previous small {
     display: block;
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     color: #95a5a6;
   }
 
@@ -570,35 +553,39 @@ const styles = `
   .fa-metric-previous strong {
     font-size: 1.1rem;
     color: #1a3d06;
+    font-weight: 700;
   }
 
   .fa-metric-arrow {
     color: #95a5a6;
+    opacity: 0.3;
   }
 
   .fa-metric-evolution {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
-    padding: 2px 8px;
+    padding: 2px 10px;
     border-radius: 100px;
     margin-top: 6px;
   }
 
   .fa-metric-subtitle {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: #95a5a6;
     margin-top: 4px;
   }
 
+  /* Chart Cards */
   .fa-chart-card {
     padding: 20px;
     background: #ffffff;
     border-radius: 12px;
-    border: 1px solid #e0e8e2;
-    box-shadow: 0 2px 8px rgba(26, 61, 6, 0.06);
+    border: 1px solid #e8edf2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    margin-bottom: 20px;
   }
 
   .fa-card-header {
@@ -615,8 +602,9 @@ const styles = `
     align-items: center;
     gap: 8px;
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: #1a3d06;
+    font-weight: 600;
   }
 
   .fa-info-badge {
@@ -626,14 +614,16 @@ const styles = `
     padding: 4px 12px;
     background: #f0f7f0;
     border-radius: 100px;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: #1a3d06;
+    font-weight: 600;
   }
 
+  /* Metrics Grid */
   .fa-metrics-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 16px;
+    gap: 12px;
     margin-bottom: 16px;
   }
 
@@ -641,18 +631,18 @@ const styles = `
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 16px;
+    padding: 14px;
     background: #f8faf8;
-    border-radius: 10px;
-    border: 1px solid #e8efe8;
+    border-radius: 8px;
+    border: 1px solid #e8edf2;
   }
 
   .fa-metric-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: 10px;
     background: #ffffff;
     color: #1a3d06;
@@ -665,7 +655,7 @@ const styles = `
   }
 
   .fa-metric-title {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: #6d7a86;
     font-weight: 600;
     text-transform: uppercase;
@@ -673,89 +663,112 @@ const styles = `
   }
 
   .fa-metric-value {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #1a3d06;
   }
 
   .fa-metric-subtitle {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     color: #95a5a6;
   }
 
+  /* Table */
   .fa-table-container {
     overflow-x: auto;
-    margin-top: 8px;
+    margin-top: 4px;
+    border-radius: 8px;
+    border: 1px solid #e8edf2;
   }
 
   .fa-data-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
 
   .fa-data-table th {
     text-align: left;
-    padding: 10px 12px;
+    padding: 10px 14px;
     background: #f8faf8;
     color: #6d7a86;
     font-weight: 600;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    border-bottom: 2px solid #e8efe8;
+    border-bottom: 2px solid #e8edf2;
   }
 
   .fa-data-table td {
-    padding: 10px 12px;
+    padding: 10px 14px;
     border-bottom: 1px solid #f0f0f0;
     color: #1a3d06;
+    font-weight: 500;
   }
 
   .fa-data-table tr:hover {
     background: #f8faf8;
   }
 
+  .fa-data-table tr:last-child td {
+    border-bottom: none;
+  }
+
   .fa-rank-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     background: #f0f7f0;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 700;
     color: #1a3d06;
+  }
+
+  .fa-rank-badge.fa-gold {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: white;
+  }
+
+  .fa-rank-badge.fa-silver {
+    background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
+    color: white;
+  }
+
+  .fa-rank-badge.fa-bronze {
+    background: linear-gradient(135deg, #CD7F32, #B8860B);
+    color: white;
   }
 
   .fa-client-badge {
     display: inline-block;
     padding: 3px 10px;
     border-radius: 100px;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 600;
     background: #f0f7f0;
     color: #1a3d06;
   }
 
   .fa-success {
-    background: #d5f5e3;
+    background: rgba(39, 174, 96, 0.1);
     color: #27ae60;
   }
 
   .fa-warning {
-    background: #fdebd0;
+    background: rgba(230, 126, 34, 0.1);
     color: #e67e22;
   }
 
   .fa-critical {
-    background: #fadbd8;
+    background: rgba(231, 76, 60, 0.1);
     color: #e74c3c;
   }
 
   .fa-moderate {
-    background: #fef9e7;
+    background: rgba(241, 196, 15, 0.1);
     color: #f1c40f;
   }
 
@@ -771,9 +784,10 @@ const styles = `
     display: inline-block;
     padding: 4px 12px;
     border-radius: 6px;
-    background: #e8efe8;
-    font-size: 0.8rem;
-    font-weight: 500;
+    background: #f0f7f0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #1a3d06;
   }
 
   .fa-retention-summary {
@@ -786,8 +800,8 @@ const styles = `
   .fa-summary-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
+    gap: 12px;
+    padding: 12px 16px;
     background: #f8faf8;
     border-radius: 8px;
     border-left: 3px solid #1a3d06;
@@ -808,58 +822,111 @@ const styles = `
     width: 60px;
     height: 4px;
     background: #f0f0f0;
-    border-radius: 4px;
+    border-radius: 100px;
     overflow: hidden;
   }
 
-  .fa-empty-state {
+  .fa-empty-top-list {
+    padding: 20px;
+    text-align: center;
+    color: #95a5a6;
+    font-size: 0.85rem;
+  }
+
+  .fa-no-data {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 60px 20px;
+    padding: 40px 20px;
+    text-align: center;
     color: #95a5a6;
   }
 
-  .fa-empty-state h4 {
-    margin: 12px 0 4px;
+  .fa-no-data h4 {
+    margin: 8px 0 4px 0;
     color: #6d7a86;
+    font-weight: 600;
+    font-size: 1rem;
   }
 
-  .fa-btn-view {
+  .fa-no-data p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #95a5a6;
+  }
+
+  .fa-loader-spinner {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .fa-loader-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #1a3d06;
+    animation: fa-bounce 1.4s infinite ease-in-out both;
+  }
+
+  .fa-loader-dot:nth-child(1) { animation-delay: -0.32s; }
+  .fa-loader-dot:nth-child(2) { animation-delay: -0.16s; }
+
+  @keyframes fa-bounce {
+    0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  .fa-dashboard-loader {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #f0f4f8;
+  }
+
+  .fa-loader-text {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border: 1px solid #e0e8e2;
-    border-radius: 6px;
-    background: transparent;
-    color: #6d7a86;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .fa-btn-view:hover {
-    background: #f0f7f0;
+    gap: 12px;
     color: #1a3d06;
+    font-size: 1rem;
+    font-weight: 500;
   }
 
-  .fa-btn-view.fa-active {
-    background: #1a3d06;
-    color: #fff;
-    border-color: #1a3d06;
+  .fa-spinning {
+    animation: fa-spin 1s linear infinite;
   }
 
+  @keyframes fa-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Responsive */
   @media (max-width: 1024px) {
-    .fa-dashboard {
-      padding: 16px;
+    .fa-kpi-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .fa-insight-section {
+      grid-template-columns: 1fr;
+    }
+
+    .fa-comparison-metrics {
+      grid-template-columns: repeat(2, 1fr);
     }
   }
 
   @media (max-width: 768px) {
     .fa-dashboard {
-      padding: 12px;
+      padding: 16px;
+    }
+
+    .fa-header {
+      padding: 16px 20px;
     }
 
     .fa-header-content {
@@ -884,18 +951,23 @@ const styles = `
     }
 
     .fa-nav-tab {
-      padding: 10px 14px;
+      padding: 8px 14px;
     }
 
     .fa-kpi-grid {
       grid-template-columns: 1fr 1fr;
+      gap: 12px;
     }
 
-    .fa-insight-section {
-      grid-template-columns: 1fr;
+    .fa-kpi-card {
+      padding: 16px;
     }
 
-    .fa-metrics-grid {
+    .fa-kpi-value {
+      font-size: 1.2rem;
+    }
+
+    .fa-status-details {
       grid-template-columns: 1fr 1fr;
     }
 
@@ -903,20 +975,16 @@ const styles = `
       grid-template-columns: 1fr;
     }
 
-    .fa-status-details {
+    .fa-metrics-grid {
       grid-template-columns: 1fr 1fr;
-    }
-
-    .fa-kpi-card {
-      padding: 14px;
-    }
-
-    .fa-kpi-value {
-      font-size: 1.2rem;
     }
   }
 
   @media (max-width: 480px) {
+    .fa-dashboard {
+      padding: 12px;
+    }
+
     .fa-kpi-grid {
       grid-template-columns: 1fr;
     }
@@ -929,8 +997,25 @@ const styles = `
       display: none;
     }
 
+    .fa-status-details {
+      grid-template-columns: 1fr;
+    }
+
+    .fa-kpi-card {
+      padding: 14px;
+    }
+
+    .fa-kpi-value {
+      font-size: 1.1rem;
+    }
+
+    .fa-kpi-icon {
+      width: 40px;
+      height: 40px;
+    }
+
     .fa-data-table {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
     }
 
     .fa-data-table th,
@@ -940,7 +1025,7 @@ const styles = `
   }
 `;
 
-const API_BASE_URL = 'http://backend-foot-omega.vercel.app/api/analyse-reservation';
+const API_BASE_URL = 'https://backend-foot-omega.vercel.app/api/analyse-reservation';
 
 const ReservationDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -948,7 +1033,6 @@ const ReservationDashboard = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [error, setError] = useState(null);
-  const [viewMode, setViewMode] = useState('table');
   
   const [dashboardData, setDashboardData] = useState(null);
   const [hourlyData, setHourlyData] = useState(null);
@@ -962,10 +1046,69 @@ const ReservationDashboard = () => {
   const [sportRentabiliteData, setSportRentabiliteData] = useState(null);
   const [terrainsDetailData, setTerrainsDetailData] = useState(null);
 
+  const requestJson = async (url) => {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 15000);
+
+    try {
+      const response = await fetch(url, {
+        headers: { 
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        signal: controller.signal
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        try {
+          const errorData = JSON.parse(text);
+          throw new Error(errorData.message || `Erreur ${response.status}`);
+        } catch {
+          throw new Error(`Erreur ${response.status}: ${text || 'Erreur inconnue'}`);
+        }
+      }
+
+      const contentType = response.headers.get('content-type') || '';
+      let data;
+      if (contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        data = text ? JSON.parse(text) : {};
+      }
+
+      return data;
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        throw new Error('La requête a expiré. Veuillez réessayer.');
+      }
+      throw error;
+    } finally {
+      window.clearTimeout(timeoutId);
+    }
+  };
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
+      const endpoints = [
+        `${API_BASE_URL}/dashboard-reservations`,
+        `${API_BASE_URL}/analyse-horaire`,
+        `${API_BASE_URL}/analyse-par-type-terrain`,
+        `${API_BASE_URL}/evolution-mensuelle`,
+        `${API_BASE_URL}/analyse-clients-reservations`,
+        `${API_BASE_URL}/comparaison-hebdomadaire`,
+        `${API_BASE_URL}/previsions-reservations`,
+        `${API_BASE_URL}/analyse-annulations`,
+        `${API_BASE_URL}/analyse-par-ville-quartier`,
+        `${API_BASE_URL}/analyse-par-sport-rentabilite`,
+        `${API_BASE_URL}/analyse-terrains-ville-quartier`
+      ];
+
+      const responses = await Promise.allSettled(endpoints.map(url => requestJson(url)));
+
       const [
         dashboardRes,
         hourlyRes,
@@ -978,69 +1121,24 @@ const ReservationDashboard = () => {
         villeQuartierRes,
         sportRentabiliteRes,
         terrainsDetailRes
-      ] = await Promise.all([
-        fetch(`${API_BASE_URL}/dashboard-reservations`),
-        fetch(`${API_BASE_URL}/analyse-horaire`),
-        fetch(`${API_BASE_URL}/analyse-par-type-terrain`),
-        fetch(`${API_BASE_URL}/evolution-mensuelle`),
-        fetch(`${API_BASE_URL}/analyse-clients-reservations`),
-        fetch(`${API_BASE_URL}/comparaison-hebdomadaire`),
-        fetch(`${API_BASE_URL}/previsions-reservations`),
-        fetch(`${API_BASE_URL}/analyse-annulations`),
-        fetch(`${API_BASE_URL}/analyse-par-ville-quartier`),
-        fetch(`${API_BASE_URL}/analyse-par-sport-rentabilite`),
-        fetch(`${API_BASE_URL}/analyse-terrains-ville-quartier`)
-      ]);
+      ] = responses.map(r => r.status === 'fulfilled' ? r.value : null);
 
-      if (dashboardRes.ok) {
-        const data = await dashboardRes.json();
-        if (data.success) setDashboardData(data);
-      }
-      if (hourlyRes.ok) {
-        const data = await hourlyRes.json();
-        if (data.success) setHourlyData(data);
-      }
-      if (typeTerrainRes.ok) {
-        const data = await typeTerrainRes.json();
-        if (data.success) setTypeTerrainData(data);
-      }
-      if (monthlyRes.ok) {
-        const data = await monthlyRes.json();
-        if (data.success) setMonthlyData(data);
-      }
-      if (clientsRes.ok) {
-        const data = await clientsRes.json();
-        if (data.success) setClientsData(data);
-      }
-      if (weeklyRes.ok) {
-        const data = await weeklyRes.json();
-        if (data.success) setWeeklyComparison(data);
-      }
-      if (forecastRes.ok) {
-        const data = await forecastRes.json();
-        if (data.success) setForecastData(data);
-      }
-      if (cancellationRes.ok) {
-        const data = await cancellationRes.json();
-        if (data.success) setCancellationData(data);
-      }
-      if (villeQuartierRes.ok) {
-        const data = await villeQuartierRes.json();
-        if (data.success) setVilleQuartierData(data);
-      }
-      if (sportRentabiliteRes.ok) {
-        const data = await sportRentabiliteRes.json();
-        if (data.success) setSportRentabiliteData(data);
-      }
-      if (terrainsDetailRes.ok) {
-        const data = await terrainsDetailRes.json();
-        if (data.success) setTerrainsDetailData(data);
-      }
+      if (dashboardRes?.success) setDashboardData(dashboardRes);
+      if (hourlyRes?.success) setHourlyData(hourlyRes);
+      if (typeTerrainRes?.success) setTypeTerrainData(typeTerrainRes);
+      if (monthlyRes?.success) setMonthlyData(monthlyRes);
+      if (clientsRes?.success) setClientsData(clientsRes);
+      if (weeklyRes?.success) setWeeklyComparison(weeklyRes);
+      if (forecastRes?.success) setForecastData(forecastRes);
+      if (cancellationRes?.success) setCancellationData(cancellationRes);
+      if (villeQuartierRes?.success) setVilleQuartierData(villeQuartierRes);
+      if (sportRentabiliteRes?.success) setSportRentabiliteData(sportRentabiliteRes);
+      if (terrainsDetailRes?.success) setTerrainsDetailData(terrainsDetailRes);
 
       setLastUpdate(new Date());
     } catch (err) {
       console.error('Erreur lors du chargement:', err);
-      setError('Erreur de connexion au serveur');
+      setError(err.message || 'Erreur de connexion au serveur');
     } finally {
       setLoading(false);
     }
@@ -1053,29 +1151,29 @@ const ReservationDashboard = () => {
   }, [fetchData]);
 
   const tabs = useMemo(() => [
-    { id: 'dashboard', label: 'Tableau de bord', icon: <LayoutDashboard size={18} /> },
-    { id: 'analyse-horaire', label: 'Analyse horaire', icon: <Clock size={18} /> },
-    { id: 'type-terrain', label: 'Types de terrain', icon: <Target size={18} /> },
-    { id: 'evolution', label: 'Évolution', icon: <ChartLine size={18} /> },
-    { id: 'clients', label: 'Clients', icon: <Users size={18} /> },
-    { id: 'previsions', label: 'Prévisions', icon: <Gauge size={18} /> },
-    { id: 'ville-quartier', label: 'Villes & Quartiers', icon: <MapPin size={18} /> },
-    { id: 'sport-rentabilite', label: 'Sports & Rentabilité', icon: <Trophy size={18} /> },
-    { id: 'terrains-detail', label: 'Terrains Détaillés', icon: <Building size={18} /> }
+    { id: 'dashboard', label: 'Tableau de bord', icon: <LayoutDashboard size={17} /> },
+    { id: 'analyse-horaire', label: 'Analyse horaire', icon: <Clock size={17} /> },
+    { id: 'type-terrain', label: 'Types de terrain', icon: <Target size={17} /> },
+    { id: 'evolution', label: 'Évolution', icon: <ChartLine size={17} /> },
+    { id: 'clients', label: 'Clients', icon: <Users size={17} /> },
+    { id: 'previsions', label: 'Prévisions', icon: <Gauge size={17} /> },
+    { id: 'ville-quartier', label: 'Villes & Quartiers', icon: <MapPin size={17} /> },
+    { id: 'sport-rentabilite', label: 'Sports & Rentabilité', icon: <Trophy size={17} /> },
+    { id: 'terrains-detail', label: 'Terrains Détaillés', icon: <Building size={17} /> }
   ], []);
 
   const getTrendIcon = (value) => {
     const numValue = parseFloat(value);
-    if (numValue > 0) return <TrendingUp size={14} />;
-    if (numValue < 0) return <TrendingDown size={14} />;
-    return <Minus size={14} />;
+    if (numValue > 0) return <TrendingUp size={13} />;
+    if (numValue < 0) return <TrendingDown size={13} />;
+    return <Minus size={13} />;
   };
 
   const getTrendClass = (value) => {
     const numValue = parseFloat(value);
     if (numValue > 0) return 'fa-positive';
     if (numValue < 0) return 'fa-negative';
-    return '';
+    return 'fa-neutral';
   };
 
   const formatNumber = (num) => {
@@ -1094,44 +1192,66 @@ const ReservationDashboard = () => {
 
   const getPerformanceLabel = (performance) => {
     switch(performance?.toUpperCase()) {
-      case 'EXCELLENT': return <span style={{ color: '#4CAF50' }}><Sparkles size={14} /> Excellent</span>;
-      case 'BON': return <span style={{ color: '#8BC34A' }}><ThumbsUp size={14} /> Bon</span>;
-      case 'MOYEN': return <span style={{ color: '#FFC107' }}><Minus size={14} /> Moyen</span>;
-      case 'FAIBLE': return <span style={{ color: '#FF9800' }}><AlertTriangle size={14} /> Faible</span>;
-      default: return 'N/A';
+      case 'EXCELLENT': return <span style={{ color: '#4CAF50', fontWeight: 600 }}><Sparkles size={13} /> Excellent</span>;
+      case 'BON': return <span style={{ color: '#8BC34A', fontWeight: 600 }}><ThumbsUp size={13} /> Bon</span>;
+      case 'MOYEN': return <span style={{ color: '#FFC107', fontWeight: 600 }}><Minus size={13} /> Moyen</span>;
+      case 'FAIBLE': return <span style={{ color: '#FF9800', fontWeight: 600 }}><AlertTriangle size={13} /> Faible</span>;
+      default: return <span style={{ color: '#95a5a6' }}>N/A</span>;
     }
   };
 
-  const getChurnStatus = (tauxChurn) => {
-    const value = parseFloat(tauxChurn);
-    if (isNaN(value)) return { label: 'N/A', className: 'fa-moderate', icon: <Minus size={14} /> };
-    if (value > 60) return { label: 'Critique', className: 'fa-critical', icon: <CircleX size={14} color="#FF5252" /> };
-    if (value > 40) return { label: 'Élevé', className: 'fa-warning', icon: <CircleAlert size={14} color="#FF9800" /> };
-    if (value > 25) return { label: 'Modéré', className: 'fa-moderate', icon: <Minus size={14} color="#FFC107" /> };
-    return { label: 'Bon', className: 'fa-success', icon: <CircleCheck size={14} color="#4CAF50" /> };
+  const getRankClass = (index) => {
+    if (index === 0) return 'fa-gold';
+    if (index === 1) return 'fa-silver';
+    if (index === 2) return 'fa-bronze';
+    return '';
   };
 
-  // Rendu du tableau de bord principal
+  // RENDER DASHBOARD - CORRIGÉ
   const renderDashboard = () => {
-    if (!dashboardData) return null;
+    if (!dashboardData) {
+      return (
+        <div className="fa-chart-card">
+          <div className="fa-card-header">
+            <h3><LayoutDashboard size={18} /> Tableau de bord</h3>
+          </div>
+          <div className="fa-no-data">
+            <Database size={40} />
+            <h4>Aucune donnée disponible</h4>
+            <p>Les données du tableau de bord n'ont pas encore été chargées.</p>
+            <button className="fa-btn-refresh" onClick={fetchData} style={{ marginTop: 12 }}>
+              <RefreshCw size={14} />
+              Charger
+            </button>
+          </div>
+        </div>
+      );
+    }
 
     const indicateurs = dashboardData.indicateurs || {};
     const topTerrains = dashboardData.top_terrains || [];
+    const hasData = indicateurs.total_reservations > 0;
 
     return (
       <div className="fa-tab-content">
+        {/* KPI Grid */}
         <div className="fa-kpi-grid">
           <div className="fa-kpi-card fa-primary">
-            <div className="fa-kpi-icon"><Calendar size={32} /></div>
+            <div className="fa-kpi-icon"><Calendar size={26} /></div>
             <div className="fa-kpi-content">
               <div className="fa-kpi-title">Total Réservations</div>
               <div className="fa-kpi-value">{formatNumber(indicateurs.total_reservations)}</div>
-              <div className="fa-kpi-subtitle">Sur la période</div>
+              {indicateurs.evolution_reservations !== undefined && hasData && (
+                <div className={`fa-kpi-trend ${getTrendClass(indicateurs.evolution_reservations)}`}>
+                  {getTrendIcon(indicateurs.evolution_reservations)}
+                  {safeToFixed(indicateurs.evolution_reservations)}%
+                </div>
+              )}
             </div>
           </div>
 
           <div className="fa-kpi-card fa-secondary">
-            <div className="fa-kpi-icon"><Users size={32} /></div>
+            <div className="fa-kpi-icon"><Users size={26} /></div>
             <div className="fa-kpi-content">
               <div className="fa-kpi-title">Clients Uniques</div>
               <div className="fa-kpi-value">{formatNumber(indicateurs.clients_uniques)}</div>
@@ -1140,7 +1260,7 @@ const ReservationDashboard = () => {
           </div>
 
           <div className="fa-kpi-card fa-info">
-            <div className="fa-kpi-icon"><Clock size={32} /></div>
+            <div className="fa-kpi-icon"><Clock size={26} /></div>
             <div className="fa-kpi-content">
               <div className="fa-kpi-title">Durée moyenne</div>
               <div className="fa-kpi-value">{safeToFixed(indicateurs.duree_moyenne_heures)}h</div>
@@ -1149,7 +1269,7 @@ const ReservationDashboard = () => {
           </div>
 
           <div className="fa-kpi-card fa-warning">
-            <div className="fa-kpi-icon"><XCircle size={32} /></div>
+            <div className="fa-kpi-icon"><XCircle size={26} /></div>
             <div className="fa-kpi-content">
               <div className="fa-kpi-title">Taux annulation</div>
               <div className="fa-kpi-value">{safeToFixed(indicateurs.taux_annulation)}%</div>
@@ -1158,19 +1278,18 @@ const ReservationDashboard = () => {
           </div>
         </div>
 
+        {/* Insight Section */}
         <div className="fa-insight-section">
           <div className="fa-insight-card fa-status-card">
             <div className="fa-status-content">
               <div className="fa-status-badge">
                 <div className="fa-status-badge-pulse"></div>
-                {indicateurs.tendance || 'STABLE'}
+                {hasData ? (indicateurs.tendance || 'STABLE') : 'AUCUNE DONNÉE'}
               </div>
               <div className="fa-status-details">
                 <div className="fa-status-item">
                   <span className="fa-label">Évolution</span>
-                  <span className={`fa-value ${getTrendClass(indicateurs.evolution_reservations)}`}>
-                    {safeToFixed(indicateurs.evolution_reservations)}%
-                  </span>
+                  <span className="fa-value">{hasData ? `${safeToFixed(indicateurs.evolution_reservations)}%` : '—'}</span>
                 </div>
                 <div className="fa-status-item">
                   <span className="fa-label">Période</span>
@@ -1179,7 +1298,7 @@ const ReservationDashboard = () => {
                 <div className="fa-status-item">
                   <span className="fa-label">Moy/jour</span>
                   <span className="fa-value">
-                    {Math.round((parseFloat(indicateurs.total_reservations) || 0) / 30)}
+                    {hasData ? Math.round((parseFloat(indicateurs.total_reservations) || 0) / 30) : '0'}
                   </span>
                 </div>
               </div>
@@ -1187,68 +1306,80 @@ const ReservationDashboard = () => {
           </div>
 
           <div className="fa-insight-card">
-            <h3 style={{ marginBottom: 16 }}>Top 5 terrains</h3>
-            <div className="fa-top-list">
-              {topTerrains.slice(0, 5).map((terrain, idx) => {
-                const maxReservations = topTerrains[0]?.reservations || 1;
-                return (
-                  <div key={idx} className="fa-top-item">
-                    <div className="fa-rank">{idx + 1}</div>
-                    <div className="fa-top-item-content">
-                      <span className="fa-name">{terrain.terrain}</span>
-                      <span className="fa-metric">{terrain.reservations} résas</span>
+            <h3><Crown size={18} style={{ color: '#FFD700' }} /> Top 5 terrains</h3>
+            {topTerrains.length > 0 ? (
+              <div className="fa-top-list">
+                {topTerrains.slice(0, 5).map((terrain, idx) => {
+                  const maxReservations = topTerrains[0]?.reservations || 1;
+                  return (
+                    <div key={idx} className="fa-top-item">
+                      <div className={`fa-rank ${idx === 0 ? 'fa-rank-1' : ''} ${idx === 1 ? 'fa-rank-2' : ''} ${idx === 2 ? 'fa-rank-3' : ''}`}>
+                        {idx + 1}
+                      </div>
+                      <div className="fa-top-item-content">
+                        <span className="fa-name">{terrain.terrain}</span>
+                        <span className="fa-metric">{terrain.reservations} résas</span>
+                      </div>
+                      <div className="fa-progress">
+                        <div 
+                          className="fa-progress-fill" 
+                          style={{ width: `${(terrain.reservations / maxReservations) * 100}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="fa-progress">
-                      <div 
-                        className="fa-progress-fill" 
-                        style={{ width: `${(terrain.reservations / maxReservations) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="fa-empty-top-list">
+                <AlertCircle size={20} style={{ color: '#95a5a6', marginBottom: 6 }} />
+                <p>Aucun terrain réservé</p>
+              </div>
+            )}
           </div>
         </div>
 
-        {weeklyComparison && (
-          <div className="fa-comparison-grid">
-            <div className="fa-comparison-card">
-              <div className="fa-comparison-header">
-                <h3>Comparaison hebdomadaire</h3>
+        {/* Comparison */}
+        {weeklyComparison && weeklyComparison.synthese && (
+          <div className="fa-comparison-card">
+            <div className="fa-comparison-header">
+              <h3>📊 Comparaison hebdomadaire</h3>
+            </div>
+            <div className="fa-comparison-metrics">
+              <div className="fa-comparison-metric">
+                <div className="fa-metric-label">Réservations</div>
+                <div className="fa-metric-values">
+                  <div className="fa-metric-current">
+                    <small>Cette semaine</small>
+                    <strong>{formatNumber(weeklyComparison.synthese?.total_semaine_courante)}</strong>
+                  </div>
+                  <div className="fa-metric-arrow"><ChevronRight size={18} /></div>
+                  <div className="fa-metric-previous">
+                    <small>Semaine dernière</small>
+                    <strong>{formatNumber(weeklyComparison.synthese?.total_semaine_precedente)}</strong>
+                  </div>
+                </div>
+                <div className={`fa-metric-evolution ${getTrendClass(weeklyComparison.synthese?.evolution_globale)}`}>
+                  {getTrendIcon(weeklyComparison.synthese?.evolution_globale)}
+                  {safeToFixed(weeklyComparison.synthese?.evolution_globale)}%
+                </div>
               </div>
-              <div className="fa-comparison-metrics">
-                <div className="fa-comparison-metric">
-                  <div className="fa-metric-label">Réservations</div>
-                  <div className="fa-metric-values">
-                    <div className="fa-metric-current">
-                      <small>Cette semaine</small>
-                      <strong>{formatNumber(weeklyComparison.synthese?.total_semaine_courante)}</strong>
-                    </div>
-                    <div className="fa-metric-arrow"><ChevronRight size={20} /></div>
-                    <div className="fa-metric-previous">
-                      <small>Semaine dernière</small>
-                      <strong>{formatNumber(weeklyComparison.synthese?.total_semaine_precedente)}</strong>
-                    </div>
-                  </div>
-                  <div className={`fa-metric-evolution ${getTrendClass(weeklyComparison.synthese?.evolution_globale)}`}>
-                    {getTrendIcon(weeklyComparison.synthese?.evolution_globale)}
-                    {safeToFixed(weeklyComparison.synthese?.evolution_globale)}%
-                  </div>
+              <div className="fa-comparison-metric">
+                <div className="fa-metric-label">Meilleur jour</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>
+                  {weeklyComparison.synthese?.meilleur_jour || 'N/A'}
                 </div>
-                <div className="fa-comparison-metric">
-                  <div className="fa-metric-label">Meilleur jour</div>
-                  <div className="fa-metric-value">{weeklyComparison.synthese?.meilleur_jour || 'N/A'}</div>
-                  <div className="fa-metric-subtitle">
-                    {weeklyComparison.comparaison_journaliere?.find(j => j.jour === weeklyComparison.synthese?.meilleur_jour)?.reservations?.courant || 0} réservations
-                  </div>
+                <div className="fa-metric-subtitle">
+                  {weeklyComparison.comparaison_journaliere?.find(j => j.jour === weeklyComparison.synthese?.meilleur_jour)?.reservations?.courant || 0} réservations
                 </div>
-                <div className="fa-comparison-metric">
-                  <div className="fa-metric-label">Jours en hausse</div>
-                  <div className="fa-metric-value">{weeklyComparison.synthese?.jours_en_hausse || 0}/7</div>
-                  <div className={`fa-metric-subtitle ${(weeklyComparison.synthese?.jours_en_hausse || 0) >= 4 ? 'fa-positive' : 'fa-negative'}`}>
-                    {(weeklyComparison.synthese?.jours_en_hausse || 0) >= 4 ? 'Tendance positive' : 'Tendance mitigée'}
-                  </div>
+              </div>
+              <div className="fa-comparison-metric">
+                <div className="fa-metric-label">Jours en hausse</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>
+                  {weeklyComparison.synthese?.jours_en_hausse || 0}/7
+                </div>
+                <div className={`fa-metric-subtitle ${(weeklyComparison.synthese?.jours_en_hausse || 0) >= 4 ? 'fa-positive-text' : 'fa-negative-text'}`}>
+                  {(weeklyComparison.synthese?.jours_en_hausse || 0) >= 4 ? '📈 Tendance positive' : '📉 Tendance mitigée'}
                 </div>
               </div>
             </div>
@@ -1258,17 +1389,18 @@ const ReservationDashboard = () => {
     );
   };
 
-  // Rendu Analyse Horaire
+  // RENDER ANALYSE HORAIRE
   const renderAnalyseHoraire = () => {
     if (!hourlyData) {
       return (
         <div className="fa-chart-card">
           <div className="fa-card-header">
-            <h3><Clock size={20} /> Distribution horaire des réservations</h3>
+            <h3><Clock size={18} /> Distribution horaire</h3>
           </div>
-          <div className="fa-empty-state">
-            <Loader2 size={48} className="fa-spinning" />
-            <h4>Chargement des données...</h4>
+          <div className="fa-no-data">
+            <Database size={40} />
+            <h4>Aucune donnée</h4>
+            <p>Les données horaires ne sont pas disponibles.</p>
           </div>
         </div>
       );
@@ -1277,91 +1409,106 @@ const ReservationDashboard = () => {
     const distribution = hourlyData.distribution_horaire || [];
     const analyses = hourlyData.analyses || {};
 
+    if (distribution.length === 0) {
+      return (
+        <div className="fa-chart-card">
+          <div className="fa-card-header">
+            <h3><Clock size={18} /> Distribution horaire</h3>
+          </div>
+          <div className="fa-no-data">
+            <Clock size={40} />
+            <h4>Aucune réservation horaire</h4>
+            <p>Aucune réservation enregistrée sur la période.</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="fa-tab-content">
         <div className="fa-chart-card">
           <div className="fa-card-header">
-            <h3><Clock size={20} /> Distribution horaire des réservations</h3>
+            <h3><Clock size={18} /> Distribution horaire des réservations</h3>
             <div className="fa-info-badge">
               <Activity size={12} />
               {hourlyData.periode || '30 jours'}
             </div>
           </div>
-          <div className="fa-chart-container">
-            <div className="fa-metrics-grid" style={{ marginBottom: 24 }}>
-              <div className="fa-metric-card">
-                <div className="fa-metric-icon"><Zap size={24} /></div>
-                <div className="fa-metric-info">
-                  <div className="fa-metric-title">Heure de pointe</div>
-                  <div className="fa-metric-value">{analyses.meilleur_creneau?.heure || 'N/A'}h</div>
-                  <div className="fa-metric-subtitle">{analyses.meilleur_creneau?.reservations || 0} réservations</div>
-                </div>
-              </div>
-              <div className="fa-metric-card">
-                <div className="fa-metric-icon"><Clock size={24} /></div>
-                <div className="fa-metric-info">
-                  <div className="fa-metric-title">Heures creuses</div>
-                  <div className="fa-metric-value">{analyses.heures_creuses?.length || 0}</div>
-                  <div className="fa-metric-subtitle">{analyses.heures_creuses?.join(', ') || 'Aucune'}</div>
-                </div>
+          
+          <div className="fa-metrics-grid">
+            <div className="fa-metric-card">
+              <div className="fa-metric-icon"><Zap size={20} /></div>
+              <div className="fa-metric-info">
+                <div className="fa-metric-title">Heure de pointe</div>
+                <div className="fa-metric-value">{analyses.meilleur_creneau?.heure || 'N/A'}h</div>
+                <div className="fa-metric-subtitle">{analyses.meilleur_creneau?.reservations || 0} réservations</div>
               </div>
             </div>
-
-            <div className="fa-table-container">
-              <table className="fa-data-table">
-                <thead>
-                  <tr><th>Heure</th><th>Réservations</th><th>Clients uniques</th><th>Taux annulation</th><th>Durée moyenne</th></tr>
-                </thead>
-                <tbody>
-                  {distribution.map((h) => (
-                    <tr key={h.heure}>
-                      <td><strong>{h.heure}:00 - {h.heure + 1}:00</strong></td>
-                      <td>{formatNumber(h.reservations)}</td>
-                      <td>{formatNumber(h.clients_uniques)}</td>
-                      <td>
-                        <div className="fa-progress-cell">
-                          <span className={parseFloat(h.taux_annulation) > 10 ? 'fa-negative' : 'fa-positive'}>
-                            {safeToFixed(h.taux_annulation)}%
-                          </span>
-                          <div className="fa-progress-bar">
-                            <div className="fa-progress-fill" style={{ width: `${Math.min(100, parseFloat(h.taux_annulation) * 2)}%`, background: '#FF5252' }}></div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{safeToFixed(h.duree_moyenne)}h</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {analyses.recommandations && analyses.recommandations.length > 0 && (
-              <div className="fa-retention-summary" style={{ marginTop: 20 }}>
-                {analyses.recommandations.map((rec, i) => (
-                  <div key={i} className="fa-summary-item">
-                    <div className="fa-summary-icon"><ThumbsUp size={20} /></div>
-                    <span>{rec}</span>
-                  </div>
-                ))}
+            <div className="fa-metric-card">
+              <div className="fa-metric-icon"><Clock size={20} /></div>
+              <div className="fa-metric-info">
+                <div className="fa-metric-title">Heures creuses</div>
+                <div className="fa-metric-value">{analyses.heures_creuses?.length || 0}</div>
+                <div className="fa-metric-subtitle">{analyses.heures_creuses?.join(', ') || 'Aucune'}</div>
               </div>
-            )}
+            </div>
           </div>
+
+          <div className="fa-table-container">
+            <table className="fa-data-table">
+              <thead>
+                <tr><th>Heure</th><th>Réservations</th><th>Clients uniques</th><th>Taux annulation</th><th>Durée moyenne</th></tr>
+              </thead>
+              <tbody>
+                {distribution.map((h) => (
+                  <tr key={h.heure}>
+                    <td><strong>{h.heure}:00 - {h.heure + 1}:00</strong></td>
+                    <td>{formatNumber(h.reservations)}</td>
+                    <td>{formatNumber(h.clients_uniques)}</td>
+                    <td>
+                      <div className="fa-progress-cell">
+                        <span className={parseFloat(h.taux_annulation) > 10 ? 'fa-negative-text' : 'fa-positive-text'}>
+                          {safeToFixed(h.taux_annulation)}%
+                        </span>
+                        <div className="fa-progress-bar">
+                          <div className="fa-progress-fill" style={{ width: `${Math.min(100, parseFloat(h.taux_annulation) * 2)}%`, background: '#FF5252' }} />
+                        </div>
+                      </div>
+                    </td>
+                    <td>{safeToFixed(h.duree_moyenne)}h</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {analyses.recommandations && analyses.recommandations.length > 0 && (
+            <div className="fa-retention-summary">
+              {analyses.recommandations.map((rec, i) => (
+                <div key={i} className="fa-summary-item">
+                  <div className="fa-summary-icon"><ThumbsUp size={18} /></div>
+                  <span>{rec}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
   };
 
-  // Rendu Types de Terrain
+  // RENDER TYPE TERRAIN
   const renderTypeTerrain = () => {
     if (!typeTerrainData) {
       return (
         <div className="fa-chart-card">
           <div className="fa-card-header">
-            <h3><Target size={20} /> Performance par type de terrain</h3>
+            <h3><Target size={18} /> Performance par type</h3>
           </div>
-          <div className="fa-empty-state">
-            <Loader2 size={48} className="fa-spinning" />
-            <h4>Chargement des données...</h4>
+          <div className="fa-no-data">
+            <Database size={40} />
+            <h4>Aucune donnée</h4>
+            <p>Les données par type de terrain ne sont pas disponibles.</p>
           </div>
         </div>
       );
@@ -1370,11 +1517,26 @@ const ReservationDashboard = () => {
     const types = typeTerrainData.types_terrain || [];
     const resume = typeTerrainData.resume || {};
 
+    if (types.length === 0) {
+      return (
+        <div className="fa-chart-card">
+          <div className="fa-card-header">
+            <h3><Target size={18} /> Performance par type</h3>
+          </div>
+          <div className="fa-no-data">
+            <Target size={40} />
+            <h4>Aucun type de terrain</h4>
+            <p>Aucune donnée disponible sur les types de terrain.</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="fa-tab-content">
         <div className="fa-chart-card">
           <div className="fa-card-header">
-            <h3><Target size={20} /> Performance par type de terrain</h3>
+            <h3><Target size={18} /> Performance par type de terrain</h3>
             <div className="fa-info-badge">
               <Calendar size={12} />
               {typeTerrainData.periode || '90 jours'}
@@ -1384,32 +1546,23 @@ const ReservationDashboard = () => {
             <table className="fa-data-table">
               <thead>
                 <tr>
-                  <th>Type de terrain</th>
+                  <th>Type</th>
                   <th>Réservations</th>
-                  <th>Clients uniques</th>
+                  <th>Clients</th>
                   <th>Résas/terrain</th>
-                  <th>Taux rotation</th>
-                  <th>Taux annulation</th>
+                  <th>Rotation</th>
+                  <th>Annulation</th>
                 </tr>
               </thead>
               <tbody>
                 {types.map((type, idx) => (
                   <tr key={idx}>
-                    <td>
-                      <div className="fa-type-badge">{type.type_terrain}</div>
-                    </td>
+                    <td><div className="fa-type-badge">{type.type_terrain}</div></td>
                     <td><strong>{formatNumber(type.reservations)}</strong></td>
                     <td>{formatNumber(type.clients_uniques)}</td>
                     <td>{type.reservations_par_terrain || '0'}</td>
-                    <td>
-                      <div className="fa-progress-cell">
-                        <span>{type.taux_rotation || '0'}/jour</span>
-                        <div className="fa-progress-bar">
-                          <div className="fa-progress-fill" style={{ width: `${Math.min(100, parseFloat(type.taux_rotation) * 20)}%` }}></div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className={parseFloat(type.taux_annulation) > 10 ? 'fa-negative' : 'fa-positive'}>
+                    <td>{type.taux_rotation || '0'}/jour</td>
+                    <td className={parseFloat(type.taux_annulation) > 10 ? 'fa-negative-text' : 'fa-positive-text'}>
                       {safeToFixed(type.taux_annulation)}%
                     </td>
                   </tr>
@@ -1417,54 +1570,70 @@ const ReservationDashboard = () => {
               </tbody>
             </table>
           </div>
-          <div className="fa-retention-summary" style={{ marginTop: 20 }}>
-            <div className="fa-summary-item">
-              <Crown size={20} className="fa-summary-icon" />
-              <span>Type le plus populaire: <strong>{resume.type_plus_populaire || 'N/A'}</strong></span>
+          {resume.type_plus_populaire && (
+            <div className="fa-retention-summary">
+              <div className="fa-summary-item">
+                <Crown size={18} className="fa-summary-icon" />
+                <span>Plus populaire: <strong>{resume.type_plus_populaire}</strong></span>
+              </div>
+              {resume.type_meilleur_taux_rotation && (
+                <div className="fa-summary-item">
+                  <Zap size={18} className="fa-summary-icon" />
+                  <span>Meilleur taux: <strong>{resume.type_meilleur_taux_rotation}</strong></span>
+                </div>
+              )}
             </div>
-            <div className="fa-summary-item">
-              <Zap size={20} className="fa-summary-icon" />
-              <span>Meilleur taux de rotation: <strong>{resume.type_meilleur_taux_rotation || 'N/A'}</strong></span>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     );
   };
 
-  // Rendu Évolution Mensuelle
+  // RENDER EVOLUTION
   const renderEvolution = () => {
     if (!monthlyData) {
       return (
         <div className="fa-chart-card">
           <div className="fa-card-header">
-            <h3><ChartLine size={20} /> Évolution mensuelle des réservations</h3>
+            <h3><ChartLine size={18} /> Évolution mensuelle</h3>
           </div>
-          <div className="fa-empty-state">
-            <Loader2 size={48} className="fa-spinning" />
-            <h4>Chargement des données...</h4>
+          <div className="fa-no-data">
+            <Database size={40} />
+            <h4>Aucune donnée</h4>
+            <p>Les données d'évolution ne sont pas disponibles.</p>
           </div>
         </div>
       );
     }
 
-    const donnees = monthlyData.donnees || [];
+    const donnees = Array.isArray(monthlyData?.donnees) ? monthlyData.donnees : 
+                    Array.isArray(monthlyData?.data) ? monthlyData.data : [];
+
+    if (donnees.length === 0) {
+      return (
+        <div className="fa-chart-card">
+          <div className="fa-card-header">
+            <h3><ChartLine size={18} /> Évolution mensuelle</h3>
+          </div>
+          <div className="fa-no-data">
+            <ChartLine size={40} />
+            <h4>Aucune évolution</h4>
+            <p>Aucune donnée mensuelle disponible.</p>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className="fa-tab-content">
         <div className="fa-chart-card">
           <div className="fa-card-header">
-            <h3><ChartLine size={20} /> Évolution mensuelle des réservations</h3>
+            <h3><ChartLine size={18} /> Évolution mensuelle des réservations</h3>
           </div>
           <div className="fa-table-container">
             <table className="fa-data-table">
               <thead>
-                <tr>
-                  <th>Mois</th>
-                  <th>Réservations</th>
-                  <th>Nouveaux clients</th>
-                  <th>Évolution</th>
-                </tr>
+                <tr><th>Mois</th><th>Réservations</th><th>Nouveaux clients</th><th>Évolution</th></tr>
               </thead>
               <tbody>
                 {donnees.map((mois, idx) => (
@@ -1485,17 +1654,18 @@ const ReservationDashboard = () => {
     );
   };
 
-  // Rendu Clients
+  // RENDER CLIENTS
   const renderClients = () => {
     if (!clientsData) {
       return (
         <div className="fa-chart-card">
           <div className="fa-card-header">
-            <h3><Users size={20} /> Analyse des clients</h3>
+            <h3><Users size={18} /> Analyse clients</h3>
           </div>
-          <div className="fa-empty-state">
-            <Loader2 size={48} className="fa-spinning" />
-            <h4>Chargement des données...</h4>
+          <div className="fa-no-data">
+            <Database size={40} />
+            <h4>Aucune donnée</h4>
+            <p>Les données clients ne sont pas disponibles.</p>
           </div>
         </div>
       );
@@ -1504,27 +1674,42 @@ const ReservationDashboard = () => {
     const clients = clientsData.clients_analyses || [];
     const alertes = clientsData.alertes || {};
 
+    if (clients.length === 0) {
+      return (
+        <div className="fa-chart-card">
+          <div className="fa-card-header">
+            <h3><Users size={18} /> Analyse clients</h3>
+          </div>
+          <div className="fa-no-data">
+            <Users size={40} />
+            <h4>Aucun client</h4>
+            <p>Aucun client enregistré sur la période.</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="fa-tab-content">
         <div className="fa-chart-card">
           <div className="fa-card-header">
-            <h3><Users size={20} /> Analyse des clients</h3>
+            <h3><Users size={18} /> Analyse des clients</h3>
             <div className="fa-info-badge">
               <Users size={12} />
               {clientsData.periode || '180 jours'}
             </div>
           </div>
 
-          <div className="fa-metrics-grid" style={{ marginBottom: 24 }}>
+          <div className="fa-metrics-grid">
             <div className="fa-metric-card">
-              <div className="fa-metric-icon"><UserCheck size={24} /></div>
+              <div className="fa-metric-icon"><UserCheck size={20} /></div>
               <div className="fa-metric-info">
                 <div className="fa-metric-title">Clients actifs</div>
                 <div className="fa-metric-value">{formatNumber(alertes.clients_actifs)}</div>
               </div>
             </div>
             <div className="fa-metric-card">
-              <div className="fa-metric-icon"><UserX size={24} /></div>
+              <div className="fa-metric-icon"><UserX size={20} /></div>
               <div className="fa-metric-info">
                 <div className="fa-metric-title">Clients à risque</div>
                 <div className="fa-metric-value">{formatNumber(alertes.clients_a_risque)}</div>
@@ -1550,7 +1735,7 @@ const ReservationDashboard = () => {
                     <td>{client.email}</td>
                     <td><strong>{client.nb_reservations}</strong></td>
                     <td>{client.anciennete_jours}j</td>
-                    <td className={client.jours_depuis_derniere_resa > 30 ? 'fa-negative' : ''}>
+                    <td className={client.jours_depuis_derniere_resa > 30 ? 'fa-negative-text' : ''}>
                       {client.jours_depuis_derniere_resa}j
                     </td>
                     <td>
@@ -1558,7 +1743,7 @@ const ReservationDashboard = () => {
                         {client.profil || 'N/A'}
                       </div>
                     </td>
-                    <td className={parseFloat(client.taux_annulation) > 15 ? 'fa-negative' : ''}>
+                    <td className={parseFloat(client.taux_annulation) > 15 ? 'fa-negative-text' : ''}>
                       {safeToFixed(client.taux_annulation)}%
                     </td>
                   </tr>
@@ -1568,10 +1753,10 @@ const ReservationDashboard = () => {
           </div>
 
           {alertes.recommandations && alertes.recommandations.length > 0 && (
-            <div className="fa-retention-summary" style={{ marginTop: 20 }}>
+            <div className="fa-retention-summary">
               {alertes.recommandations.map((rec, i) => (
                 <div key={i} className="fa-summary-item">
-                  <AlertCircle size={20} className="fa-summary-icon" />
+                  <AlertCircle size={18} className="fa-summary-icon" />
                   <span>{rec}</span>
                 </div>
               ))}
@@ -1582,17 +1767,18 @@ const ReservationDashboard = () => {
     );
   };
 
-  // Rendu Prévisions
+  // RENDER PREVISIONS
   const renderPrevisions = () => {
     if (!forecastData) {
       return (
         <div className="fa-chart-card">
           <div className="fa-card-header">
-            <h3><Gauge size={20} /> Prévisions des réservations</h3>
+            <h3><Gauge size={18} /> Prévisions</h3>
           </div>
-          <div className="fa-empty-state">
-            <Loader2 size={48} className="fa-spinning" />
-            <h4>Chargement des données...</h4>
+          <div className="fa-no-data">
+            <Database size={40} />
+            <h4>Aucune donnée</h4>
+            <p>Les prévisions ne sont pas disponibles.</p>
           </div>
         </div>
       );
@@ -1600,21 +1786,32 @@ const ReservationDashboard = () => {
 
     const previsions = forecastData.previsions || [];
 
+    if (previsions.length === 0) {
+      return (
+        <div className="fa-chart-card">
+          <div className="fa-card-header">
+            <h3><Gauge size={18} /> Prévisions</h3>
+          </div>
+          <div className="fa-no-data">
+            <Gauge size={40} />
+            <h4>Aucune prévision</h4>
+            <p>Pas assez de données pour établir des prévisions.</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="fa-tab-content">
         <div className="fa-chart-card">
           <div className="fa-card-header">
-            <h3><Gauge size={20} /> Prévisions des réservations</h3>
-            <div className="fa-info-badge">Basé sur tendance linéaire</div>
+            <h3><Gauge size={18} /> Prévisions des réservations</h3>
+            <div className="fa-info-badge">📈 Tendance linéaire</div>
           </div>
           <div className="fa-table-container">
             <table className="fa-data-table">
               <thead>
-                <tr>
-                  <th>Mois</th>
-                  <th>Réservations prévues</th>
-                  <th>Niveau confiance</th>
-                </tr>
+                <tr><th>Mois</th><th>Prévisions</th><th>Confiance</th></tr>
               </thead>
               <tbody>
                 {previsions.map((prev, idx) => (
@@ -1631,28 +1828,31 @@ const ReservationDashboard = () => {
               </tbody>
             </table>
           </div>
-          <div className="fa-retention-summary" style={{ marginTop: 20 }}>
-            <div className="fa-summary-item">
-              <CheckCircle size={20} className="fa-summary-icon" />
-              <span>Recommandation: <strong>{forecastData.analyse_tendance?.recommandations || 'Aucune recommandation'}</strong></span>
+          {forecastData.analyse_tendance?.recommandations && (
+            <div className="fa-retention-summary">
+              <div className="fa-summary-item">
+                <CheckCircle size={18} className="fa-summary-icon" />
+                <span><strong>{forecastData.analyse_tendance.recommandations}</strong></span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     );
   };
 
-  // Rendu Villes & Quartiers (simplifié)
+  // RENDER VILLE QUARTIER
   const renderVilleQuartier = () => {
     if (!villeQuartierData) {
       return (
         <div className="fa-chart-card">
           <div className="fa-card-header">
-            <h3><MapPin size={20} /> Analyse par Ville et Quartier</h3>
+            <h3><MapPin size={18} /> Villes & Quartiers</h3>
           </div>
-          <div className="fa-empty-state">
-            <Loader2 size={48} className="fa-spinning" />
-            <h4>Chargement des données...</h4>
+          <div className="fa-no-data">
+            <Database size={40} />
+            <h4>Aucune donnée</h4>
+            <p>Les données par ville ne sont pas disponibles.</p>
           </div>
         </div>
       );
@@ -1661,54 +1861,66 @@ const ReservationDashboard = () => {
     const synthese = villeQuartierData.synthese || {};
     const analyseParVille = villeQuartierData.analyse_par_ville || [];
 
+    if (analyseParVille.length === 0) {
+      return (
+        <div className="fa-chart-card">
+          <div className="fa-card-header">
+            <h3><MapPin size={18} /> Villes & Quartiers</h3>
+          </div>
+          <div className="fa-no-data">
+            <MapPin size={40} />
+            <h4>Aucune ville active</h4>
+            <p>Aucune réservation par ville enregistrée.</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="fa-tab-content">
         <div className="fa-chart-card">
           <div className="fa-card-header">
-            <h3><MapPin size={20} /> Performance par Ville et Quartier</h3>
+            <h3><MapPin size={18} /> Performance par Ville et Quartier</h3>
             <div className="fa-info-badge">
               <Calendar size={12} />
-              {villeQuartierData.periode || '90 derniers jours'}
+              {villeQuartierData.periode || '90 jours'}
             </div>
           </div>
 
-          <div className="fa-metrics-grid" style={{ marginBottom: 24 }}>
+          <div className="fa-metrics-grid">
             <div className="fa-metric-card">
-              <div className="fa-metric-icon"><Award size={24} /></div>
+              <div className="fa-metric-icon"><Award size={20} /></div>
               <div className="fa-metric-info">
-                <div className="fa-metric-title">Ville la plus active</div>
-                <div className="fa-metric-value" style={{ fontSize: 20 }}>
+                <div className="fa-metric-title">Ville plus active</div>
+                <div className="fa-metric-value" style={{ fontSize: '0.95rem' }}>
                   {synthese.ville_la_plus_active || 'N/A'}
                 </div>
-                <div className="fa-metric-subtitle">Meilleure performance</div>
               </div>
             </div>
             <div className="fa-metric-card">
-              <div className="fa-metric-icon"><DollarSign size={24} /></div>
+              <div className="fa-metric-icon"><DollarSign size={20} /></div>
               <div className="fa-metric-info">
                 <div className="fa-metric-title">Ville plus rentable</div>
-                <div className="fa-metric-value" style={{ fontSize: 20 }}>
+                <div className="fa-metric-value" style={{ fontSize: '0.95rem' }}>
                   {synthese.ville_plus_rentable || 'N/A'}
                 </div>
-                <div className="fa-metric-subtitle">Plus grand revenu</div>
               </div>
             </div>
             <div className="fa-metric-card">
-              <div className="fa-metric-icon"><Shield size={24} /></div>
+              <div className="fa-metric-icon"><Shield size={20} /></div>
               <div className="fa-metric-info">
                 <div className="fa-metric-title">Meilleure fidélisation</div>
-                <div className="fa-metric-value" style={{ fontSize: 20 }}>
+                <div className="fa-metric-value" style={{ fontSize: '0.95rem' }}>
                   {synthese.ville_meilleur_fidelisation || 'N/A'}
                 </div>
-                <div className="fa-metric-subtitle">Churn: {synthese.meilleur_taux_churn || '0%'}</div>
               </div>
             </div>
             <div className="fa-metric-card">
-              <div className="fa-metric-icon"><MapPin size={24} /></div>
+              <div className="fa-metric-icon"><MapPin size={20} /></div>
               <div className="fa-metric-info">
                 <div className="fa-metric-title">Villes actives</div>
                 <div className="fa-metric-value">{formatNumber(synthese.nombre_villes_actives)}</div>
-                <div className="fa-metric-subtitle">Total réservations: {formatNumber(synthese.total_reservations)}</div>
+                <div className="fa-metric-subtitle">Total: {formatNumber(synthese.total_reservations)} résas</div>
               </div>
             </div>
           </div>
@@ -1716,13 +1928,7 @@ const ReservationDashboard = () => {
           <div className="fa-table-container">
             <table className="fa-data-table">
               <thead>
-                <tr>
-                  <th>Ville</th>
-                  <th>Réservations</th>
-                  <th>Clients</th>
-                  <th>Revenu (DH)</th>
-                  <th>Taux Churn</th>
-                </tr>
+                <tr><th>Ville</th><th>Réservations</th><th>Clients</th><th>Revenu (DH)</th><th>Churn</th></tr>
               </thead>
               <tbody>
                 {analyseParVille.map((ville, idx) => (
@@ -1730,8 +1936,8 @@ const ReservationDashboard = () => {
                     <td><strong>{ville.ville}</strong></td>
                     <td>{formatNumber(ville.total_reservations)}</td>
                     <td>{formatNumber(ville.clients_uniques)}</td>
-                    <td className="fa-positive">{formatNumber(parseFloat(ville.revenu_total || 0))}</td>
-                    <td className={parseFloat(ville.taux_churn) > 30 ? 'fa-negative' : 'fa-positive'}>
+                    <td className="fa-positive-text">{formatNumber(parseFloat(ville.revenu_total || 0))}</td>
+                    <td className={parseFloat(ville.taux_churn) > 30 ? 'fa-negative-text' : 'fa-positive-text'}>
                       {safeToFixed(ville.taux_churn)}%
                     </td>
                   </tr>
@@ -1741,10 +1947,10 @@ const ReservationDashboard = () => {
           </div>
 
           {synthese.recommandations && synthese.recommandations.length > 0 && (
-            <div className="fa-retention-summary" style={{ marginTop: 20 }}>
+            <div className="fa-retention-summary">
               {synthese.recommandations.map((rec, i) => (
                 <div key={i} className="fa-summary-item">
-                  <ThumbsUp size={20} className="fa-summary-icon" />
+                  <ThumbsUp size={18} className="fa-summary-icon" />
                   <span>{rec}</span>
                 </div>
               ))}
@@ -1755,17 +1961,18 @@ const ReservationDashboard = () => {
     );
   };
 
-  // Rendu Sports & Rentabilité (simplifié)
+  // RENDER SPORT RENTABILITE
   const renderSportRentabilite = () => {
     if (!sportRentabiliteData) {
       return (
         <div className="fa-chart-card">
           <div className="fa-card-header">
-            <h3><Trophy size={20} /> Analyse des Sports et Rentabilité</h3>
+            <h3><Trophy size={18} /> Sports & Rentabilité</h3>
           </div>
-          <div className="fa-empty-state">
-            <Loader2 size={48} className="fa-spinning" />
-            <h4>Chargement des données...</h4>
+          <div className="fa-no-data">
+            <Database size={40} />
+            <h4>Aucune donnée</h4>
+            <p>Les données sur les sports ne sont pas disponibles.</p>
           </div>
         </div>
       );
@@ -1774,46 +1981,59 @@ const ReservationDashboard = () => {
     const synthese = sportRentabiliteData.synthese || {};
     const topSports = sportRentabiliteData.top_sports_rentables || [];
 
+    if (topSports.length === 0) {
+      return (
+        <div className="fa-chart-card">
+          <div className="fa-card-header">
+            <h3><Trophy size={18} /> Sports & Rentabilité</h3>
+          </div>
+          <div className="fa-no-data">
+            <Trophy size={40} />
+            <h4>Aucun sport</h4>
+            <p>Aucune donnée sur les sports enregistrés.</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="fa-tab-content">
         <div className="fa-chart-card">
           <div className="fa-card-header">
-            <h3><Trophy size={20} /> Analyse des Sports et Rentabilité</h3>
+            <h3><Trophy size={18} /> Analyse des Sports et Rentabilité</h3>
             <div className="fa-info-badge">
               <Calendar size={12} />
-              {sportRentabiliteData.periode || '90 derniers jours'}
+              {sportRentabiliteData.periode || '90 jours'}
             </div>
           </div>
 
-          <div className="fa-metrics-grid" style={{ marginBottom: 24 }}>
+          <div className="fa-metrics-grid">
             <div className="fa-metric-card">
-              <div className="fa-metric-icon"><Crown size={24} /></div>
+              <div className="fa-metric-icon"><Crown size={20} /></div>
               <div className="fa-metric-info">
-                <div className="fa-metric-title">Sport le plus rentable</div>
-                <div className="fa-metric-value" style={{ fontSize: 20 }}>
+                <div className="fa-metric-title">Plus rentable</div>
+                <div className="fa-metric-value" style={{ fontSize: '0.95rem' }}>
                   {synthese.sport_le_plus_rentable || 'N/A'}
                 </div>
-                <div className="fa-metric-subtitle">Meilleur ROI</div>
               </div>
             </div>
             <div className="fa-metric-card">
-              <div className="fa-metric-icon"><Flame size={24} /></div>
+              <div className="fa-metric-icon"><Flame size={20} /></div>
               <div className="fa-metric-info">
-                <div className="fa-metric-title">Sport le plus populaire</div>
-                <div className="fa-metric-value" style={{ fontSize: 20 }}>
+                <div className="fa-metric-title">Plus populaire</div>
+                <div className="fa-metric-value" style={{ fontSize: '0.95rem' }}>
                   {synthese.sport_plus_populaire || 'N/A'}
                 </div>
-                <div className="fa-metric-subtitle">Plus de réservations</div>
               </div>
             </div>
             <div className="fa-metric-card">
-              <div className="fa-metric-icon"><DollarSign size={24} /></div>
+              <div className="fa-metric-icon"><DollarSign size={20} /></div>
               <div className="fa-metric-info">
                 <div className="fa-metric-title">Revenu total</div>
-                <div className="fa-metric-value" style={{ fontSize: 20 }}>
+                <div className="fa-metric-value" style={{ fontSize: '0.95rem' }}>
                   {formatNumber(parseFloat(synthese.total_revenu || 0))} DH
                 </div>
-                <div className="fa-metric-subtitle">{formatNumber(synthese.total_reservations)} réservations</div>
+                <div className="fa-metric-subtitle">{formatNumber(synthese.total_reservations)} résas</div>
               </div>
             </div>
           </div>
@@ -1821,22 +2041,16 @@ const ReservationDashboard = () => {
           <div className="fa-table-container">
             <table className="fa-data-table">
               <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Sport</th>
-                  <th>Revenu (DH)</th>
-                  <th>Réservations</th>
-                  <th>Rentabilité (DH/terrain)</th>
-                </tr>
+                <tr><th>#</th><th>Sport</th><th>Revenu (DH)</th><th>Réservations</th><th>Rentabilité</th></tr>
               </thead>
               <tbody>
                 {topSports.map((sport, idx) => (
                   <tr key={idx}>
-                    <td><span className="fa-rank-badge">{idx + 1}</span></td>
+                    <td><span className={`fa-rank-badge ${getRankClass(idx)}`}>{idx + 1}</span></td>
                     <td><strong>{sport.sport}</strong></td>
-                    <td className="fa-positive">{formatNumber(parseFloat(sport.revenu_total || 0))}</td>
+                    <td className="fa-positive-text">{formatNumber(parseFloat(sport.revenu_total || 0))}</td>
                     <td>{formatNumber(sport.total_reservations)}</td>
-                    <td className="fa-positive">{formatNumber(parseFloat(sport.rentabilite || 0))} DH</td>
+                    <td className="fa-positive-text">{formatNumber(parseFloat(sport.rentabilite || 0))} DH</td>
                   </tr>
                 ))}
               </tbody>
@@ -1847,17 +2061,18 @@ const ReservationDashboard = () => {
     );
   };
 
-  // Rendu Terrains Détaillés (simplifié)
+  // RENDER TERRAINS DETAIL
   const renderTerrainsDetail = () => {
     if (!terrainsDetailData) {
       return (
         <div className="fa-chart-card">
           <div className="fa-card-header">
-            <h3><Building size={20} /> Analyse Détaillée des Terrains</h3>
+            <h3><Building size={18} /> Terrains détaillés</h3>
           </div>
-          <div className="fa-empty-state">
-            <Loader2 size={48} className="fa-spinning" />
-            <h4>Chargement des données...</h4>
+          <div className="fa-no-data">
+            <Database size={40} />
+            <h4>Aucune donnée</h4>
+            <p>Les données détaillées des terrains ne sont pas disponibles.</p>
           </div>
         </div>
       );
@@ -1866,52 +2081,64 @@ const ReservationDashboard = () => {
     const synthese = terrainsDetailData.synthese_globale || {};
     const topTerrains = terrainsDetailData.top_terrains_global || [];
 
+    if (topTerrains.length === 0) {
+      return (
+        <div className="fa-chart-card">
+          <div className="fa-card-header">
+            <h3><Building size={18} /> Terrains détaillés</h3>
+          </div>
+          <div className="fa-no-data">
+            <Building size={40} />
+            <h4>Aucun terrain</h4>
+            <p>Aucune donnée sur les terrains.</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="fa-tab-content">
         <div className="fa-chart-card">
           <div className="fa-card-header">
-            <h3><Building size={20} /> Analyse Détaillée des Terrains</h3>
+            <h3><Building size={18} /> Analyse Détaillée des Terrains</h3>
             <div className="fa-info-badge">
               <Calendar size={12} />
-              {terrainsDetailData.periode || '90 derniers jours'}
+              {terrainsDetailData.periode || '90 jours'}
             </div>
           </div>
 
           <div className="fa-metrics-grid">
             <div className="fa-metric-card">
-              <div className="fa-metric-icon"><Building size={24} /></div>
+              <div className="fa-metric-icon"><Building size={20} /></div>
               <div className="fa-metric-info">
                 <div className="fa-metric-title">Total Terrains</div>
                 <div className="fa-metric-value">{formatNumber(synthese.total_terrains)}</div>
-                <div className="fa-metric-subtitle">Dans {formatNumber(synthese.total_villes)} villes</div>
+                <div className="fa-metric-subtitle">{formatNumber(synthese.total_villes)} villes</div>
               </div>
             </div>
             <div className="fa-metric-card">
-              <div className="fa-metric-icon"><Calendar size={24} /></div>
+              <div className="fa-metric-icon"><Calendar size={20} /></div>
               <div className="fa-metric-info">
-                <div className="fa-metric-title">Total Réservations</div>
+                <div className="fa-metric-title">Réservations</div>
                 <div className="fa-metric-value">{formatNumber(synthese.total_reservations)}</div>
-                <div className="fa-metric-subtitle">Sur la période</div>
               </div>
             </div>
             <div className="fa-metric-card">
-              <div className="fa-metric-icon" style={{ color: '#FF5252' }}><TrendingDown size={24} /></div>
+              <div className="fa-metric-icon" style={{ color: '#FF5252' }}><TrendingDown size={20} /></div>
               <div className="fa-metric-info">
-                <div className="fa-metric-title">Terrains en Déclin</div>
+                <div className="fa-metric-title">En déclin</div>
                 <div className="fa-metric-value" style={{ color: '#FF5252' }}>
                   {formatNumber(synthese.total_terrains_en_declin)}
                 </div>
-                <div className="fa-metric-subtitle"><AlertTriangle size={12} /> À surveiller</div>
               </div>
             </div>
             <div className="fa-metric-card">
-              <div className="fa-metric-icon" style={{ color: '#4CAF50' }}><TrendingUp size={24} /></div>
+              <div className="fa-metric-icon" style={{ color: '#4CAF50' }}><TrendingUp size={20} /></div>
               <div className="fa-metric-info">
-                <div className="fa-metric-title">Terrains en Croissance</div>
+                <div className="fa-metric-title">En croissance</div>
                 <div className="fa-metric-value" style={{ color: '#4CAF50' }}>
                   {formatNumber(synthese.total_terrains_en_croissance)}
                 </div>
-                <div className="fa-metric-subtitle"><Rocket size={12} /> Opportunités</div>
               </div>
             </div>
           </div>
@@ -1919,23 +2146,16 @@ const ReservationDashboard = () => {
           <div className="fa-table-container">
             <table className="fa-data-table">
               <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Terrain</th>
-                  <th>Ville</th>
-                  <th>Réservations</th>
-                  <th>Revenu (DH)</th>
-                  <th>Performance</th>
-                </tr>
+                <tr><th>#</th><th>Terrain</th><th>Ville</th><th>Réservations</th><th>Revenu (DH)</th><th>Performance</th></tr>
               </thead>
               <tbody>
                 {topTerrains.slice(0, 10).map((t, idx) => (
                   <tr key={idx}>
-                    <td><span className="fa-rank-badge">{idx + 1}</span></td>
+                    <td><span className={`fa-rank-badge ${getRankClass(idx)}`}>{idx + 1}</span></td>
                     <td><strong>{t.nom || t.numeroterrain}</strong></td>
                     <td>{t.ville}</td>
                     <td>{formatNumber(t.reservations)}</td>
-                    <td className="fa-positive">{formatNumber(parseFloat(t.revenu))}</td>
+                    <td className="fa-positive-text">{formatNumber(parseFloat(t.revenu))}</td>
                     <td>{getPerformanceLabel(t.performance)}</td>
                   </tr>
                 ))}
@@ -1944,10 +2164,10 @@ const ReservationDashboard = () => {
           </div>
 
           {terrainsDetailData.recommandations_strategiques && terrainsDetailData.recommandations_strategiques.length > 0 && (
-            <div className="fa-retention-summary" style={{ marginTop: 20 }}>
+            <div className="fa-retention-summary">
               {terrainsDetailData.recommandations_strategiques.map((rec, i) => (
                 <div key={i} className="fa-summary-item">
-                  <CheckCircle size={20} className="fa-summary-icon" />
+                  <CheckCircle size={18} className="fa-summary-icon" />
                   <span>{rec}</span>
                 </div>
               ))}
@@ -1958,29 +2178,18 @@ const ReservationDashboard = () => {
     );
   };
 
-  // Rendu du contenu en fonction de l'onglet actif
   const renderContent = () => {
     switch(activeTab) {
-      case 'dashboard':
-        return renderDashboard();
-      case 'analyse-horaire':
-        return renderAnalyseHoraire();
-      case 'type-terrain':
-        return renderTypeTerrain();
-      case 'evolution':
-        return renderEvolution();
-      case 'clients':
-        return renderClients();
-      case 'previsions':
-        return renderPrevisions();
-      case 'ville-quartier':
-        return renderVilleQuartier();
-      case 'sport-rentabilite':
-        return renderSportRentabilite();
-      case 'terrains-detail':
-        return renderTerrainsDetail();
-      default:
-        return renderDashboard();
+      case 'dashboard': return renderDashboard();
+      case 'analyse-horaire': return renderAnalyseHoraire();
+      case 'type-terrain': return renderTypeTerrain();
+      case 'evolution': return renderEvolution();
+      case 'clients': return renderClients();
+      case 'previsions': return renderPrevisions();
+      case 'ville-quartier': return renderVilleQuartier();
+      case 'sport-rentabilite': return renderSportRentabilite();
+      case 'terrains-detail': return renderTerrainsDetail();
+      default: return renderDashboard();
     }
   };
 
@@ -1988,12 +2197,12 @@ const ReservationDashboard = () => {
     return (
       <div className="fa-dashboard-loader">
         <div className="fa-loader-spinner">
-          <div className="fa-loader-dot"></div>
-          <div className="fa-loader-dot"></div>
-          <div className="fa-loader-dot"></div>
+          <div className="fa-loader-dot" />
+          <div className="fa-loader-dot" />
+          <div className="fa-loader-dot" />
         </div>
         <div className="fa-loader-text">
-          <Loader2 size={24} className="fa-spinning" />
+          <Loader2 size={22} className="fa-spinning" />
           <span>Chargement des données...</span>
         </div>
       </div>
@@ -2008,45 +2217,36 @@ const ReservationDashboard = () => {
           <div className="fa-header-content">
             <div className="fa-logo-section">
               <div className="fa-logo-icon">
-                <div className="fa-logo-pulse"></div>
-                <Calendar size={28} />
+                <Calendar size={24} />
               </div>
               <div className="fa-logo-text">
                 <h1>Dashboard Réservations</h1>
-                <div className="fa-subtitle">Analyse complète des réservations</div>
+                <div className="fa-subtitle">Analyse intelligente des performances</div>
               </div>
             </div>
             <div className="fa-header-actions">
               <button className="fa-btn-refresh" onClick={fetchData}>
-                <RefreshCw size={16} />
+                <RefreshCw size={14} />
                 <span>Actualiser</span>
               </button>
-              <button 
-                className="fa-btn-mobile-menu" 
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                <Menu size={20} />
+              <button className="fa-btn-mobile-menu" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                <Menu size={18} />
               </button>
               <div className="fa-header-time">
-                <Clock size={14} />
-                <span className="fa-time-text">
-                  {lastUpdate ? lastUpdate.toLocaleTimeString('fr-FR') : '--:--'}
-                </span>
+                <span className="fa-dot-online" />
+                {lastUpdate ? lastUpdate.toLocaleTimeString('fr-FR') : '--:--'}
               </div>
             </div>
           </div>
         </header>
 
-        <nav className={`fa-nav ${mobileMenuOpen ? 'fa-mobile-open' : ''}`}>
+        <nav className="fa-nav">
           <div className="fa-nav-track">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 className={`fa-nav-tab ${activeTab === tab.id ? 'fa-nav-tab-active' : ''}`}
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  setMobileMenuOpen(false);
-                }}
+                onClick={() => setActiveTab(tab.id)}
               >
                 {tab.icon}
                 <span>{tab.label}</span>
@@ -2060,13 +2260,16 @@ const ReservationDashboard = () => {
             {renderContent()}
 
             {error && (
-              <div className="fa-chart-card" style={{ background: 'rgba(255,82,82,0.1)', borderColor: '#FF5252' }}>
+              <div className="fa-chart-card" style={{ borderColor: '#FF5252' }}>
                 <div className="fa-card-header">
-                  <AlertCircle size={20} color="#FF5252" />
-                  <h3>Erreur</h3>
+                  <AlertCircle size={18} color="#FF5252" />
+                  <h3 style={{ color: '#FF5252' }}>Erreur</h3>
                 </div>
-                <p>{error}</p>
-                <button className="fa-btn-refresh" onClick={fetchData}>Réessayer</button>
+                <p style={{ color: '#6d7a86' }}>{error}</p>
+                <button className="fa-btn-refresh" onClick={fetchData} style={{ marginTop: 8 }}>
+                  <RefreshCw size={14} />
+                  Réessayer
+                </button>
               </div>
             )}
           </div>

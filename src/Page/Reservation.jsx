@@ -66,9 +66,49 @@ const ReservationDashboard = () => {
     quartier: ''
   });
 
-  // URL de l'API locale
-  const API_URL = 'http://backend-foot-omega.vercel.app/api/reservation';
-  const API_CRENEAUX = 'http://backend-foot-omega.vercel.app/api/gestioncreneaux';
+  const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
+  const API_URL = `${API_BASE_URL}/reservation`;
+  const API_CRENEAUX = `${API_BASE_URL}/gestioncreneaux`;
+
+  const parseJsonSafely = async (response) => {
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      return response.json();
+    }
+
+    const text = await response.text();
+    if (!text) return {};
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: false, message: 'Réponse inattendue de l’API', raw: text };
+    }
+  };
+
+  const apiRequest = async (url, options = {}) => {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 15000);
+
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        headers: {
+          Accept: 'application/json',
+          ...(options.headers || {})
+        }
+      });
+
+      const result = await parseJsonSafely(response);
+      if (!response.ok) {
+        throw new Error(result.message || `Erreur ${response.status}`);
+      }
+      return result;
+    } finally {
+      window.clearTimeout(timeoutId);
+    }
+  };
 
   const addToast = (message, type = 'info') => {
     const id = Date.now();
@@ -84,13 +124,7 @@ const ReservationDashboard = () => {
   const fetchReservations = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/`);
-      
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
-      }
-      
-      const data = await response.json();
+      const data = await apiRequest(`${API_URL}/`);
       
       if (data.success) {
         const reservationsData = data.data || [];
@@ -335,8 +369,7 @@ const ReservationDashboard = () => {
 
   const updateCreneauStatus = async (nomterrain, datereservation, heurereservation, newStatus) => {
     try {
-      const creneauxResponse = await fetch(`${API_CRENEAUX}/`);
-      const creneauxData = await creneauxResponse.json();
+      const creneauxData = await apiRequest(`${API_CRENEAUX}/`);
       
       if (creneauxData.success) {
         const creneau = creneauxData.data.find(c => 
@@ -346,7 +379,7 @@ const ReservationDashboard = () => {
         );
         
         if (creneau) {
-          const updateResponse = await fetch(`${API_CRENEAUX}/${creneau.idcreneaux}`, {
+          const updateData = await apiRequest(`${API_CRENEAUX}/${creneau.idcreneaux}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -357,7 +390,6 @@ const ReservationDashboard = () => {
             })
           });
           
-          const updateData = await updateResponse.json();
           return updateData.success;
         }
       }
@@ -378,15 +410,13 @@ const ReservationDashboard = () => {
       
       const method = modalMode === 'create' ? 'POST' : 'PUT';
       
-      const response = await fetch(url, {
+      const data = await apiRequest(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });
-      
-      const data = await response.json();
       
       if (data.success) {
         let message = modalMode === 'create' 
@@ -427,11 +457,7 @@ const ReservationDashboard = () => {
       
       const url = `${API_URL}/${id}`;
       
-      const response = await fetch(url, {
-        method: 'DELETE',
-      });
-      
-      const data = await response.json();
+      const data = await apiRequest(url, { method: 'DELETE' });
       
       if (data.success) {
         if (reservation && reservation.statut === 'confirmée') {
@@ -460,15 +486,13 @@ const ReservationDashboard = () => {
       
       const url = `${API_URL}/${id}/statut`;
       
-      const response = await fetch(url, {
+      const data = await apiRequest(url, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ statut: newStatus }),
       });
-      
-      const data = await response.json();
       
       if (data.success) {
         let message = 'Statut modifié avec succès';

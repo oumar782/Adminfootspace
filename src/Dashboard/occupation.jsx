@@ -1,17 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  BarChart3, 
-  Calendar, 
-  TrendingUp, 
-  Flame, 
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import {
+  BarChart3,
+  Calendar,
+  TrendingUp,
+  Flame,
   Zap,
   Target,
   Clock,
   RefreshCw,
   AlertCircle,
   Users,
-  MapPin
+  MapPin,
+  Award,
+  Activity,
+  Sun,
+  Play,
+  Pause,
+  Maximize2,
+  Minimize2
 } from 'lucide-react';
+
+// Importer le CSS avec les classes préfixées
 import './custom.css';
 
 const OccupationChart = () => {
@@ -20,12 +29,17 @@ const OccupationChart = () => {
   const [hoveredData, setHoveredData] = useState(null);
   const [reservations, setReservations] = useState([]);
   const [error, setError] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isAutoRefresh, setIsAutoRefresh] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const chartRef = useRef(null);
 
-  const API_URL = 'http://backend-foot-omega.vercel.app/api/reservation';
+  const API_URL = 'https://backend-foot-omega.vercel.app/api/reservation';
 
-  const fetchReservations = async () => {
+  const fetchReservations = useCallback(async () => {
     try {
-      setIsLoading(true);
+      setIsRefreshing(true);
       setError(null);
       const response = await fetch(API_URL);
       
@@ -37,65 +51,66 @@ const OccupationChart = () => {
       
       if (result.success) {
         setReservations(result.data || []);
+        setLastRefresh(new Date());
       } else {
-        throw new Error(result.message || 'Erreur lors de la récupération des réservations');
+        throw new Error(result.message || 'Erreur lors de la récupération');
       }
     } catch (err) {
       setError(err.message);
       console.error('Erreur:', err);
     } finally {
+      setIsRefreshing(false);
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchReservations();
-  }, []);
+  }, [fetchReservations]);
 
-  // Fonction pour obtenir les données par période
-  const getOccupationData = () => {
+  useEffect(() => {
+    if (!isAutoRefresh) return;
+    const interval = setInterval(fetchReservations, 30000);
+    return () => clearInterval(interval);
+  }, [isAutoRefresh, fetchReservations]);
+
+  const getOccupationData = useCallback(() => {
     if (!reservations.length) {
       return getDefaultData();
     }
 
     const now = new Date();
-    const stats = {
-      day: [],
-      week: [],
-      month: []
-    };
+    const stats = { day: [], week: [], month: [] };
 
-    // --- DONNÉES POUR LE JOUR (8h à 22h) ---
+    // Données du jour
     const todayStr = now.toISOString().split('T')[0];
     const todayReservations = reservations.filter(r => 
       r.datereservation === todayStr && r.statut === 'confirmée'
     );
 
     for (let hour = 8; hour <= 22; hour++) {
-      const hourStr = `${hour}h`;
       const count = todayReservations.filter(r => {
         const resHour = parseInt(r.heurereservation?.split(':')[0] || 0);
         return resHour === hour;
       }).length;
       
       stats.day.push({
-        time: hourStr,
+        time: `${hour}h`,
         occupation: Math.min(100, Math.round((count / 4) * 100)),
-        capacity: 100,
         count: count,
-        max: 4
+        max: 4,
+        label: `${hour}:00`
       });
     }
 
-    // --- DONNÉES POUR LA SEMAINE ---
+    // Données de la semaine
     const weekDays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-    const today = new Date();
-    const currentDay = today.getDay(); // 0 = Dimanche, 1 = Lundi...
+    const currentDay = now.getDay();
     const mondayOffset = currentDay === 0 ? 6 : currentDay - 1;
 
     weekDays.forEach((day, index) => {
-      const date = new Date(today);
-      date.setDate(today.getDate() - mondayOffset + index);
+      const date = new Date(now);
+      date.setDate(now.getDate() - mondayOffset + index);
       const dateStr = date.toISOString().split('T')[0];
       
       const count = reservations.filter(r => 
@@ -105,16 +120,16 @@ const OccupationChart = () => {
       stats.week.push({
         time: day,
         occupation: Math.min(100, Math.round((count / 28) * 100)),
-        capacity: 100,
         count: count,
-        max: 28
+        max: 28,
+        label: `${day} ${date.getDate()}`
       });
     });
 
-    // --- DONNÉES POUR LE MOIS (4 semaines) ---
+    // Données du mois
     for (let week = 0; week < 4; week++) {
-      const startDate = new Date(today.getFullYear(), today.getMonth(), week * 7 + 1);
-      const endDate = new Date(today.getFullYear(), today.getMonth(), (week + 1) * 7);
+      const startDate = new Date(now.getFullYear(), now.getMonth(), week * 7 + 1);
+      const endDate = new Date(now.getFullYear(), now.getMonth(), (week + 1) * 7);
       const startStr = startDate.toISOString().split('T')[0];
       const endStr = endDate.toISOString().split('T')[0];
       
@@ -125,111 +140,99 @@ const OccupationChart = () => {
       }).length;
       
       stats.month.push({
-        time: `Sem ${week + 1}`,
+        time: `S${week + 1}`,
         occupation: Math.min(100, Math.round((count / 196) * 100)),
-        capacity: 100,
         count: count,
-        max: 196
+        max: 196,
+        label: `Semaine ${week + 1}`
       });
     }
 
     return stats;
-  };
+  }, [reservations]);
 
-  // Données par défaut (quand pas de réservations)
   const getDefaultData = () => {
-    const dayData = Array.from({ length: 15 }, (_, i) => {
-      const hour = i + 8;
-      return {
-        time: `${hour}h`,
-        occupation: Math.floor(Math.random() * 40) + 10,
-        capacity: 100,
-        count: Math.floor(Math.random() * 3) + 1,
-        max: 4
-      };
-    });
+    const dayData = Array.from({ length: 15 }, (_, i) => ({
+      time: `${i + 8}h`,
+      occupation: Math.floor(Math.random() * 40) + 10,
+      count: Math.floor(Math.random() * 3) + 1,
+      max: 4,
+      label: `${i + 8}:00`
+    }));
 
     const weekData = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day => ({
       time: day,
       occupation: Math.floor(Math.random() * 50) + 30,
-      capacity: 100,
       count: Math.floor(Math.random() * 20) + 5,
-      max: 28
+      max: 28,
+      label: day
     }));
 
     const monthData = Array.from({ length: 4 }, (_, i) => ({
-      time: `Sem ${i + 1}`,
+      time: `S${i + 1}`,
       occupation: Math.floor(Math.random() * 40) + 40,
-      capacity: 100,
       count: Math.floor(Math.random() * 80) + 40,
-      max: 196
+      max: 196,
+      label: `Semaine ${i + 1}`
     }));
 
     return { day: dayData, week: weekData, month: monthData };
   };
 
-  // Récupérer les données pour la période sélectionnée
   const allData = getOccupationData();
   const data = allData[period] && allData[period].length > 0 ? allData[period] : getDefaultData()[period];
 
-  // Calcul des statistiques
-  const averageOccupation = data.length > 0 
-    ? Math.round(data.reduce((sum, item) => sum + item.occupation, 0) / data.length)
-    : 0;
+  const stats = useMemo(() => {
+    const avg = data.length > 0 
+      ? Math.round(data.reduce((sum, item) => sum + item.occupation, 0) / data.length)
+      : 0;
+    const peak = data.length > 0 
+      ? Math.max(...data.map(item => item.occupation))
+      : 0;
+    const total = reservations.filter(r => r.statut === 'confirmée').length;
+    const peakItem = data.find(item => item.occupation === peak);
+    
+    return { avg, peak, total, peakItem };
+  }, [data, reservations]);
 
-  const peakOccupation = data.length > 0 
-    ? Math.max(...data.map(item => item.occupation))
-    : 0;
+  const getBarGradient = (occupation) => {
+    if (occupation > 70) return 'linear-gradient(180deg, #ef4444, #dc2626, #b91c1c)';
+    if (occupation > 40) return 'linear-gradient(180deg, #f59e0b, #d97706, #b45309)';
+    return 'linear-gradient(180deg, #22c55e, #16a34a, #15803d)';
+  };
 
-  const totalReservations = reservations.filter(r => r.statut === 'confirmée').length;
+  const getBarColor = (occupation) => {
+    if (occupation > 70) return '#ef4444';
+    if (occupation > 40) return '#f59e0b';
+    return '#22c55e';
+  };
 
-  // Rendu du skeleton de chargement
-  const renderChartSkeleton = () => (
-    <div className="chart-skeleton">
-      <div className="skeleton-header" style={{ height: '30px', background: '#e0e0e0', borderRadius: '8px', marginBottom: '20px' }}></div>
-      <div className="skeleton-chart" style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end', height: '200px', gap: '10px' }}>
-        {Array.from({ length: period === 'day' ? 15 : period === 'week' ? 7 : 4 }).map((_, i) => (
-          <div 
-            key={i} 
-            className="skeleton-bar"
-            style={{ 
-              height: `${Math.random() * 70 + 30}%`,
-              width: '100%',
-              background: '#e0e0e0',
-              borderRadius: '4px 4px 0 0',
-              minHeight: '20px'
-            }}
-          ></div>
-        ))}
-      </div>
-      <div className="skeleton-footer" style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
-        <div className="skeleton-stats" style={{ flex: 1, height: '60px', background: '#e0e0e0', borderRadius: '8px' }}></div>
-        <div className="skeleton-stats" style={{ flex: 1, height: '60px', background: '#e0e0e0', borderRadius: '8px' }}></div>
-      </div>
-    </div>
-  );
+  const getPeriodLabel = () => {
+    switch(period) {
+      case 'day': return "Aujourd'hui";
+      case 'week': return 'Cette semaine';
+      case 'month': return 'Ce mois-ci';
+      default: return '';
+    }
+  };
+
+  const getPeriodEmoji = () => {
+    switch(period) {
+      case 'day': return '☀️';
+      case 'week': return '📅';
+      case 'month': return '📊';
+      default: return '';
+    }
+  };
 
   if (error) {
     return (
-      <div className="occupation-chart-card" style={{ padding: '40px', textAlign: 'center' }}>
-        <div className="error-message">
-          <AlertCircle size={48} className="error-icon" color="#FF5252" />
-          <p style={{ margin: '16px 0' }}>Erreur de chargement: {error}</p>
-          <button 
-            onClick={fetchReservations} 
-            className="retry-btn"
-            style={{
-              padding: '10px 24px',
-              background: '#1a3d06',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
+      <div className="oc-chart-card" style={{ padding: '40px' }}>
+        <div className="oc-error-message">
+          <AlertCircle size={48} className="oc-error-icon" />
+          <h3 style={{ margin: '12px 0 8px', color: '#1a3d06' }}>Erreur de chargement</h3>
+          <p style={{ color: '#6d7a86', maxWidth: '400px' }}>{error}</p>
+          <button onClick={fetchReservations} className="oc-retry-btn">
             <RefreshCw size={16} />
             Réessayer
           </button>
@@ -239,457 +242,242 @@ const OccupationChart = () => {
   }
 
   return (
-    <div className="occupation-chart-card" style={{
-      background: '#ffffff',
-      borderRadius: '20px',
-      padding: '24px',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-      border: '1px solid #e8efe8'
-    }}>
+    <div className="oc-chart-card" ref={chartRef}>
       {/* Header */}
-      <div className="chart-header" style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        flexWrap: 'wrap',
-        gap: '16px',
-        marginBottom: '24px'
-      }}>
-        <div className="header-content">
-          <div className="title-section" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div className="header-icon-container" style={{
-              background: 'rgba(26,61,6,0.1)',
-              padding: '12px',
-              borderRadius: '12px',
-              color: '#1a3d06'
-            }}>
-              <BarChart3 size={28} className="header-icon" />
+      <div className="oc-chart-header">
+        <div className="oc-header-content">
+          <div className="oc-title-section">
+            <div className="oc-header-icon-wrap">
+              <BarChart3 size={28} className="oc-header-icon" />
             </div>
-            <div className="title-text">
-              <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#1a3d06' }}>Tableau de Bord d'Occupation</h2>
-              <p className="chart-subtitle" style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#6d7a86' }}>
-                Surveillance en temps réel des réservations et de l'occupation des terrains
+            <div className="oc-title-text">
+              <h2>Tableau de Bord d'Occupation</h2>
+              <p className="oc-chart-subtitle">
+                <span className="oc-live-indicator">
+                  <span className="oc-live-dot" />
+                  Live
+                </span>
+                <span className="oc-status-badge">
+                  <Activity size={14} />
+                  {reservations.length} réservations
+                </span>
+                <span className="oc-status-badge">
+                  <Clock size={14} />
+                  {lastRefresh.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                </span>
               </p>
             </div>
           </div>
-        </div>
-        <div className="period-selector" style={{
-          display: 'flex',
-          gap: '4px',
-          background: '#f3f6f4',
-          padding: '4px',
-          borderRadius: '10px'
-        }}>
-          <button 
-            className={`period-btn ${period === 'day' ? 'active' : ''}`}
-            onClick={() => setPeriod('day')}
-            style={{
-              padding: '8px 16px',
-              border: 'none',
-              borderRadius: '8px',
-              background: period === 'day' ? '#1a3d06' : 'transparent',
-              color: period === 'day' ? '#fff' : '#6d7a86',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              transition: 'all 0.2s'
-            }}
-          >
-            <Calendar size={16} />
-            Aujourd'hui
-          </button>
-          <button 
-            className={`period-btn ${period === 'week' ? 'active' : ''}`}
-            onClick={() => setPeriod('week')}
-            style={{
-              padding: '8px 16px',
-              border: 'none',
-              borderRadius: '8px',
-              background: period === 'week' ? '#1a3d06' : 'transparent',
-              color: period === 'week' ? '#fff' : '#6d7a86',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              transition: 'all 0.2s'
-            }}
-          >
-            <Calendar size={16} />
-            Cette Semaine
-          </button>
-          <button 
-            className={`period-btn ${period === 'month' ? 'active' : ''}`}
-            onClick={() => setPeriod('month')}
-            style={{
-              padding: '8px 16px',
-              border: 'none',
-              borderRadius: '8px',
-              background: period === 'month' ? '#1a3d06' : 'transparent',
-              color: period === 'month' ? '#fff' : '#6d7a86',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              transition: 'all 0.2s'
-            }}
-          >
-            <BarChart3 size={16} />
-            Ce Mois
-          </button>
+          <div className="oc-period-selector">
+            <button 
+              className={`oc-period-btn ${period === 'day' ? 'oc-active' : ''}`}
+              onClick={() => setPeriod('day')}
+            >
+              <Calendar size={16} />
+              <span>Jour</span>
+            </button>
+            <button 
+              className={`oc-period-btn ${period === 'week' ? 'oc-active' : ''}`}
+              onClick={() => setPeriod('week')}
+            >
+              <Calendar size={16} />
+              <span>Semaine</span>
+            </button>
+            <button 
+              className={`oc-period-btn ${period === 'month' ? 'oc-active' : ''}`}
+              onClick={() => setPeriod('month')}
+            >
+              <BarChart3 size={16} />
+              <span>Mois</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="chart-content">
+      <div className="oc-chart-content">
         {isLoading ? (
-          renderChartSkeleton()
+          <div className="oc-chart-skeleton">
+            <div className="oc-skeleton-header" />
+            <div className="oc-skeleton-chart">
+              {Array.from({ length: period === 'day' ? 15 : period === 'week' ? 7 : 4 }).map((_, i) => (
+                <div key={i} className="oc-skeleton-bar" style={{ height: `${Math.random() * 60 + 20}%` }} />
+              ))}
+            </div>
+            <div className="oc-skeleton-footer">
+              <div className="oc-skeleton-stats" />
+              <div className="oc-skeleton-stats" />
+              <div className="oc-skeleton-stats" />
+            </div>
+          </div>
         ) : (
           <>
             {/* Graphique */}
-            <div className="chart-container" style={{ marginBottom: '24px' }}>
-              <div className="chart-bars" style={{
-                display: 'flex',
-                justifyContent: 'space-around',
-                alignItems: 'flex-end',
-                height: '220px',
-                gap: '8px',
-                padding: '0 4px',
-                position: 'relative'
-              }}>
-                {data.map((item, index) => (
-                  <div key={index} className="bar-container" style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    flex: 1,
-                    height: '100%',
-                    position: 'relative'
-                  }}>
-                    <div 
-                      className="bar-background" 
-                      style={{ 
-                        width: '100%',
-                        height: '100%',
-                        background: '#f0f7f0',
-                        borderRadius: '6px 6px 0 0',
-                        position: 'relative',
-                        overflow: 'hidden'
-                      }}
-                    >
+            <div className="oc-chart-container">
+              <div className="oc-chart-actions">
+                <button 
+                  className={`oc-chart-action-btn ${isAutoRefresh ? 'oc-active' : ''}`}
+                  onClick={() => setIsAutoRefresh(!isAutoRefresh)}
+                  title={isAutoRefresh ? 'Auto-refresh activé' : 'Auto-refresh désactivé'}
+                >
+                  {isAutoRefresh ? <Play size={14} /> : <Pause size={14} />}
+                </button>
+                <button 
+                  className="oc-chart-action-btn" 
+                  onClick={fetchReservations}
+                  title="Actualiser"
+                >
+                  <RefreshCw size={14} className={isRefreshing ? 'oc-btn-spinner' : ''} />
+                </button>
+                <button 
+                  className="oc-chart-action-btn" 
+                  onClick={() => setIsFullscreen(!isFullscreen)}
+                  title={isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+                >
+                  {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                </button>
+              </div>
+
+              <div className="oc-bars-wrapper">
+                <div className="oc-bars">
+                  {data.map((item, index) => {
+                    const barGradient = getBarGradient(item.occupation);
+                    const barColor = getBarColor(item.occupation);
+                    const isHovered = hoveredData === item;
+                    
+                    return (
                       <div 
-                        className="bar-fill" 
-                        style={{ 
-                          position: 'absolute',
-                          bottom: 0,
-                          left: 0,
-                          width: '100%',
-                          height: `${item.occupation}%`,
-                          background: `linear-gradient(180deg, ${item.occupation > 70 ? '#e74c3c' : item.occupation > 40 ? '#f39c12' : '#27ae60'}, ${item.occupation > 70 ? '#c0392b' : item.occupation > 40 ? '#e67e22' : '#1a3d06'})`,
-                          borderRadius: '6px 6px 0 0',
-                          transition: 'height 0.6s ease',
-                          opacity: hoveredData === item ? 1 : 0.9,
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          minHeight: '30px'
-                        }}
+                        key={index} 
+                        className="oc-bar-container"
                         onMouseEnter={() => setHoveredData(item)}
                         onMouseLeave={() => setHoveredData(null)}
                       >
-                        <div className="occupation-label" style={{
-                          position: 'absolute',
-                          top: '4px',
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          color: item.occupation > 50 ? '#fff' : '#1a3d06',
-                          fontSize: '0.7rem',
-                          fontWeight: 700,
-                          textShadow: item.occupation > 50 ? '0 1px 4px rgba(0,0,0,0.3)' : 'none'
-                        }}>
-                          <span className="occupation-percent">{item.occupation}%</span>
-                          <span className="occupation-details" style={{ fontSize: '0.6rem', opacity: 0.8 }}>
-                            {item.count}/{item.max}
-                          </span>
+                        <div className="oc-bar-wrapper">
+                          <div 
+                            className="oc-bar-fill"
+                            style={{
+                              height: `${Math.max(item.occupation, 5)}%`,
+                              background: barGradient,
+                              boxShadow: isHovered ? `0 4px 24px ${barColor}40` : 'none',
+                              transform: isHovered ? 'scaleY(1.02)' : 'scaleY(1)',
+                              transformOrigin: 'bottom'
+                            }}
+                          >
+                            <div className="oc-bar-shine" />
+                            <div className="oc-occupation-label">
+                              <span className="oc-occupation-percent">{item.occupation}%</span>
+                              <span className="oc-occupation-details">
+                                {item.count}/{item.max} créneaux
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="oc-bar-label">{item.time}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Tooltip */}
+                {hoveredData && (
+                  <div className="oc-chart-tooltip" style={{
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    bottom: '100%',
+                    marginBottom: '12px'
+                  }}>
+                    <div className="oc-tooltip-content">
+                      <div className="oc-tooltip-header">
+                        <span className="oc-tooltip-title">{hoveredData.label || hoveredData.time}</span>
+                        <div className="oc-tooltip-indicator">
+                          <span className="oc-indicator-dot" />
+                          {hoveredData.occupation}% d'occupation
+                        </div>
+                      </div>
+                      <div className="oc-tooltip-details">
+                        <div className="oc-detail-item">
+                          <Users size={14} />
+                          {hoveredData.count} réservation{hoveredData.count > 1 ? 's' : ''}
+                        </div>
+                        <div className="oc-detail-item">
+                          <MapPin size={14} />
+                          {hoveredData.max} terrains max
                         </div>
                       </div>
                     </div>
-                    <div className="bar-label" style={{
-                      marginTop: '8px',
-                      fontSize: '0.7rem',
-                      color: '#6d7a86',
-                      fontWeight: 600
-                    }}>{item.time}</div>
                   </div>
-                ))}
+                )}
               </div>
-              
-              {/* Tooltip */}
-              {hoveredData && (
-                <div className="chart-tooltip" style={{
-                  position: 'absolute',
-                  background: '#fff',
-                  padding: '16px',
-                  borderRadius: '12px',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
-                  border: '1px solid #e8efe8',
-                  zIndex: 10,
-                  minWidth: '200px',
-                  top: '-80px',
-                  left: '50%',
-                  transform: 'translateX(-50%)'
-                }}>
-                  <div className="tooltip-content">
-                    <div className="tooltip-header" style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '8px'
-                    }}>
-                      <span className="tooltip-title" style={{ fontWeight: 700, color: '#1a3d06' }}>
-                        {hoveredData.time}
-                      </span>
-                      <div className="tooltip-indicator" style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        fontSize: '0.8rem',
-                        color: '#1a3d06'
-                      }}>
-                        <div className="indicator-dot" style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          background: '#27ae60'
-                        }}></div>
-                        {hoveredData.occupation}% d'occupation
-                      </div>
-                    </div>
-                    <div className="tooltip-details" style={{
-                      display: 'flex',
-                      gap: '16px',
-                      fontSize: '0.8rem',
-                      color: '#6d7a86'
-                    }}>
-                      <div className="detail-item" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Users size={14} />
-                        <span>{hoveredData.count} réservation{hoveredData.count > 1 ? 's' : ''}</span>
-                      </div>
-                      <div className="detail-item" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <MapPin size={14} />
-                        <span>{hoveredData.max} terrains max</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Statistiques */}
-            <div className="chart-stats" style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '16px',
-              marginBottom: '20px'
-            }}>
-              <div className="stat-item" style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
-                padding: '16px',
-                background: '#f8faf8',
-                borderRadius: '12px',
-                border: '1px solid #e8efe8'
-              }}>
-                <div className="stat-icon average" style={{
-                  padding: '10px',
-                  background: 'rgba(39,174,96,0.1)',
-                  borderRadius: '10px',
-                  color: '#27ae60'
-                }}>
-                  <TrendingUp size={20} />
+            <div className="oc-chart-stats">
+              <div className="oc-stat-item">
+                <div className="oc-stat-glow" />
+                <div className="oc-stat-icon oc-average">
+                  <TrendingUp size={22} />
                 </div>
-                <div className="stat-content" style={{ flex: 1 }}>
-                  <div className="stat-labels" style={{ fontSize: '0.75rem', color: '#6d7a86', fontWeight: 600 }}>
-                    Occupation moyenne
-                  </div>
-                  <div className="stat-values" style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1a3d06' }}>
-                    {averageOccupation}%
-                  </div>
-                  <div className="stat-bar" style={{
-                    width: '100%',
-                    height: '4px',
-                    background: '#e8efe8',
-                    borderRadius: '4px',
-                    marginTop: '4px',
-                    overflow: 'hidden'
-                  }}>
-                    <div 
-                      className="stat-bar-fill" 
-                      style={{ 
-                        width: `${averageOccupation}%`,
-                        height: '100%',
-                        background: '#27ae60',
-                        borderRadius: '4px',
-                        transition: 'width 0.6s ease'
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="stat-item" style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
-                padding: '16px',
-                background: '#f8faf8',
-                borderRadius: '12px',
-                border: '1px solid #e8efe8'
-              }}>
-                <div className="stat-icon peak" style={{
-                  padding: '10px',
-                  background: 'rgba(231,76,60,0.1)',
-                  borderRadius: '10px',
-                  color: '#e74c3c'
-                }}>
-                  <Flame size={20} />
-                </div>
-                <div className="stat-content" style={{ flex: 1 }}>
-                  <div className="stat-labels" style={{ fontSize: '0.75rem', color: '#6d7a86', fontWeight: 600 }}>
-                    Pic d'occupation
-                  </div>
-                  <div className="stat-values" style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1a3d06' }}>
-                    {peakOccupation}%
-                  </div>
-                  <div className="stat-bar" style={{
-                    width: '100%',
-                    height: '4px',
-                    background: '#e8efe8',
-                    borderRadius: '4px',
-                    marginTop: '4px',
-                    overflow: 'hidden'
-                  }}>
-                    <div 
-                      className="stat-bar-fill peak" 
-                      style={{ 
-                        width: `${peakOccupation}%`,
-                        height: '100%',
-                        background: '#e74c3c',
-                        borderRadius: '4px',
-                        transition: 'width 0.6s ease'
-                      }}
-                    ></div>
+                <div className="oc-stat-content">
+                  <div className="oc-stat-labels">Occupation moyenne</div>
+                  <div className="oc-stat-values">{stats.avg}%</div>
+                  <div className="oc-stat-bar">
+                    <div className="oc-stat-bar-fill" style={{ width: `${stats.avg}%` }} />
                   </div>
                 </div>
               </div>
 
-              <div className="stat-item" style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
-                padding: '16px',
-                background: '#f8faf8',
-                borderRadius: '12px',
-                border: '1px solid #e8efe8'
-              }}>
-                <div className="stat-icon period" style={{
-                  padding: '10px',
-                  background: 'rgba(52,152,219,0.1)',
-                  borderRadius: '10px',
-                  color: '#3498db'
-                }}>
-                  <Zap size={20} />
+              <div className="oc-stat-item">
+                <div className="oc-stat-glow" />
+                <div className="oc-stat-icon oc-peak">
+                  <Flame size={22} />
                 </div>
-                <div className="stat-content" style={{ flex: 1 }}>
-                  <div className="stat-labels" style={{ fontSize: '0.75rem', color: '#6d7a86', fontWeight: 600 }}>
-                    Période analysée
+                <div className="oc-stat-content">
+                  <div className="oc-stat-labels">Pic d'occupation</div>
+                  <div className="oc-stat-values">{stats.peak}%</div>
+                  <div className="oc-stat-bar">
+                    <div className="oc-stat-bar-fill oc-peak" style={{ width: `${stats.peak}%` }} />
                   </div>
-                  <div className="stat-values" style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1a3d06' }}>
-                    {period === 'day' ? "Aujourd'hui" : 
-                     period === 'week' ? 'Cette semaine' : 
-                     'Ce mois-ci'}
-                  </div>
-                  <div className="stat-period" style={{ fontSize: '0.7rem', color: '#95a5a6' }}>
-                    {data.length} créneau{data.length > 1 ? 'x' : ''} analysé{data.length > 1 ? 's' : ''}
+                  {stats.peakItem && (
+                    <div className="oc-stat-period">
+                      {stats.peakItem.time} • {stats.peakItem.count} réservations
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="oc-stat-item">
+                <div className="oc-stat-glow" />
+                <div className="oc-stat-icon oc-total">
+                  <Target size={22} />
+                </div>
+                <div className="oc-stat-content">
+                  <div className="oc-stat-labels">Total réservations</div>
+                  <div className="oc-stat-values">{stats.total}</div>
+                  <div className="oc-stat-period">
+                    {getPeriodEmoji()} {getPeriodLabel()}
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="data-info" style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: '12px',
-              paddingTop: '16px',
-              borderTop: '1px solid #e8efe8'
-            }}>
-              <div className="data-summary" style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                <span className="data-badge" style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '6px 14px',
-                  background: '#f0f7f0',
-                  borderRadius: '100px',
-                  fontSize: '0.75rem',
-                  color: '#1a3d06'
-                }}>
-                  <Target size={14} />
-                  {totalReservations} réservations confirmées
+            <div className="oc-data-info">
+              <div className="oc-data-summary">
+                <span className="oc-data-badge">
+                  <span className="oc-badge-dot oc-green" />
+                  {period === 'day' ? 'Temps réel' : period === 'week' ? 'Hebdomadaire' : 'Mensuel'}
                 </span>
-                <span className="data-badge" style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '6px 14px',
-                  background: '#f0f7f0',
-                  borderRadius: '100px',
-                  fontSize: '0.75rem',
-                  color: '#1a3d06'
-                }}>
-                  <Clock size={14} />
-                  Mis à jour à {new Date().toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}
+                <span className="oc-data-badge">
+                  <span className="oc-badge-dot oc-blue" />
+                  {data.length} créneaux
+                </span>
+                <span className="oc-data-badge">
+                  <span className="oc-badge-dot oc-purple" />
+                  {reservations.filter(r => r.statut === 'confirmée').length} confirmées
                 </span>
               </div>
-              <button 
-                onClick={fetchReservations} 
-                className="refresh-btn"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '8px 16px',
-                  background: 'transparent',
-                  border: '1px solid #d0e0d0',
-                  borderRadius: '8px',
-                  color: '#1a3d06',
-                  cursor: 'pointer',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#f0f7f0';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                }}
-              >
-                <RefreshCw size={16} />
+              <button className="oc-refresh-btn" onClick={fetchReservations}>
+                <RefreshCw size={16} className={isRefreshing ? 'oc-btn-spinner' : ''} />
                 Actualiser
               </button>
             </div>

@@ -107,11 +107,38 @@ const Crenau = () => {
     nomterrain: '',
     surfaceterrains: '',
     tarif: '',
-    ville: '',
+    ville: '',  
     quartier: ''
   });
 
-  const API_URL = 'http://backend-foot-omega.vercel.app/api/gestioncreneaux';
+  const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
+  const API_URL = `${API_BASE_URL}/gestioncreneaux`;
+
+  const normalizeCreneau = (item = {}) => ({
+    ...item,
+    idcreneaux: item.idcreneaux ?? item.id ?? item.id_creneau ?? item.idcreneau ?? null,
+    datecreneaux: item.datecreneaux || item.date || item.date_creneaux || '',
+    heure: item.heure || item.heure_debut || item.heuredebut || '',
+    heurefin: item.heurefin || item.heure_fin || item.heurefin || '',
+    statut: item.statut || item.status || 'disponible',
+    numeroterrain: item.numeroterrain ?? item.numero_terrain ?? item.numero ?? '',
+    typeterrain: item.typeterrain || item.type_terrain || item.sport || '',
+    nomterrain: item.nomterrain || item.nom_terrain || item.terrain || '',
+    surfaceterrains: item.surfaceterrains || item.surface || item.surfaceterrain || '',
+    tarif: item.tarif ?? item.prix ?? item.tarif_horaire ?? '',
+    ville: item.ville || item.city || '',
+    quartier: item.quartier || item.quartier_name || ''
+  });
+
+  const normalizeStats = (data = {}) => ({
+    total_creneaux: data.total_creneaux ?? data.total ?? 0,
+    disponibles: data.disponibles ?? data.available ?? 0,
+    reserves: data.reserves ?? data.reserve ?? 0,
+    maintenance: data.maintenance ?? data.maintenance_count ?? 0,
+    terrains_actifs: data.terrains_actifs ?? data.terrains ?? 0,
+    tarif_moyen: data.tarif_moyen ?? data.tarif_moyenne ?? data.tarifMoyen ?? 0,
+    villes_disponibles: data.villes_disponibles ?? data.villes ?? 0
+  });
 
   // Toast
   const toast = (message, type = 'success') => {
@@ -127,9 +154,14 @@ const Crenau = () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_URL}/`);
-      const result = await response.json();
-      if (result.success) {
-        setCreneaux(result.data);
+      const result = await response.json().catch(() => ({}));
+      const items = Array.isArray(result?.data)
+        ? result.data
+        : Array.isArray(result?.creneaux)
+          ? result.creneaux
+          : [];
+      if (result?.success) {
+        setCreneaux(items.map(normalizeCreneau));
       }
     } catch (error) {
       toast('Erreur de connexion', 'error');
@@ -142,9 +174,9 @@ const Crenau = () => {
   const fetchStats = async () => {
     try {
       const response = await fetch(`${API_URL}/statistiques/overview`);
-      const result = await response.json();
-      if (result.success) {
-        setStats(result.data);
+      const result = await response.json().catch(() => ({}));
+      if (result?.success) {
+        setStats(normalizeStats(result.data || {}));
       }
     } catch (error) {
       console.error('Erreur stats:', error);
@@ -171,10 +203,15 @@ const Crenau = () => {
         if (filters[key]) params.append(key, filters[key]);
       });
       const response = await fetch(`${API_URL}/filtre/recherche?${params}`);
-      const result = await response.json();
-      if (result.success) {
-        setCreneaux(result.data);
-        toast(`${result.count} créneau(x) trouvé(s)`);
+      const result = await response.json().catch(() => ({}));
+      const items = Array.isArray(result?.data)
+        ? result.data
+        : Array.isArray(result?.creneaux)
+          ? result.creneaux
+          : [];
+      if (result?.success) {
+        setCreneaux(items.map(normalizeCreneau));
+        toast(`${result.count || items.length} créneau(x) trouvé(s)`);
       }
     } catch (error) {
       toast('Erreur de filtrage', 'error');

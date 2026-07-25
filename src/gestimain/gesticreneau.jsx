@@ -24,10 +24,13 @@ import {
   BarChart3,
   Award,
   Home,
-  Navigation
+  Navigation,
+  ChevronDown,
+  ChevronUp,
+  Grid
 } from 'lucide-react';
 
-// Configuration des sports avec leurs surfaces correspondantes (identique à Reservation)
+// Configuration des sports avec leurs surfaces correspondantes
 const sportConfigs = {
   'football': {
     label: 'Football',
@@ -157,13 +160,13 @@ const sportConfigs = {
   }
 };
 
-// Villes marocaines (identique à Reservation)
+// Villes marocaines
 const villesMaroc = [
   'Casablanca', 'Rabat', 'Tanger', 'Marrakech', 'Fès', 'Agadir',
   'Meknès', 'Oujda', 'Kenitra', 'Tétouan', 'Safi', 'Mohammedia'
 ];
 
-// Quartiers par ville (identique à Reservation)
+// Quartiers par ville
 const quartiersParVille = {
   'Casablanca': ['Maarif', 'Sidi Moumen', 'Ain Sebaa', 'Anfa', 'Hay Hassani', 'Derb Sultan', 'Mers Sultan', 'Roches Noires'],
   'Rabat': ['Agdal', 'Hay Riad', 'Souissi', 'Yacoub El Mansour', 'Temara', 'Hassan', 'Oudayas'],
@@ -178,6 +181,36 @@ const quartiersParVille = {
   'Safi': ['Ville Nouvelle', 'Médina', 'Chaâba', 'Hajri', 'Harbi'],
   'Mohammedia': ['Ville Nouvelle', 'Médina', 'Coopérative', 'Roches Noires', 'Moulay Abdallah']
 };
+
+// ========== FONCTIONS DE NORMALISATION AJOUTÉES ==========
+const normalizeCreneau = (item) => {
+  return {
+    idcreneaux: item.idcreneaux || item.id || item._id,
+    datecreneaux: item.datecreneaux || item.date || '',
+    heure: item.heure || '',
+    heurefin: item.heurefin || '',
+    statut: item.statut || 'disponible',
+    numeroterrain: item.numeroterrain || item.numeroTerrain || '',
+    typeterrain: item.typeterrain || item.sport || '',
+    nomterrain: item.nomterrain || item.nomTerrain || '',
+    surfaceterrains: item.surfaceterrains || item.surface || '',
+    tarif: item.tarif || item.prix || '0',
+    ville: item.ville || '',
+    quartier: item.quartier || ''
+  };
+};
+
+const normalizeStats = (data) => {
+  return {
+    total_creneaux: data.total_creneaux || data.total || data.totalCreneaux || 0,
+    disponibles: data.disponibles || data.available || data.disponible || 0,
+    reserves: data.reserves || data.reserved || data.reserve || 0,
+    maintenance: data.maintenance || data.maintenance || 0,
+    terrains_actifs: data.terrains_actifs || data.active_terrains || data.terrainsActifs || 0,
+    tarif_moyen: data.tarif_moyen || data.average_price || data.tarifMoyen || '0'
+  };
+};
+// ========================================================
 
 // Toast Component
 const Toast = ({ message, type, onClose }) => {
@@ -236,7 +269,7 @@ const Crenau = () => {
     quartier: ''
   });
 
-  const API_URL = 'http://backend-foot-omega.vercel.app/api/gestioncreneaux';
+  const API_URL = 'https://backend-foot-omega.vercel.app/api/gestioncreneaux';
 
   // Toast
   const showToast = (message, type = 'success') => {
@@ -252,9 +285,14 @@ const Crenau = () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_URL}/`);
-      const result = await response.json();
-      if (result.success) {
-        setCreneaux(result.data);
+      const result = await response.json().catch(() => ({}));
+      const items = Array.isArray(result?.data)
+        ? result.data
+        : Array.isArray(result?.creneaux)
+          ? result.creneaux
+          : [];
+      if (result?.success) {
+        setCreneaux(items.map(normalizeCreneau));
         showToast('Créneaux chargés avec succès', 'success');
       }
     } catch (error) {
@@ -268,9 +306,9 @@ const Crenau = () => {
   const fetchStats = async () => {
     try {
       const response = await fetch(`${API_URL}/statistiques/overview`);
-      const result = await response.json();
-      if (result.success) {
-        setStats(result.data);
+      const result = await response.json().catch(() => ({}));
+      if (result?.success) {
+        setStats(normalizeStats(result.data || {}));
       }
     } catch (error) {
       console.error('Erreur stats:', error);
@@ -297,10 +335,15 @@ const Crenau = () => {
         if (filters[key]) params.append(key, filters[key]);
       });
       const response = await fetch(`${API_URL}/filtre/recherche?${params}`);
-      const result = await response.json();
-      if (result.success) {
-        setCreneaux(result.data);
-        showToast(`${result.count} créneau(x) trouvé(s)`, 'success');
+      const result = await response.json().catch(() => ({}));
+      const items = Array.isArray(result?.data)
+        ? result.data
+        : Array.isArray(result?.creneaux)
+          ? result.creneaux
+          : [];
+      if (result?.success) {
+        setCreneaux(items.map(normalizeCreneau));
+        showToast(`${result.count || items.length} créneau(x) trouvé(s)`, 'success');
       }
     } catch (error) {
       showToast('Erreur de filtrage', 'error');
@@ -430,7 +473,7 @@ const Crenau = () => {
     }
   };
 
-  // Utilitaires - identiques à Reservation
+  // Utilitaires
   const getAvailableSurfaces = (sport) => {
     if (!sport) return [];
     return sportConfigs[sport]?.surfaces || [];
@@ -702,42 +745,42 @@ const Crenau = () => {
               Tableau de bord
             </h2>
             <div className="gc-stats-grid">
-              <div className="gc-stat-card">
+              <div className="gc-stat-card" key="stat-total">
                 <div className="gc-stat-icon"><Calendar size={28} /></div>
                 <div className="gc-stat-content">
                   <div className="gc-stat-value">{stats.total_creneaux || 0}</div>
                   <div className="gc-stat-label">Total créneaux</div>
                 </div>
               </div>
-              <div className="gc-stat-card">
+              <div className="gc-stat-card" key="stat-disponibles">
                 <div className="gc-stat-icon"><CheckCircle size={28} /></div>
                 <div className="gc-stat-content">
                   <div className="gc-stat-value">{stats.disponibles || 0}</div>
                   <div className="gc-stat-label">Disponibles</div>
                 </div>
               </div>
-              <div className="gc-stat-card">
+              <div className="gc-stat-card" key="stat-reserves">
                 <div className="gc-stat-icon"><Users size={28} /></div>
                 <div className="gc-stat-content">
                   <div className="gc-stat-value">{stats.reserves || 0}</div>
                   <div className="gc-stat-label">Réservés</div>
                 </div>
               </div>
-              <div className="gc-stat-card">
+              <div className="gc-stat-card" key="stat-maintenance">
                 <div className="gc-stat-icon"><AlertCircle size={28} /></div>
                 <div className="gc-stat-content">
                   <div className="gc-stat-value">{stats.maintenance || 0}</div>
                   <div className="gc-stat-label">Maintenance</div>
                 </div>
               </div>
-              <div className="gc-stat-card">
+              <div className="gc-stat-card" key="stat-terrains">
                 <div className="gc-stat-icon"><MapPin size={28} /></div>
                 <div className="gc-stat-content">
                   <div className="gc-stat-value">{stats.terrains_actifs || 0}</div>
                   <div className="gc-stat-label">Terrains actifs</div>
                 </div>
               </div>
-              <div className="gc-stat-card">
+              <div className="gc-stat-card" key="stat-tarif">
                 <div className="gc-stat-icon"><DollarSign size={28} /></div>
                 <div className="gc-stat-content">
                   <div className="gc-stat-value">{parseFloat(stats.tarif_moyen || 0).toFixed(2)} DH</div>
@@ -880,18 +923,18 @@ const Crenau = () => {
                     </tr>
                   ) : (
                     creneaux.map((c, i) => (
-                      <tr key={c.idcreneaux} className="gc-table-row" style={{ animationDelay: `${i * 0.05}s` }}>
+                      <tr key={c.idcreneaux || i} className="gc-table-row" style={{ animationDelay: `${i * 0.05}s` }}>
                         <td><span className="gc-id-badge">#{c.idcreneaux}</span></td>
                         <td className="gc-date-cell">
                           <div className="gc-cell-content">
                             <Calendar size={14} className="gc-cell-icon" />
-                            {new Date(c.datecreneaux).toLocaleDateString('fr-FR')}
+                            {c.datecreneaux ? new Date(c.datecreneaux).toLocaleDateString('fr-FR') : '-'}
                           </div>
                         </td>
                         <td>
                           <div className="gc-cell-content">
                             <Clock size={14} className="gc-cell-icon" />
-                            <span className="gc-time-badge">{c.heure}</span>
+                            <span className="gc-time-badge">{c.heure || '-'}</span>
                           </div>
                         </td>
                         <td>
@@ -993,7 +1036,7 @@ const Crenau = () => {
                 <div className="gc-detail-item">
                   <span className="gc-detail-label"><Calendar size={14} /> Date</span>
                   <span className="gc-detail-value">
-                    {new Date(selectedCreneau.datecreneaux).toLocaleDateString('fr-FR')}
+                    {selectedCreneau.datecreneaux ? new Date(selectedCreneau.datecreneaux).toLocaleDateString('fr-FR') : '-'}
                   </span>
                 </div>
                 <div className="gc-detail-item">
@@ -1069,8 +1112,5 @@ const Crenau = () => {
     </div>
   );
 };
-
-// Import des icônes manquantes
-import { ChevronDown, ChevronUp, Grid } from 'lucide-react';
 
 export default Crenau;

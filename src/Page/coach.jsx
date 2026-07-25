@@ -99,9 +99,50 @@ const AdminCoaches = () => {
     career: []
   });
 
-  const API_URL = 'http://backend-foot-omega.vercel.app/api/coach';
+  const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
+  const API_URL = `${API_BASE_URL}/coach`;
   const DISCIPLINES = ['football', 'tennis', 'basketball', 'volleyball', 'handball', 'padel', 'badminton', 'rugby', 'pingpong'];
   const CITIES = ['Casablanca', 'Rabat', 'Tanger', 'Marrakech', 'Fes', 'Agadir', 'Meknes', 'Oujda', 'Kenitra', 'Tetouan', 'Safi', 'Mohammedia'];
+
+  const parseJsonSafely = async (response) => {
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      return response.json();
+    }
+
+    const text = await response.text();
+    if (!text) return {};
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: false, message: 'Réponse inattendue de l’API', raw: text };
+    }
+  };
+
+  const apiRequest = async (url, options = {}) => {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 15000);
+
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        headers: {
+          Accept: 'application/json',
+          ...(options.headers || {})
+        }
+      });
+
+      const result = await parseJsonSafely(response);
+      if (!response.ok) {
+        throw new Error(result.message || `Erreur ${response.status}`);
+      }
+      return result;
+    } finally {
+      window.clearTimeout(timeoutId);
+    }
+  };
 
   // Toast
   const showToast = (message, type = 'success') => {
@@ -122,26 +163,38 @@ const AdminCoaches = () => {
       if (filters.search) params.append('search', filters.search);
       
       const url = `${API_URL}${params.toString() ? `?${params.toString()}` : ''}`;
-      const response = await fetch(url);
-      const result = await response.json();
-      
-      if (result.success) {
-        setCoaches(result.data);
+      const result = await apiRequest(url);
+      const payload = Array.isArray(result?.data) ? result.data : Array.isArray(result) ? result : [];
+
+      if (result?.success || payload.length > 0) {
+        setCoaches(payload);
         setStats({
-          total_coaches: result.total || result.data.length,
-          total_disciplines: result.data.reduce((acc, c) => {
+          total_coaches: result.total || payload.length,
+          total_disciplines: payload.reduce((acc, c) => {
             if (!acc.includes(c.discipline)) acc.push(c.discipline);
             return acc;
           }, []).length,
-          total_cities: result.data.reduce((acc, c) => {
+          total_cities: payload.reduce((acc, c) => {
             if (c.city && !acc.includes(c.city)) acc.push(c.city);
             return acc;
           }, []).length,
-          avg_rating: (result.data.reduce((acc, c) => acc + (c.rating || 0), 0) / (result.data.length || 1)).toFixed(2),
-          min_price: Math.min(...result.data.map(c => c.price || 0)),
-          max_price: Math.max(...result.data.map(c => c.price || 0)),
-          avg_price: (result.data.reduce((acc, c) => acc + (c.price || 0), 0) / (result.data.length || 1)).toFixed(2),
-          total_reviews: result.data.reduce((acc, c) => acc + (c.reviewCount || 0), 0)
+          avg_rating: (payload.reduce((acc, c) => acc + (c.rating || 0), 0) / (payload.length || 1)).toFixed(2),
+          min_price: payload.length ? Math.min(...payload.map(c => c.price || 0)) : 0,
+          max_price: payload.length ? Math.max(...payload.map(c => c.price || 0)) : 0,
+          avg_price: (payload.reduce((acc, c) => acc + (c.price || 0), 0) / (payload.length || 1)).toFixed(2),
+          total_reviews: payload.reduce((acc, c) => acc + (c.reviewCount || 0), 0)
+        });
+      } else {
+        setCoaches([]);
+        setStats({
+          total_coaches: 0,
+          total_disciplines: 0,
+          total_cities: 0,
+          avg_rating: 0,
+          min_price: 0,
+          max_price: 0,
+          avg_price: 0,
+          total_reviews: 0
         });
       }
     } catch (error) {
@@ -153,7 +206,7 @@ const AdminCoaches = () => {
 
   useEffect(() => {
     fetchCoaches();
-  }, [filters.discipline, filters.city]);
+  }, [filters.discipline, filters.city, filters.search]);
 
   // Gestion des filtres
   const handleFilterChange = (e) => {
@@ -247,13 +300,11 @@ const AdminCoaches = () => {
         : `${API_URL}/`;
       const method = editingCoach ? 'PUT' : 'POST';
       
-      const response = await fetch(url, {
+      const result = await apiRequest(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-      
-      const result = await response.json();
       if (result.success) {
         showToast(editingCoach ? 'Coach modifie avec succes' : 'Coach cree avec succes');
         closeModal();
@@ -269,8 +320,7 @@ const AdminCoaches = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Etes-vous sur de vouloir supprimer ce coach ?')) return;
     try {
-      const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-      const result = await response.json();
+      const result = await apiRequest(`${API_URL}/${id}`, { method: 'DELETE' });
       if (result.success) {
         showToast('Coach desactive avec succes');
         fetchCoaches();
